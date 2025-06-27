@@ -1,12 +1,27 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiClient } from './authSlice';
+import { apiClient } from '../api';
 
 // Async thunks para las operaciones de productos
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/products');
+      const response = await apiClient.get('/admin/products');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Error al obtener los productos'
+      );
+    }
+  }
+);
+
+// Fetch productos públicos (para la tienda sin autenticación)
+export const fetchPublicProducts = createAsyncThunk(
+  'products/fetchPublicProducts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get('/public/products');
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -20,7 +35,7 @@ export const createProduct = createAsyncThunk(
   'products/createProduct',
   async (productData, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/products', productData);
+      const response = await apiClient.post('/admin/products', productData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -34,7 +49,7 @@ export const updateProduct = createAsyncThunk(
   'products/updateProduct',
   async ({ id, ...productData }, { rejectWithValue }) => {
     try {
-      const response = await apiClient.put(`/products/${id}`, productData);
+      const response = await apiClient.put(`/admin/products/${id}`, productData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -48,7 +63,7 @@ export const deleteProduct = createAsyncThunk(
   'products/deleteProduct',
   async (productId, { rejectWithValue }) => {
     try {
-      await apiClient.delete(`/products/${productId}`);
+      await apiClient.delete(`/admin/products/${productId}`);
       return productId;
     } catch (error) {
       return rejectWithValue(
@@ -136,6 +151,21 @@ const productsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch public products
+      .addCase(fetchPublicProducts.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchPublicProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.products = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchPublicProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

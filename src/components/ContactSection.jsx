@@ -78,8 +78,8 @@ function ContactSection() {
           </h2>
           <div className="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            ¿Listo para comenzar tu próximo proyecto en cerámica? Estamos aquí para ayudarte en
-            cada paso del proceso creativo
+            ¿Listo para comenzar tu próximo proyecto en cerámica? Estamos aquí
+            para ayudarte en cada paso del proceso creativo
           </p>
         </div>
 

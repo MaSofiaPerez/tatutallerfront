@@ -2,16 +2,20 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, clearError } from "../redux/slices/authSlice";
+import toast from "react-hot-toast";
 
 function Login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [rememberMe, setRememberMe] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading, error, isAuthenticated, isAdmin } = useSelector((state) => state.auth);
+  const { isLoading, error, isAuthenticated, isAdmin } = useSelector(
+    (state) => state.auth
+  );
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -41,15 +45,36 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(clearError());
-    
+
+    const toastId = toast.loading("Iniciando sesión...");
+
     try {
-      const result = await dispatch(loginUser(formData));
-      if (loginUser.fulfilled.match(result)) {
-        // El redirect se maneja en el useEffect
-        console.log("Login exitoso");
+      const result = await dispatch(loginUser(formData)).unwrap();
+      console.log("Login exitoso:", result);
+      toast.success("¡Bienvenido! Has iniciado sesión correctamente", {
+        id: toastId,
+      });
+
+      // Redirigir según el rol del usuario
+      if (result.user?.isAdmin || result.isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/");
       }
     } catch (error) {
       console.error("Error en login:", error);
+
+      // Mensaje específico para el problema conocido del backend
+      const errorMessage =
+        error.message === "Credenciales inválidas"
+          ? "⚠️ Problema conocido del backend: El login está temporalmente deshabilitado. Se está trabajando en una solución."
+          : error.message ||
+            "Error al iniciar sesión. Verifica tus credenciales.";
+
+      toast.error(errorMessage, {
+        id: toastId,
+        duration: 6000,
+      });
     }
   };
 
@@ -77,12 +102,6 @@ function Login() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
-              {error}
-            </div>
-          )}
-
           <div className="space-y-4">
             <div>
               <label
@@ -129,6 +148,8 @@ function Login() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label

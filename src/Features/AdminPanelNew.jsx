@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardStats,
   fetchRecentBookings,
-  // fetchMonthlyRevenue y fetchPopularClasses se implementarán más tarde
+  fetchMonthlyRevenue,
+  fetchPopularClasses,
 } from "../redux/slices/dashboardSlice";
 import {
   fetchUsers,
@@ -39,6 +40,8 @@ function AdminPanel() {
   const {
     stats,
     recentBookings,
+    monthlyRevenue,
+    popularClasses,
     isLoading: dashboardLoading,
   } = useSelector((state) => state.dashboard);
   const { users, isLoading: usersLoading } = useSelector(
@@ -60,8 +63,8 @@ function AdminPanel() {
       case "dashboard":
         dispatch(fetchDashboardStats());
         dispatch(fetchRecentBookings());
-        // dispatch(fetchMonthlyRevenue()); // TODO: Implementar en el backend
-        // dispatch(fetchPopularClasses()); // TODO: Implementar en el backend
+        dispatch(fetchMonthlyRevenue());
+        dispatch(fetchPopularClasses());
         break;
       case "usuarios":
         dispatch(fetchUsers());

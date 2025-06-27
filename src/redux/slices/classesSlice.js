@@ -1,12 +1,27 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiClient } from './authSlice';
+import { apiClient } from '../api';
 
 // Async thunks para las operaciones de clases
 export const fetchClasses = createAsyncThunk(
   'classes/fetchClasses',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/classes');
+      const response = await apiClient.get('/admin/classes');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Error al obtener las clases'
+      );
+    }
+  }
+);
+
+// Fetch clases públicas (para mostrar sin autenticación)
+export const fetchPublicClasses = createAsyncThunk(
+  'classes/fetchPublicClasses',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get('/public/classes');
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -20,7 +35,7 @@ export const createClass = createAsyncThunk(
   'classes/createClass',
   async (classData, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/classes', classData);
+      const response = await apiClient.post('/admin/classes', classData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -34,7 +49,7 @@ export const updateClass = createAsyncThunk(
   'classes/updateClass',
   async ({ id, ...classData }, { rejectWithValue }) => {
     try {
-      const response = await apiClient.put(`/classes/${id}`, classData);
+      const response = await apiClient.put(`/admin/classes/${id}`, classData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -48,7 +63,7 @@ export const deleteClass = createAsyncThunk(
   'classes/deleteClass',
   async (classId, { rejectWithValue }) => {
     try {
-      await apiClient.delete(`/classes/${classId}`);
+      await apiClient.delete(`/admin/classes/${classId}`);
       return classId;
     } catch (error) {
       return rejectWithValue(
@@ -104,6 +119,21 @@ const classesSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchClasses.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch public classes
+      .addCase(fetchPublicClasses.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchPublicClasses.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.classes = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchPublicClasses.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

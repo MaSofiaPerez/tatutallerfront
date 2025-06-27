@@ -1,73 +1,23 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPublicProducts } from "../redux/slices/productsSlice";
 
 function Tienda() {
-  const [products, setProducts] = useState([]);
+  const dispatch = useDispatch();
+  const { products, isLoading, error } = useSelector((state) => state.products);
+
   const [categories, setCategories] = useState([
     "Todos",
-    "Clases",
-    "Piezas",
-    "Materiales",
-    "Servicios",
+    "MATERIALES",
+    "HERRAMIENTAS",
+    "PIEZAS",
   ]);
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Datos de ejemplo - esto vendría de tu API
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Clase de Principiantes",
-      price: 50,
-      category: "Clases",
-      description: "Clase introductoria de cerámica",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-    },
-    {
-      id: 2,
-      name: "Taller de Torno",
-      price: 60,
-      category: "Clases",
-      description: "Aprende técnicas básicas del torno",
-      image: "https://images.unsplash.com/photo-1594736797933-d0902e3a17b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-    },
-    {
-      id: 3,
-      name: "Juego de Vajilla",
-      price: 120,
-      category: "Piezas",
-      description: "Set completo de vajilla artesanal",
-      image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-    },
-    {
-      id: 4,
-      name: "Kit de Herramientas",
-      price: 35,
-      category: "Materiales",
-      description: "Kit básico de herramientas para cerámica",
-      image: "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-    },
-    {
-      id: 5,
-      name: "Arcilla de Gres",
-      price: 15,
-      category: "Materiales",
-      description: "Arcilla de alta calidad para modelado",
-      image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-    },
-    {
-      id: 6,
-      name: "Servicio de Cocción",
-      price: 25,
-      category: "Servicios",
-      description: "Cocción profesional de tus piezas",
-      image: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-    },
-  ];
-
   useEffect(() => {
-    // Simular carga de productos
-    setProducts(mockProducts);
-  }, []);
+    dispatch(fetchPublicProducts());
+  }, [dispatch]);
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
@@ -84,6 +34,33 @@ function Tienda() {
     alert(`${product.name} agregado al carrito`);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Error al cargar productos
+          </h2>
+          <p className="text-gray-600">{error}</p>
+          <button
+            onClick={() => dispatch(fetchPublicProducts())}
+            className="mt-4 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,7 +69,7 @@ function Tienda() {
             Nuestra Tienda
           </h1>
           <p className="text-gray-600">
-            Descubre nuestros servicios y productos
+            Descubre nuestros productos de cerámica
           </p>
         </div>
 

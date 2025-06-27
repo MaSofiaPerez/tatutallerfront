@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState } from "react";
+import { logoutUser } from "../redux/slices/authSlice";
 import {
   HiShoppingCart,
   HiUser,
   HiBars3,
   HiXMark,
   HiEllipsisVertical,
+  HiCog6Tooth,
 } from "react-icons/hi2";
 
 function Navbar() {
@@ -16,12 +18,10 @@ function Navbar() {
   const [isRightMenuOpen, setIsRightMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  // Cuando tengamos el auth slice:
-  // const { user } = useSelector(state => state.auth)
-  const user = null; // placeholder por ahora
+  const { user, isAuthenticated, isAdmin } = useSelector((state) => state.auth);
 
   const handleLogout = () => {
-    // dispatch(logout())
+    dispatch(logoutUser());
     navigate("/");
   };
 
@@ -176,11 +176,32 @@ function Navbar() {
 
             {/* Right Side - User Actions */}
             <div className="flex items-center space-x-4">
-              {user ? (
+              {/* TEMPORAL: Botón directo al admin para testing */}
+              <Link
+                to="/admin"
+                className="flex items-center space-x-1 bg-yellow-600 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition-colors"
+              >
+                <HiCog6Tooth className="w-4 h-4" />
+                <span className="text-sm">Admin Demo</span>
+              </Link>
+
+              {isAuthenticated ? (
                 <div className="flex items-center space-x-3">
                   <span className="hidden md:inline text-gray-700">
-                    Hola, {user.name}
+                    Hola, {user?.name}
                   </span>
+
+                  {/* Admin Panel Button */}
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="flex items-center space-x-1 bg-yellow-600 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition-colors"
+                    >
+                      <HiCog6Tooth className="w-4 h-4" />
+                      <span className="hidden lg:inline text-sm">Admin</span>
+                    </Link>
+                  )}
+
                   <button
                     onClick={handleLogout}
                     className="text-gray-600 hover:text-gray-800 p-1"

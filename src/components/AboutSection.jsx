@@ -52,8 +52,8 @@ function AboutSection() {
           <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
             En{" "}
             <span className="font-semibold text-yellow-600">Tatú Taller</span>,
-            somos más que un taller de cerámica. Somos ceramistas apasionados por
-            crear piezas únicas que se conviertan en parte de tu historia
+            somos más que un taller de cerámica. Somos ceramistas apasionados
+            por crear piezas únicas que se conviertan en parte de tu historia
             personal y tu hogar.
           </p>
         </div>

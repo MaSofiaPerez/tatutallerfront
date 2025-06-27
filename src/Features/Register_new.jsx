@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser, clearError } from "../redux/slices/authSlice";
-import toast from "react-hot-toast";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -55,47 +54,17 @@ function Register() {
 
     if (formData.password !== formData.confirmPassword) {
       setPasswordMatch(false);
-      toast.error("Las contraseñas no coinciden");
       return;
     }
 
-    const toastId = toast.loading("Creando tu cuenta...");
-
     try {
       const { confirmPassword, ...userData } = formData;
-      const result = await dispatch(registerUser(userData)).unwrap();
-      console.log("Registro exitoso:", result);
-
-      // Si el registro fue exitoso pero no hay token (requiere login)
-      if (result.success && !result.token) {
-        toast.success(
-          "¡Cuenta creada exitosamente! Por favor, inicia sesión con tus credenciales.",
-          {
-            id: toastId,
-            duration: 5000,
-          }
-        );
-        navigate("/login");
-      } else if (result.token) {
-        // Si hay token, el usuario está autenticado
-        toast.success(
-          "¡Bienvenido! Tu cuenta ha sido creada y has iniciado sesión.",
-          { id: toastId }
-        );
-        navigate("/");
-      } else {
-        // Respuesta inesperada
-        toast.success("Cuenta creada. Por favor, inicia sesión.", {
-          id: toastId,
-        });
-        navigate("/login");
+      const result = await dispatch(registerUser(userData));
+      if (registerUser.fulfilled.match(result)) {
+        console.log("Registro exitoso");
       }
     } catch (error) {
       console.error("Error en registro:", error);
-      toast.error(
-        error.message || "Error al crear la cuenta. Inténtalo de nuevo.",
-        { id: toastId }
-      );
     }
   };
 
@@ -118,6 +87,12 @@ function Register() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
               <label

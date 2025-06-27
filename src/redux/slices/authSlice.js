@@ -1,21 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-// Base URL de tu API - ajusta según tu configuración
-const API_BASE_URL = 'http://localhost:3000/api'; // Cambia por tu URL del backend
-
-// Configurar axios interceptor para incluir token en todas las requests
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+﻿import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { apiClient } from '../api';
 
 // Async thunks para las operaciones de autenticación
 export const loginUser = createAsyncThunk(
@@ -23,15 +7,34 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await apiClient.post('/auth/login', credentials);
-      const { token, user } = response.data;
+      console.log('Response completa del login:', response.data);
       
-      // Guardar token en localStorage
-      localStorage.setItem('token', token);
+      // Manejar diferentes estructuras de respuesta del backend
+      let token, user;
+      
+      if (response.data.token && response.data.user) {
+        token = response.data.token;
+        user = response.data.user;
+      } else if (response.data.access_token) {
+        token = response.data.access_token;
+        user = response.data.user || response.data;
+      } else if (response.data.jwt) {
+        token = response.data.jwt;
+        user = response.data.user || response.data;
+      } else {
+        token = response.data.token || null;
+        user = response.data.user || response.data;
+      }
+      
+      if (token) {
+        localStorage.setItem('token', token);
+      }
       
       return { token, user };
     } catch (error) {
+      console.error('Error completo en login:', error);
       return rejectWithValue(
-        error.response?.data?.message || 'Error al iniciar sesión'
+        error.response?.data?.message || error.response?.data || 'Credenciales inválidas'
       );
     }
   }
@@ -42,15 +45,35 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await apiClient.post('/auth/register', userData);
-      const { token, user } = response.data;
+      console.log('Response completa del registro:', response.data);
       
-      // Guardar token en localStorage
-      localStorage.setItem('token', token);
+      let token, user;
+      
+      if (response.data.token && response.data.user) {
+        token = response.data.token;
+        user = response.data.user;
+      } else if (response.data.access_token) {
+        token = response.data.access_token;
+        user = response.data.user || response.data;
+      } else if (response.data.jwt) {
+        token = response.data.jwt;
+        user = response.data.user || response.data;
+      } else if (typeof response.data === 'string') {
+        return { success: true, message: response.data };
+      } else {
+        token = response.data.token || null;
+        user = response.data;
+      }
+      
+      if (token) {
+        localStorage.setItem('token', token);
+      }
       
       return { token, user };
     } catch (error) {
+      console.error('Error completo en registro:', error);
       return rejectWithValue(
-        error.response?.data?.message || 'Error al registrarse'
+        error.response?.data?.message || error.response?.data || 'Error al registrarse'
       );
     }
   }
@@ -82,27 +105,32 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+const initialState = {
+  user: null,
+  token: localStorage.getItem('token'),
+  isAuthenticated: false,
+  isAdmin: false,
+  isLoading: false,
+  error: null,
+};
+
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    token: null,
-    isLoading: false,
-    isAuthenticated: false,
-    error: null,
-    isAdmin: false,
-  },
+  initialState,
   reducers: {
     clearError: (state) => {
       state.error = null;
     },
-    setLoading: (state, action) => {
-      state.isLoading = action.payload;
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.isAdmin = false;
+      localStorage.removeItem('token');
     },
   },
   extraReducers: (builder) => {
     builder
-      // Login
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -110,9 +138,9 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = action.payload.user || {};
         state.token = action.payload.token;
-        state.isAdmin = action.payload.user.role === 'admin';
+        state.isAdmin = action.payload.user?.role === 'admin' || false;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -123,26 +151,28 @@ const authSlice = createSlice({
         state.token = null;
         state.isAdmin = false;
       })
-      
-      // Register
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
+        
+        if (action.payload.success && !action.payload.token) {
+          state.error = null;
+          return;
+        }
+        
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = action.payload.user || {};
         state.token = action.payload.token;
-        state.isAdmin = action.payload.user.role === 'admin';
+        state.isAdmin = action.payload.user?.role === 'admin' || false;
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
-      
-      // Verify token
       .addCase(verifyToken.pending, (state) => {
         state.isLoading = true;
       })
@@ -151,7 +181,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload;
         state.isAdmin = action.payload.role === 'admin';
-        state.token = localStorage.getItem('token');
       })
       .addCase(verifyToken.rejected, (state) => {
         state.isLoading = false;
@@ -160,8 +189,6 @@ const authSlice = createSlice({
         state.token = null;
         state.isAdmin = false;
       })
-      
-      // Logout
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.token = null;
@@ -172,8 +199,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setLoading } = authSlice.actions;
+export const { clearError, logout } = authSlice.actions;
 export default authSlice.reducer;
-
-// Export the API client for use in other slices
-export { apiClient };

@@ -47,8 +47,8 @@ function Home() {
                 Piezas Personalizadas
               </h3>
               <p className="text-gray-600 mb-4">
-                Creaciones únicas en cerámica diseñadas especialmente para ti, adaptadas a tu
-                estilo y necesidades.
+                Creaciones únicas en cerámica diseñadas especialmente para ti,
+                adaptadas a tu estilo y necesidades.
               </p>
               <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
                 Ver más →
@@ -75,8 +75,8 @@ function Home() {
                 Esmaltado Profesional
               </h3>
               <p className="text-gray-600 mb-4">
-                Técnicas avanzadas de esmaltado con máxima calidad
-                y acabados perfectos para tus piezas.
+                Técnicas avanzadas de esmaltado con máxima calidad y acabados
+                perfectos para tus piezas.
               </p>
               <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
                 Ver más →
@@ -103,8 +103,8 @@ function Home() {
                 Cocción y Acabados
               </h3>
               <p className="text-gray-600 mb-4">
-                Servicio completo de cocción y asesoramiento para el
-                perfecto acabado de tus piezas cerámicas.
+                Servicio completo de cocción y asesoramiento para el perfecto
+                acabado de tus piezas cerámicas.
               </p>
               <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
                 Ver más →
@@ -121,7 +121,8 @@ function Home() {
             ¿Quieres aprender el arte de la cerámica?
           </h2>
           <p className="text-xl text-gray-800 mb-8 max-w-3xl mx-auto">
-            Únete a nuestras clases con instructores profesionales. Desde principiantes hasta técnicas avanzadas de modelado.
+            Únete a nuestras clases con instructores profesionales. Desde
+            principiantes hasta técnicas avanzadas de modelado.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

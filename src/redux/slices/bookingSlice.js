@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiClient } from './authSlice';
+import { apiClient } from '../api';
 
 // Async thunks para las operaciones de reservas
 export const createBooking = createAsyncThunk(
@@ -20,7 +20,7 @@ export const fetchBookings = createAsyncThunk(
   'booking/fetchBookings',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/bookings');
+      const response = await apiClient.get('/admin/bookings');
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -30,11 +30,26 @@ export const fetchBookings = createAsyncThunk(
   }
 );
 
+// Fetch reservas del usuario actual
+export const fetchMyBookings = createAsyncThunk(
+  'booking/fetchMyBookings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get('/my-bookings');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Error al obtener mis reservas'
+      );
+    }
+  }
+);
+
 export const fetchUserBookings = createAsyncThunk(
   'booking/fetchUserBookings',
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(`/bookings/user/${userId}`);
+      const response = await apiClient.get(`/admin/bookings/user/${userId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -48,7 +63,7 @@ export const updateBookingStatus = createAsyncThunk(
   'booking/updateBookingStatus',
   async ({ bookingId, status }, { rejectWithValue }) => {
     try {
-      const response = await apiClient.patch(`/bookings/${bookingId}`, { status });
+      const response = await apiClient.put(`/admin/bookings/${bookingId}/status`, { status });
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -62,7 +77,7 @@ export const deleteBooking = createAsyncThunk(
   'booking/deleteBooking',
   async (bookingId, { rejectWithValue }) => {
     try {
-      await apiClient.delete(`/bookings/${bookingId}`);
+      await apiClient.delete(`/admin/bookings/${bookingId}`);
       return bookingId;
     } catch (error) {
       return rejectWithValue(
@@ -138,6 +153,21 @@ const bookingSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchBookings.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch my bookings
+      .addCase(fetchMyBookings.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchMyBookings.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userBookings = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchMyBookings.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

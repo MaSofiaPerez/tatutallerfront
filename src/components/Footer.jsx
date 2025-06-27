@@ -83,8 +83,8 @@ function Footer() {
               </h3>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Tu taller de cerámica de confianza. Creamos piezas únicas
-              y ofrecemos clases profesionales con los más altos estándares de
+              Tu taller de cerámica de confianza. Creamos piezas únicas y
+              ofrecemos clases profesionales con los más altos estándares de
               calidad y técnicas tradicionales.
             </p>
 
@@ -196,8 +196,7 @@ function Footer() {
                 ¡Mantente al día!
               </h4>
               <p className="text-gray-300">
-                Suscríbete para recibir noticias, promociones y tips de
-                cerámica
+                Suscríbete para recibir noticias, promociones y tips de cerámica
               </p>
             </div>
             <div className="flex max-w-md">

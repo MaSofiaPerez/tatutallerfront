@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   HiCalendarDays,
   HiClock,
@@ -6,57 +7,98 @@ import {
   HiPhone,
   HiEnvelope,
 } from "react-icons/hi2";
+import { createBooking, clearError } from "../redux/slices/bookingSlice";
+import { fetchPublicClasses } from "../redux/slices/classesSlice";
 
-function BookingSystem() {
+function BookingSystem({ selectedService }) {
   const [step, setStep] = useState(1);
   const [bookingData, setBookingData] = useState({
-    service: "",
-    artist: "",
-    date: "",
-    time: "",
-    name: "",
-    email: "",
-    phone: "",
-    description: "",
+    classEntity: { id: "" },
+    bookingDate: "",
+    bookingTime: "",
+    notes: "",
   });
 
-  const services = [
-    {
-      id: "clase-principiantes",
-      name: "Clase para Principiantes",
-      duration: "2 horas",
-      price: "50",
-      description: "Introducción al modelado básico",
-    },
-    {
-      id: "clase-torno",
-      name: "Clase de Torno",
-      duration: "2 horas",
-      price: "60",
-      description: "Aprende técnicas de torno",
-    },
-    {
-      id: "clase-esmaltado",
-      name: "Clase de Esmaltado",
-      duration: "1.5 horas",
-      price: "45",
-      description: "Técnicas de esmaltado y decoración",
-    },
-    {
-      id: "pieza-personalizada",
-      name: "Pieza Personalizada",
-      duration: "Variable",
-      price: "80+",
-      description: "Crea tu pieza única",
-    },
-    {
-      id: "coccion",
-      name: "Servicio de Cocción",
-      duration: "Variable",
-      price: "25",
-      description: "Cocción de tus piezas",
-    },
+  const dispatch = useDispatch();
+  const {
+    isLoading: bookingLoading,
+    error: bookingError,
+    currentBooking,
+  } = useSelector((state) => state.booking);
+  const { classes, isLoading: classesLoading } = useSelector(
+    (state) => state.classes
+  );
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(fetchPublicClasses());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (selectedService) {
+      setBookingData((prev) => ({
+        ...prev,
+        classEntity: { id: selectedService.id },
+      }));
+    }
+  }, [selectedService]);
+
+  const timeSlots = [
+    "09:00:00",
+    "10:30:00",
+    "14:00:00",
+    "15:30:00",
+    "17:00:00",
+    "18:30:00",
   ];
+
+  // Usar clases del backend o datos por defecto
+  const services =
+    classes.length > 0
+      ? classes.map((cls) => ({
+          id: cls.id,
+          name: cls.name,
+          duration: cls.duration || "2 horas",
+          price: cls.price || "50",
+          description: cls.description || "",
+        }))
+      : [
+          {
+            id: "clase-principiantes",
+            name: "Clase para Principiantes",
+            duration: "2 horas",
+            price: "50",
+            description: "Introducción al modelado básico",
+          },
+          {
+            id: "clase-torno",
+            name: "Clase de Torno",
+            duration: "2 horas",
+            price: "60",
+            description: "Aprende técnicas de torno",
+          },
+          {
+            id: "clase-esmaltado",
+            name: "Clase de Esmaltado",
+            duration: "1.5 horas",
+            price: "45",
+            description: "Técnicas de esmaltado y decoración",
+          },
+          {
+            id: "pieza-personalizada",
+            name: "Pieza Personalizada",
+            duration: "Variable",
+            price: "80+",
+            description: "Crea tu pieza única",
+          },
+          {
+            id: "coccion",
+            name: "Servicio de Cocción",
+            duration: "Variable",
+            price: "25",
+            description: "Cocción de tus piezas",
+          },
+        ];
 
   const artists = [
     {
@@ -107,24 +149,39 @@ function BookingSystem() {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica para enviar la reserva
-    console.log("Reserva enviada:", bookingData);
-    alert("¡Reserva enviada exitosamente! Te contactaremos para confirmar.");
 
-    // Reset form
-    setBookingData({
-      service: "",
-      artist: "",
-      date: "",
-      time: "",
-      name: "",
-      email: "",
-      phone: "",
-      description: "",
-    });
-    setStep(1);
+    if (!isAuthenticated) {
+      alert("Debes iniciar sesión para realizar una reserva");
+      return;
+    }
+
+    try {
+      const bookingPayload = {
+        classEntity: { id: bookingData.classEntity.id },
+        bookingDate: bookingData.bookingDate,
+        bookingTime: bookingData.bookingTime,
+        notes: bookingData.notes || "",
+      };
+
+      const result = await dispatch(createBooking(bookingPayload)).unwrap();
+      console.log("Reserva creada exitosamente:", result);
+
+      // Reset form
+      setBookingData({
+        classEntity: { id: "" },
+        bookingDate: "",
+        bookingTime: "",
+        notes: "",
+      });
+      setStep(1);
+
+      alert("¡Reserva enviada exitosamente! Te contactaremos para confirmar.");
+    } catch (error) {
+      console.error("Error al crear reserva:", error);
+      alert("Error al enviar la reserva. Por favor, intenta nuevamente.");
+    }
   };
 
   const getMinDate = () => {
@@ -147,11 +204,13 @@ function BookingSystem() {
                 <div
                   key={service.id}
                   className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    bookingData.service === service.id
+                    bookingData.classEntity.id === service.id
                       ? "border-yellow-500 bg-yellow-50"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => handleInputChange("service", service.id)}
+                  onClick={() =>
+                    handleInputChange("classEntity", { id: service.id })
+                  }
                 >
                   <div className="flex justify-between items-start">
                     <div>
@@ -192,11 +251,11 @@ function BookingSystem() {
               <div className="grid sm:grid-cols-2 gap-3">
                 <div
                   className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                    bookingData.artist === ""
+                    bookingData.instructorId === ""
                       ? "border-yellow-500 bg-yellow-50"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => handleInputChange("artist", "")}
+                  onClick={() => handleInputChange("instructorId", "")}
                 >
                   <div className="font-medium text-gray-900">
                     Sin preferencia
@@ -209,11 +268,11 @@ function BookingSystem() {
                   <div
                     key={artist.id}
                     className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                      bookingData.artist === artist.id
+                      bookingData.instructorId === artist.id
                         ? "border-yellow-500 bg-yellow-50"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
-                    onClick={() => handleInputChange("artist", artist.id)}
+                    onClick={() => handleInputChange("instructorId", artist.id)}
                   >
                     <div className="font-medium text-gray-900">
                       {artist.name}
@@ -237,8 +296,10 @@ function BookingSystem() {
               <input
                 type="date"
                 id="date"
-                value={bookingData.date}
-                onChange={(e) => handleInputChange("date", e.target.value)}
+                value={bookingData.bookingDate}
+                onChange={(e) =>
+                  handleInputChange("bookingDate", e.target.value)
+                }
                 min={getMinDate()}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 required
@@ -256,11 +317,11 @@ function BookingSystem() {
                     key={time}
                     type="button"
                     className={`px-3 py-2 text-sm rounded-md transition-all ${
-                      bookingData.time === time
+                      bookingData.bookingTime === time
                         ? "bg-yellow-500 text-gray-900"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
-                    onClick={() => handleInputChange("time", time)}
+                    onClick={() => handleInputChange("bookingTime", time)}
                   >
                     {time}
                   </button>
@@ -274,111 +335,80 @@ function BookingSystem() {
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Información de contacto
+              Confirmación de reserva
             </h3>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Nombre completo *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={bookingData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  required
-                />
+            {!isAuthenticated ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+                <p className="text-yellow-800">
+                  Debes <strong>iniciar sesión</strong> para realizar una
+                  reserva.
+                </p>
               </div>
-
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Teléfono *
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={bookingData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Email *
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={bookingData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Describe tu proyecto (opcional)
-              </label>
-              <textarea
-                id="description"
-                value={bookingData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 resize-none"
-                placeholder="Cuéntanos sobre tu proyecto, el tipo de pieza que quieres crear, técnicas de interés, etc."
-              />
-            </div>
-
-            {/* Resumen */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 mb-3">
-                Resumen de tu reserva
-              </h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Servicio:</span>
-                  <span className="font-medium">
-                    {services.find((s) => s.id === bookingData.service)?.name}
-                  </span>
+            ) : (
+              <>
+                <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
+                  <p className="text-green-800">
+                    Reservando como: <strong>{user?.name}</strong> (
+                    {user?.email})
+                  </p>
                 </div>
-                {bookingData.artist && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Artista:</span>
-                    <span className="font-medium">
-                      {artists.find((a) => a.id === bookingData.artist)?.name}
-                    </span>
+
+                <div>
+                  <label
+                    htmlFor="notes"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Observaciones (opcional)
+                  </label>
+                  <textarea
+                    id="notes"
+                    rows={4}
+                    value={bookingData.notes}
+                    onChange={(e) => handleInputChange("notes", e.target.value)}
+                    placeholder="Menciona cualquier comentario adicional, preferencias o consultas..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  />
+                </div>
+
+                {/* Resumen */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">
+                    Resumen de tu reserva
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Clase:</span>
+                      <span className="font-medium">
+                        {
+                          services.find(
+                            (s) => s.id === bookingData.classEntity.id
+                          )?.name
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Fecha:</span>
+                      <span className="font-medium">
+                        {bookingData.bookingDate}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Hora:</span>
+                      <span className="font-medium">
+                        {bookingData.bookingTime}
+                      </span>
+                    </div>
+                    {bookingData.notes && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Observaciones:</span>
+                        <span className="font-medium">{bookingData.notes}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Fecha:</span>
-                  <span className="font-medium">{bookingData.date}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Hora:</span>
-                  <span className="font-medium">{bookingData.time}</span>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         );
 
@@ -390,15 +420,11 @@ function BookingSystem() {
   const isStepValid = () => {
     switch (step) {
       case 1:
-        return bookingData.service !== "";
+        return bookingData.classEntity.id !== "";
       case 2:
-        return bookingData.date !== "" && bookingData.time !== "";
+        return bookingData.bookingDate !== "" && bookingData.bookingTime !== "";
       case 3:
-        return (
-          bookingData.name !== "" &&
-          bookingData.email !== "" &&
-          bookingData.phone !== ""
-        );
+        return isAuthenticated; // Solo necesita estar autenticado
       default:
         return false;
     }
@@ -418,6 +444,21 @@ function BookingSystem() {
             confirmar disponibilidad.
           </p>
         </div>
+
+        {/* Error Message */}
+        {bookingError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-6">
+            {bookingError}
+          </div>
+        )}
+
+        {/* Loading State */}
+        {(bookingLoading || classesLoading) && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+            <span className="ml-3 text-gray-600">Procesando...</span>
+          </div>
+        )}
 
         {/* Progress Indicator */}
         <div className="mb-8">
