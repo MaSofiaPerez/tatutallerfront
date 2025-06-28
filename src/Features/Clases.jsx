@@ -1,6 +1,14 @@
-import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchPublicClasses } from "../redux/slices/classesSlice";
+/**
+ * VERSIÓN TEMPORAL CON DATOS ESTÁTICOS
+ *
+ * Esta versión de Clases.jsx usa datos estáticos para evitar el bucle infinito
+ * que sobrecarga el backend. Una vez resuelto el problema de bucle infinito,
+ * se debe restaurar la lógica de Redux para consumir datos reales del backend.
+ *
+ * Ver el historial de cambios para la versión original con Redux.
+ */
+
+import { useState } from "react";
 import BookingSystem from "../components/BookingSystem";
 import {
   HiAcademicCap,
@@ -10,41 +18,56 @@ import {
   HiCalendarDays,
 } from "react-icons/hi2";
 
+// DATOS ESTÁTICOS TEMPORALES - PARA PROTEGER EL BACKEND DEL BUCLE INFINITO
+const staticClasses = [
+  {
+    id: 1,
+    name: "Cerámica para Principiantes",
+    description:
+      "Aprende las técnicas básicas de la cerámica desde cero. Incluye modelado básico, decoración y esmaltado.",
+    duration: 120,
+    price: 2500,
+    capacity: 8,
+    level: "Principiante",
+    includes: ["Materiales básicos", "Herramientas", "Horno"],
+    image:
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: 2,
+    name: "Torno de Alfarero",
+    description:
+      "Domina el arte del torno. Aprende a centrar, abrir y levantar piezas cilíndricas.",
+    duration: 180,
+    price: 3500,
+    capacity: 6,
+    level: "Intermedio",
+    includes: ["Uso del torno", "Arcilla", "Esmaltado básico"],
+    image:
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: 3,
+    name: "Técnicas de Esmaltado",
+    description:
+      "Explora diferentes técnicas de esmaltado y efectos decorativos para tus piezas.",
+    duration: 150,
+    price: 3000,
+    capacity: 10,
+    level: "Intermedio",
+    includes: ["Esmaltes diversos", "Pinceles especializados", "Cocción"],
+    image:
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  },
+];
+
 function Clases() {
-  const dispatch = useDispatch();
-  const { classes, isLoading, error } = useSelector((state) => state.classes);
   const [selectedClass, setSelectedClass] = useState(null);
 
-  useEffect(() => {
-    dispatch(fetchPublicClasses());
-  }, [dispatch]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Error al cargar clases
-          </h2>
-          <p className="text-gray-600">{error}</p>
-          <button
-            onClick={() => dispatch(fetchPublicClasses())}
-            className="mt-4 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // USANDO DATOS ESTÁTICOS PARA EVITAR BUCLE INFINITO
+  const classes = staticClasses;
+  const isLoading = false;
+  const error = null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -100,110 +123,76 @@ function Clases() {
             </p>
           </div>
 
-          {classes && classes.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {classes.map((classItem) => (
-                <div
-                  key={classItem.id}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-gray-100"
-                >
-                  <div className="aspect-w-16 aspect-h-9 overflow-hidden">
-                    <img
-                      src={
-                        classItem.imageUrl ||
-                        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                      }
-                      alt={classItem.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  </div>
-
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {classItem.name}
-                      </h3>
-                      <span className="text-2xl font-bold text-yellow-600">
-                        ${classItem.price}
-                      </span>
-                    </div>
-
-                    <p className="text-gray-600 mb-4">
-                      {classItem.description}
-                    </p>
-
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <HiClock className="w-4 h-4 mr-2" />
-                      <span>Duración: {classItem.duration}</span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <HiUsers className="w-4 h-4 mr-2" />
-                      <span>
-                        Capacidad máxima: {classItem.maxCapacity} estudiantes
-                      </span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <HiAcademicCap className="w-4 h-4 mr-2" />
-                      <span>Nivel: {classItem.level}</span>
-                    </div>
-
-                    {classItem.instructor && (
-                      <div className="flex items-center text-sm text-gray-500 mb-6">
-                        <span className="font-medium">
-                          Instructor: {classItem.instructor.name}
-                        </span>
-                      </div>
-                    )}
-
-                    {classItem.materials && (
-                      <div className="space-y-2 mb-6">
-                        <h4 className="font-semibold text-gray-900">
-                          Materiales incluidos:
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {classItem.materials}
-                        </p>
-                      </div>
-                    )}
-
-                    {classItem.requirements && (
-                      <div className="space-y-2 mb-6">
-                        <h4 className="font-semibold text-gray-900">
-                          Requisitos:
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {classItem.requirements}
-                        </p>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => {
-                        setSelectedClass(classItem);
-                        document
-                          .getElementById("reserva-sistema")
-                          .scrollIntoView({ behavior: "smooth" });
-                      }}
-                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 rounded-lg font-semibold transition-colors"
-                    >
-                      Reservar Clase
-                    </button>
-                  </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {classes.map((classItem) => (
+              <div
+                key={classItem.id}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-gray-100"
+              >
+                <div className="aspect-w-16 aspect-h-9 overflow-hidden">
+                  <img
+                    src={
+                      classItem.image ||
+                      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                    }
+                    alt={classItem.name}
+                    className="w-full h-48 object-cover"
+                  />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-medium text-gray-900 mb-2">
-                No hay clases disponibles
-              </h3>
-              <p className="text-gray-600">
-                Pronto tendremos nuevas clases disponibles.
-              </p>
-            </div>
-          )}
+
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {classItem.name}
+                    </h3>
+                    <span className="text-2xl font-bold text-yellow-600">
+                      ${classItem.price}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-600 mb-4">{classItem.description}</p>
+
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <HiClock className="w-4 h-4 mr-2" />
+                    <span>Duración: {classItem.duration} min</span>
+                  </div>
+
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <HiUsers className="w-4 h-4 mr-2" />
+                    <span>
+                      Capacidad máxima: {classItem.capacity} estudiantes
+                    </span>
+                  </div>
+
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <HiAcademicCap className="w-4 h-4 mr-2" />
+                    <span>Nivel: {classItem.level}</span>
+                  </div>
+
+                  {classItem.includes && (
+                    <div className="space-y-2 mb-6">
+                      <h4 className="font-semibold text-gray-900">Incluye:</h4>
+                      <ul className="text-sm text-gray-600">
+                        {classItem.includes.map((item, index) => (
+                          <li key={index} className="flex items-center">
+                            <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => setSelectedClass(classItem)}
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Reservar Clase
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

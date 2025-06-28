@@ -7,7 +7,10 @@ import {
   HiPhone,
   HiEnvelope,
 } from "react-icons/hi2";
-import { createBooking, clearError } from "../redux/slices/bookingSlice";
+import {
+  createBookingWithNotification,
+  clearError,
+} from "../redux/slices/bookingSlice";
 import { fetchPublicClasses } from "../redux/slices/classesSlice";
 
 function BookingSystem({ selectedService }) {
@@ -24,6 +27,8 @@ function BookingSystem({ selectedService }) {
     isLoading: bookingLoading,
     error: bookingError,
     currentBooking,
+    notificationStatus,
+    notificationError,
   } = useSelector((state) => state.booking);
   const { classes, isLoading: classesLoading } = useSelector(
     (state) => state.classes
@@ -159,13 +164,15 @@ function BookingSystem({ selectedService }) {
 
     try {
       const bookingPayload = {
-        classEntity: { id: bookingData.classEntity.id },
+        classId: bookingData.classEntity.id,
         bookingDate: bookingData.bookingDate,
         bookingTime: bookingData.bookingTime,
         notes: bookingData.notes || "",
       };
 
-      const result = await dispatch(createBooking(bookingPayload)).unwrap();
+      const result = await dispatch(
+        createBookingWithNotification(bookingPayload)
+      ).unwrap();
       console.log("Reserva creada exitosamente:", result);
 
       // Reset form
@@ -177,7 +184,13 @@ function BookingSystem({ selectedService }) {
       });
       setStep(1);
 
-      alert("¡Reserva enviada exitosamente! Te contactaremos para confirmar.");
+      // Mostrar mensaje basado en el estado de la notificación
+      const notificationMessage =
+        notificationStatus === "sent"
+          ? "¡Reserva enviada exitosamente! El profesor ha sido notificado por email y te contactará para confirmar."
+          : "¡Reserva enviada exitosamente! Te contactaremos para confirmar.";
+
+      alert(notificationMessage);
     } catch (error) {
       console.error("Error al crear reserva:", error);
       alert("Error al enviar la reserva. Por favor, intenta nuevamente.");
@@ -452,6 +465,29 @@ function BookingSystem({ selectedService }) {
           </div>
         )}
 
+        {/* Notification Status */}
+        {notificationStatus === "sending" && (
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-md mb-6">
+            📧 Enviando notificación al profesor...
+          </div>
+        )}
+
+        {notificationStatus === "sent" && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md mb-6">
+            ✅ Profesor notificado por email exitosamente
+          </div>
+        )}
+
+        {notificationStatus === "failed" && (
+          <div className="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded-md mb-6">
+            ⚠️ Reserva creada, pero no se pudo notificar al profesor por email.
+            Te contactaremos directamente.
+            {notificationError && (
+              <div className="text-sm mt-1">Error: {notificationError}</div>
+            )}
+          </div>
+        )}
+
         {/* Loading State */}
         {(bookingLoading || classesLoading) && (
           <div className="flex justify-center items-center py-8">
@@ -550,12 +586,17 @@ function BookingSystem({ selectedService }) {
 
         {/* Additional Info */}
         <div className="mt-8 text-center">
+          {" "}
           <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
             <h4 className="font-semibold text-gray-900 mb-2">
               Información importante
             </h4>
             <div className="text-sm text-gray-600 space-y-1">
-              <p>• Te contactaremos en 24 horas para confirmar tu cita</p>
+              <p>
+                • El profesor será notificado automáticamente por email sobre tu
+                reserva
+              </p>
+              <p>• Te contactarán en 24 horas para confirmar tu cita</p>
               <p>• Las consultas de diseño son gratuitas y sin compromiso</p>
               <p>
                 • Puedes cancelar o reprogramar con 24 horas de anticipación

@@ -18,7 +18,9 @@ function Navbar() {
   const [isRightMenuOpen, setIsRightMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  const { user, isAuthenticated, isAdmin } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, isAdmin, isTeacher } = useSelector(
+    (state) => state.auth
+  );
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -176,29 +178,18 @@ function Navbar() {
 
             {/* Right Side - User Actions */}
             <div className="flex items-center space-x-4">
-              {/* TEMPORAL: Botón directo al admin para testing */}
-              <Link
-                to="/admin"
-                className="flex items-center space-x-1 bg-yellow-600 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition-colors"
-              >
-                <HiCog6Tooth className="w-4 h-4" />
-                <span className="text-sm">Admin Demo</span>
-              </Link>
-
               {isAuthenticated ? (
                 <div className="flex items-center space-x-3">
-                  <span className="hidden md:inline text-gray-700">
-                    Hola, {user?.name}
-                  </span>
-
-                  {/* Admin Panel Button */}
-                  {isAdmin && (
+                  {/* Admin Panel Button - Solo para admins y teachers */}
+                  {(isAdmin || isTeacher) && (
                     <Link
                       to="/admin"
                       className="flex items-center space-x-1 bg-yellow-600 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition-colors"
                     >
                       <HiCog6Tooth className="w-4 h-4" />
-                      <span className="hidden lg:inline text-sm">Admin</span>
+                      <span className="hidden lg:inline text-sm">
+                        {isAdmin ? "Admin" : "Panel"}
+                      </span>
                     </Link>
                   )}
 

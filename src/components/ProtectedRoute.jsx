@@ -1,8 +1,12 @@
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-const ProtectedRoute = ({ children, requireAdmin = false }) => {
-  const { isAuthenticated, isAdmin, isLoading } = useSelector(
+const ProtectedRoute = ({
+  children,
+  requireAdmin = false,
+  requireAdminOrTeacher = false,
+}) => {
+  const { isAuthenticated, isAdmin, isTeacher, isLoading } = useSelector(
     (state) => state.auth
   );
 
@@ -20,6 +24,10 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   }
 
   if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (requireAdminOrTeacher && !isAdmin && !isTeacher) {
     return <Navigate to="/" replace />;
   }
 

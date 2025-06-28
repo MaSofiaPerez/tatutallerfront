@@ -51,14 +51,24 @@ function Login() {
     try {
       const result = await dispatch(loginUser(formData)).unwrap();
       console.log("Login exitoso:", result);
+      console.log("Datos del usuario:", result.user);
+      console.log("Rol del usuario:", result.user?.role);
+      console.log("Es admin?:", result.user?.role?.toLowerCase() === "admin");
+
       toast.success("¡Bienvenido! Has iniciado sesión correctamente", {
         id: toastId,
       });
 
       // Redirigir según el rol del usuario
-      if (result.user?.isAdmin || result.isAdmin) {
+      if (
+        result.user?.isAdmin ||
+        result.isAdmin ||
+        result.user?.role?.toLowerCase() === "admin"
+      ) {
+        console.log("Redirigiendo a admin panel");
         navigate("/admin");
       } else {
+        console.log("Redirigiendo a home");
         navigate("/");
       }
     } catch (error) {

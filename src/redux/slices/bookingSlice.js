@@ -103,6 +103,290 @@ export const fetchAvailableSlots = createAsyncThunk(
   }
 );
 
+// Helper function to safely parse JSON or return error message
+const safeParseResponse = async (response) => {
+  const contentType = response.headers.get('content-type');
+  
+  try {
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    } else {
+      // If it's not JSON (e.g., HTML error page), read as text
+      const text = await response.text();
+      return { 
+        message: `El servidor respondió con un error (${response.status}). Por favor, verifica que el endpoint esté configurado correctamente.`,
+        details: text.length > 200 ? text.substring(0, 200) + '...' : text
+      };
+    }
+  } catch (parseError) {
+    // If JSON parsing fails, read as text
+    try {
+      const text = await response.text();
+      return { 
+        message: 'Error al procesar la respuesta del servidor',
+        details: text.length > 200 ? text.substring(0, 200) + '...' : text
+      };
+    } catch (textError) {
+      return { message: 'Error de comunicación con el servidor' };
+    }
+  }
+};
+
+// Thunk para notificar al profesor usando la estructura específica
+export const notifyTeacherBooking = createAsyncThunk(
+  'booking/notifyTeacherBooking',
+  async (notificationData, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const token = auth.token;
+      
+      const response = await fetch('/api/bookings/notify-teacher', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(notificationData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await safeParseResponse(response);
+        throw new Error(errorData.message || 'Error al enviar notificación');
+      }
+      
+      const result = await safeParseResponse(response);
+      console.log('✅ Notificación enviada al profesor:', result);
+      return result;
+    } catch (error) {
+      console.log('❌ Error al enviar notificación al profesor:', error);
+      return rejectWithValue(error.message || 'Error al notificar al profesor');
+    }
+  }
+);
+
+// Implementación del flujo específico solicitado
+export const createBookingWithNotification = createAsyncThunk(
+  'booking/createBookingWithNotification',
+  async (bookingData, { dispatch, getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const token = auth.token;
+      const userInfo = auth.user;
+      
+      // 1. Crear la reserva
+      const response = await apiClient.post('/bookings', bookingData);
+      const booking = response.data;
+      console.log('✅ Reserva creada:', booking);        // 2. Obtener detalles de la clase (incluyendo profesor)
+        try {
+          const classResponse = await fetch(`/api/public/classes/${booking.classEntity.id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!classResponse.ok) {
+            throw new Error('No se pudo obtener detalles de la clase');
+          }
+          
+          const classDetails = await safeParseResponse(classResponse);
+          console.log('✅ Detalles de clase obtenidos:', classDetails);
+          
+          // 3. Determinar información del profesor
+          let teacherEmail = null;
+          let teacherName = null;
+          
+          // Opción 1: instructor en los detalles de la clase
+          if (classDetails.instructor && classDetails.instructor.email) {
+            teacherEmail = classDetails.instructor.email;
+            teacherName = classDetails.instructor.name;
+          }
+          // Opción 2: usuario creador de la clase
+          else if (classDetails.user && classDetails.user.email) {
+            teacherEmail = classDetails.user.email;
+            teacherName = classDetails.user.name;
+          }
+          // Opción 3: campo teacher directo
+          else if (classDetails.teacher && classDetails.teacher.email) {
+            teacherEmail = classDetails.teacher.email;
+            teacherName = classDetails.teacher.name;
+          }
+          // Opción 4: buscar en el booking response por si tiene info del profesor
+          else if (booking.classEntity && booking.classEntity.user && booking.classEntity.user.email) {
+            teacherEmail = booking.classEntity.user.email;
+            teacherName = booking.classEntity.user.name;
+          }
+          // Opción 5: Si solo tenemos ID del profesor, obtener datos del usuario
+          else if (classDetails.instructorId || classDetails.instructor_id || classDetails.teacherId || classDetails.teacher_id || classDetails.userId || classDetails.user_id) {
+            const instructorId = classDetails.instructorId || classDetails.instructor_id || 
+                               classDetails.teacherId || classDetails.teacher_id || 
+                               classDetails.userId || classDetails.user_id;
+            
+            console.log(`🔍 Obteniendo datos del profesor con ID: ${instructorId}`);
+            
+            try {
+              const instructorResponse = await fetch(`/api/users/${instructorId}`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              if (instructorResponse.ok) {
+                const instructorData = await safeParseResponse(instructorResponse);
+                if (instructorData && instructorData.email) {
+                  teacherEmail = instructorData.email;
+                  teacherName = instructorData.name;
+                  console.log(`✅ Datos del profesor obtenidos: ${teacherName} (${teacherEmail})`);
+                }
+              } else {
+                console.log('⚠️ No se pudo obtener datos del profesor desde /api/users/' + instructorId);
+                // Intentar endpoint alternativo para usuarios públicos
+                const publicUserResponse = await fetch(`/api/public/users/${instructorId}`, {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                });
+                
+                if (publicUserResponse.ok) {
+                  const publicUserData = await safeParseResponse(publicUserResponse);
+                  if (publicUserData && publicUserData.email) {
+                    teacherEmail = publicUserData.email;
+                    teacherName = publicUserData.name;
+                    console.log(`✅ Datos del profesor obtenidos desde endpoint público: ${teacherName} (${teacherEmail})`);
+                  }
+                }
+              }
+            } catch (instructorError) {
+              console.log('❌ Error al obtener datos del profesor:', instructorError);
+            }
+          }
+          
+          if (teacherEmail) {
+            console.log(`📧 Enviando notificación a: ${teacherName} (${teacherEmail})`);
+            
+            const notification = await fetch('/api/bookings/notify-teacher', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                bookingId: booking.id,
+                teacherEmail: teacherEmail,
+                teacherName: teacherName || 'Profesor/a',
+                studentName: userInfo.name || userInfo.email,
+                studentEmail: userInfo.email,
+                className: classDetails.name || booking.classEntity.name,
+                bookingDate: booking.bookingDate,
+                bookingTime: booking.bookingTime,
+                notes: booking.notes || ''
+              })
+            });
+            
+            if (notification.ok) {
+              const notificationResult = await safeParseResponse(notification);
+              console.log('✅ Profesor notificado exitosamente:', notificationResult);
+              
+              // Dispatch acción de éxito de notificación
+              dispatch(notifyTeacherBooking.fulfilled(notificationResult));
+            } else {
+              const errorData = await safeParseResponse(notification);
+              
+              // Mensaje específico para error 404 (endpoint no implementado)
+              if (notification.status === 404) {
+                console.log('📋 El endpoint /api/bookings/notify-teacher no está implementado en el backend');
+                console.log('💡 La reserva se creó correctamente, pero la notificación por email requiere implementación del backend');
+                dispatch(notifyTeacherBooking.rejected('Endpoint de notificación no implementado en el backend'));
+              } else {
+                console.log('❌ Error al notificar profesor:', errorData);
+                dispatch(notifyTeacherBooking.rejected(errorData.message || 'Error al notificar profesor'));
+              }
+            }
+          } else {
+            console.log('⚠️ No se encontró email del instructor para la clase');
+            console.log('📋 Estructura de la clase recibida:', JSON.stringify(classDetails, null, 2));
+            console.log('📋 Estructura del booking:', JSON.stringify(booking, null, 2));
+            
+            // Mostrar TODOS los campos de la clase para debugging
+            console.log('🔍 Todos los campos de classDetails:', Object.keys(classDetails));
+            
+            // Mostrar qué campos están disponibles para el instructor
+            const availableFields = Object.keys(classDetails).filter(key => 
+              key.toLowerCase().includes('instructor') || 
+              key.toLowerCase().includes('teacher') || 
+              key.toLowerCase().includes('user')
+            );
+            console.log('🔍 Campos relacionados con profesor encontrados:', availableFields);
+            
+            // Mostrar también si hay campos que contengan 'id'
+            const idFields = Object.keys(classDetails).filter(key => 
+              key.toLowerCase().includes('id')
+            );
+            console.log('🔍 Campos que contienen "id":', idFields);
+            
+            // Para desarrollo: usar email de fallback si está configurado
+            const fallbackEmail = import.meta.env.VITE_FALLBACK_TEACHER_EMAIL;
+            
+            if (import.meta.env.DEV && fallbackEmail) {
+              console.log(`🔧 Modo desarrollo: usando email de fallback: ${fallbackEmail}`);
+              
+              const notification = await fetch('/api/bookings/notify-teacher', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  bookingId: booking.id,
+                  teacherEmail: fallbackEmail,
+                  teacherName: 'Administrador (Fallback)',
+                  studentName: userInfo.name || userInfo.email,
+                  studentEmail: userInfo.email,
+                  className: classDetails.name || booking.classEntity.name,
+                  bookingDate: booking.bookingDate,
+                  bookingTime: booking.bookingTime,
+                  notes: booking.notes || ''
+                })
+              });
+              
+              if (notification.ok) {
+                const notificationResult = await safeParseResponse(notification);
+                console.log('✅ Notificación enviada a email de fallback:', notificationResult);
+                dispatch(notifyTeacherBooking.fulfilled(notificationResult));
+              } else {
+                const errorData = await safeParseResponse(notification);
+                
+                // Mensaje específico para error 404 (endpoint no implementado)
+                if (notification.status === 404) {
+                  console.log('📋 El endpoint /api/bookings/notify-teacher no está implementado en el backend');
+                  console.log('💡 La reserva se creó correctamente, pero la notificación por email requiere implementación del backend');
+                  dispatch(notifyTeacherBooking.rejected('Endpoint de notificación no implementado en el backend'));
+                } else {
+                  console.log('❌ Error al notificar con email de fallback:', errorData);
+                  dispatch(notifyTeacherBooking.rejected(errorData.message || 'Error al notificar profesor'));
+                }
+              }
+            } else {
+              dispatch(notifyTeacherBooking.rejected('No se encontró información del instructor para enviar la notificación'));
+            }
+          }
+      } catch (notificationError) {
+        console.log('⚠️ Reserva creada pero falló la notificación:', notificationError);
+        dispatch(notifyTeacherBooking.rejected(notificationError.message));
+        // No fallar todo el proceso si solo falla la notificación
+      }
+      
+      return booking;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Error al crear la reserva'
+      );
+    }
+  }
+);
+
 const bookingSlice = createSlice({
   name: 'booking',
   initialState: {
@@ -112,6 +396,8 @@ const bookingSlice = createSlice({
     isLoading: false,
     error: null,
     currentBooking: null,
+    notificationStatus: null, // 'sending', 'sent', 'failed'
+    notificationError: null,
   },
   reducers: {
     clearError: (state) => {
@@ -236,6 +522,37 @@ const bookingSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAvailableSlots.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Notify teacher booking
+      .addCase(notifyTeacherBooking.pending, (state) => {
+        state.notificationStatus = 'sending';
+        state.notificationError = null;
+      })
+      .addCase(notifyTeacherBooking.fulfilled, (state, action) => {
+        state.notificationStatus = 'sent';
+        state.notificationError = null;
+      })
+      .addCase(notifyTeacherBooking.rejected, (state, action) => {
+        state.notificationStatus = 'failed';
+        state.notificationError = action.payload;
+      })
+      
+      // Create booking with notification
+      .addCase(createBookingWithNotification.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.notificationStatus = null;
+      })
+      .addCase(createBookingWithNotification.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.bookings.push(action.payload);
+        state.currentBooking = action.payload;
+        state.error = null;
+      })
+      .addCase(createBookingWithNotification.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

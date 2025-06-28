@@ -94,6 +94,7 @@ const classesSlice = createSlice({
     currentClass: null,
     isLoading: false,
     error: null,
+    hasLoadedPublicClasses: false,
   },
   reducers: {
     clearError: (state) => {
@@ -104,6 +105,9 @@ const classesSlice = createSlice({
     },
     clearCurrentClass: (state) => {
       state.currentClass = null;
+    },
+    resetLoadedFlag: (state) => {
+      state.hasLoadedPublicClasses = false;
     },
   },
   extraReducers: (builder) => {
@@ -132,10 +136,12 @@ const classesSlice = createSlice({
         state.isLoading = false;
         state.classes = action.payload;
         state.error = null;
+        state.hasLoadedPublicClasses = true;
       })
       .addCase(fetchPublicClasses.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.hasLoadedPublicClasses = true; // Marcar como intentado incluso si falló
       })
       
       // Create class
@@ -208,5 +214,5 @@ const classesSlice = createSlice({
   },
 });
 
-export const { clearError, setCurrentClass, clearCurrentClass } = classesSlice.actions;
+export const { clearError, setCurrentClass, clearCurrentClass, resetLoadedFlag } = classesSlice.actions;
 export default classesSlice.reducer;

@@ -110,6 +110,7 @@ const initialState = {
   token: localStorage.getItem('token'),
   isAuthenticated: false,
   isAdmin: false,
+  isTeacher: false,
   isLoading: false,
   error: null,
 };
@@ -126,6 +127,7 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.isAdmin = false;
+      state.isTeacher = false;
       localStorage.removeItem('token');
     },
   },
@@ -140,7 +142,10 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user || {};
         state.token = action.payload.token;
-        state.isAdmin = action.payload.user?.role === 'admin' || false;
+        // Verificar roles del usuario
+        const userRole = action.payload.user?.role?.toLowerCase();
+        state.isAdmin = userRole === 'admin' || userRole === 'administrator';
+        state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -150,6 +155,7 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAdmin = false;
+        state.isTeacher = false;
       })
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
@@ -166,7 +172,10 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user || {};
         state.token = action.payload.token;
-        state.isAdmin = action.payload.user?.role === 'admin' || false;
+        // Verificar roles del usuario
+        const userRole = action.payload.user?.role?.toLowerCase();
+        state.isAdmin = userRole === 'admin' || userRole === 'administrator';
+        state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -180,7 +189,10 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
-        state.isAdmin = action.payload.role === 'admin';
+        // Verificar roles del usuario
+        const userRole = action.payload.role?.toLowerCase();
+        state.isAdmin = userRole === 'admin' || userRole === 'administrator';
+        state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
       })
       .addCase(verifyToken.rejected, (state) => {
         state.isLoading = false;
@@ -188,12 +200,14 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAdmin = false;
+        state.isTeacher = false;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
         state.isAdmin = false;
+        state.isTeacher = false;
         state.error = null;
       });
   },

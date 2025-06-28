@@ -100,10 +100,111 @@ export const toggleUserStatus = createAsyncThunk(
   }
 );
 
+export const fetchTeachers = createAsyncThunk(
+  'users/fetchTeachers',
+  async (_, { rejectWithValue }) => {
+    try {
+      // Primero intentamos el endpoint específico de teachers
+      let response;
+      try {
+        response = await apiClient.get('/admin/teachers');
+        console.log('✅ Respuesta de /admin/teachers:', response.data);
+        return response.data;
+      } catch (error) {
+        console.log('❌ Endpoint /admin/teachers falló:', error.response?.status, error.response?.data);
+        
+        // Si no existe el endpoint, obtenemos todos los usuarios y filtramos
+        console.log('🔄 Intentando /admin/users como fallback...');
+        try {
+          const usersResponse = await apiClient.get('/admin/users');
+          console.log('✅ Respuesta de /admin/users:', usersResponse.data);
+          
+          const allUsers = usersResponse.data.users || usersResponse.data;
+          console.log('👥 Todos los usuarios:', allUsers);
+          
+          if (!Array.isArray(allUsers)) {
+            console.log('⚠️ Los datos de usuarios no son un array:', typeof allUsers, allUsers);
+            return { teachers: [] };
+          }
+          
+          const teachers = allUsers.filter(user => {
+            const role = user.role?.toLowerCase();
+            const isTeacher = role === 'teacher' || role === 'instructor' || role === 'profesor';
+            console.log(`Usuario ${user.name || user.username}: rol="${role}", esTeacher=${isTeacher}`);
+            return isTeacher;
+          });
+          
+          console.log('🎓 Teachers filtrados:', teachers);
+          return { teachers };
+        } catch (usersError) {
+          console.log('❌ También falló /admin/users:', usersError);
+          throw usersError;
+        }
+      }
+    } catch (error) {
+      console.error('💥 Error general al obtener teachers:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Error al obtener los profesores'
+      );
+    }
+  }
+);
+
+// Obtener estudiantes de las clases del teacher logueado
+export const fetchMyStudents = createAsyncThunk(
+  'users/fetchMyStudents',
+  async (_, { rejectWithValue }) => {
+    try {
+      // Intentar endpoint específico para estudiantes del teacher
+      try {
+        const response = await apiClient.get('/teacher/my-students');
+        console.log('✅ Estudiantes del teacher:', response.data);
+        return response.data;
+      } catch (error) {
+        console.log('❌ Endpoint /teacher/my-students no disponible, usando fallback...');
+        
+        // Fallback: obtener clases del teacher y luego estudiantes
+        try {
+          const classesResponse = await apiClient.get('/teacher/my-classes');
+          const myClasses = classesResponse.data.classes || classesResponse.data;
+          console.log('📚 Mis clases:', myClasses);
+          
+          // Obtener estudiantes inscritos en mis clases
+          const studentsResponse = await apiClient.get('/teacher/students-from-classes');
+          const students = studentsResponse.data.students || studentsResponse.data;
+          console.log('👥 Mis estudiantes:', students);
+          
+          return { students };
+        } catch (fallbackError) {
+          console.log('❌ Fallback también falló, usando /admin/users filtrado...');
+          
+          // Último fallback: obtener todos los usuarios y filtrar estudiantes
+          const usersResponse = await apiClient.get('/admin/users');
+          const allUsers = usersResponse.data.users || usersResponse.data;
+          const students = allUsers.filter(user => {
+            const role = user.role?.toLowerCase();
+            return role === 'student' || role === 'estudiante' || (!user.role && user.role !== 'admin' && user.role !== 'teacher');
+          });
+          
+          console.log('👥 Estudiantes filtrados (temporal):', students);
+          return { students };
+        }
+      }
+    } catch (error) {
+      console.error('💥 Error al obtener mis estudiantes:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Error al obtener los estudiantes'
+      );
+    }
+  }
+);
+
 const usersSlice = createSlice({
   name: 'users',
   initialState: {
     users: [],
+    teachers: [],
+    myStudents: [], // Para teachers: sus estudiantes específicos
     currentUser: null,
     isLoading: false,
     error: null,
@@ -267,6 +368,44 @@ const usersSlice = createSlice({
         state.error = null;
       })
       .addCase(toggleUserStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch teachers
+      .addCase(fetchTeachers.pending, (state) => {
+        console.log('Fetch teachers: pending...');
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchTeachers.fulfilled, (state, action) => {
+        console.log('Fetch teachers: fulfilled', action.payload);
+        state.isLoading = false;
+        state.teachers = action.payload.teachers || action.payload;
+        console.log('Teachers actualizados en store:', state.teachers);
+        state.error = null;
+      })
+      .addCase(fetchTeachers.rejected, (state, action) => {
+        console.log('Fetch teachers: rejected', action.payload);
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch my students (for teachers)
+      .addCase(fetchMyStudents.pending, (state) => {
+        console.log('Fetch my students: pending...');
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchMyStudents.fulfilled, (state, action) => {
+        console.log('Fetch my students: fulfilled', action.payload);
+        state.isLoading = false;
+        state.myStudents = action.payload.students || action.payload;
+        console.log('My students actualizados en store:', state.myStudents);
+        state.error = null;
+      })
+      .addCase(fetchMyStudents.rejected, (state, action) => {
+        console.log('Fetch my students: rejected', action.payload);
         state.isLoading = false;
         state.error = action.payload;
       });
