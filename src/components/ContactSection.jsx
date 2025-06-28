@@ -41,28 +41,28 @@ function ContactSection() {
     {
       icon: HiMapPin,
       title: "Dirección",
-      content: "Av. 18 de Julio 1234, Montevideo, Uruguay",
+      content: "Canelones 1033, Montevideo, Uruguay",
       color: "text-blue-600",
       bgColor: "bg-blue-100",
     },
     {
       icon: HiPhone,
       title: "Teléfono",
-      content: "+598 2xxx xxxx",
+      content: "+598 98 028 302",
       color: "text-green-600",
       bgColor: "bg-green-100",
     },
     {
       icon: HiEnvelope,
       title: "Email",
-      content: "info@tatutaller.com",
+      content: "tatutaller@gmail.com",
       color: "text-purple-600",
       bgColor: "bg-purple-100",
     },
     {
       icon: HiClock,
       title: "Horarios",
-      content: "Lun-Sáb: 10:00-20:00",
+      content: "Lun-Vi: 10:00-20:00",
       color: "text-orange-600",
       bgColor: "bg-orange-100",
     },
@@ -164,7 +164,7 @@ function ContactSection() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                 >
                   <option value="consulta">Consulta general</option>
-                  <option value="presupuesto">Solicitar presupuesto</option>
+                  <option value="cowork">Alquiler de espacio de trabajo</option>
                   <option value="clase">Información sobre clases</option>
                   <option value="pieza">Encargo de pieza personalizada</option>
                   <option value="coccion">Servicio de cocción</option>
@@ -228,7 +228,10 @@ function ContactSection() {
                   <div className="text-center text-gray-600">
                     <HiMapPin className="w-12 h-12 mx-auto mb-2" />
                     <p className="font-medium">Mapa interactivo</p>
-                    <p className="text-sm">Av. 18 de Julio 1234</p>
+                    <p className="text-sm">Canelones 1033 esq. Rio Negro</p>
+                    <p className="text-sm">
+                      Wilson Ferreira Aldunate 1238 esq. Soriano
+                    </p>
                     <p className="text-sm">Montevideo, Uruguay</p>
                   </div>
                 </div>
@@ -239,8 +242,8 @@ function ContactSection() {
             <div className="bg-yellow-500 rounded-xl p-6 text-gray-900">
               <h4 className="font-bold text-xl mb-4">¡Síguenos en redes!</h4>
               <p className="mb-4">
-                Mantente al día con nuestros trabajos más recientes, promociones
-                especiales y consejos de cuidado.
+                Mantente al día con nuestros trabajos más recientes y
+                promociones especiales.
               </p>
               <div className="flex space-x-4">
                 <button className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">

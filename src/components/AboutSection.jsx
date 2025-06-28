@@ -33,13 +33,6 @@ function AboutSection() {
     },
   ];
 
-  const stats = [
-    { number: "10+", label: "Años de Experiencia" },
-    { number: "1000+", label: "Piezas Creadas" },
-    { number: "5", label: "Ceramistas Especializados" },
-    { number: "100%", label: "Materiales de Calidad" },
-  ];
-
   return (
     <section className="py-16 bg-gradient-to-br from-amber-50 to-orange-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,9 +45,9 @@ function AboutSection() {
           <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
             En{" "}
             <span className="font-semibold text-yellow-600">Tatú Taller</span>,
-            somos más que un taller de cerámica. Somos ceramistas apasionados
-            por crear piezas únicas que se conviertan en parte de tu historia
-            personal y tu hogar.
+            somos ceramistas que creen en el hacer colectivo. Compartimos lo que
+            sabemos porque sentimos que el arte se aprende, se vive y se
+            disfruta en comunidad.
           </p>
         </div>
 
@@ -64,7 +57,7 @@ function AboutSection() {
           <div className="relative">
             <div className="aspect-w-4 aspect-h-3 rounded-2xl overflow-hidden shadow-2xl">
               <img
-                src="https://images.unsplash.com/photo-1565058379802-bbe22375cd8f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                src="/img/nosotros.jpg"
                 alt="Nuestro taller"
                 className="w-full h-96 object-cover"
               />
@@ -89,21 +82,26 @@ function AboutSection() {
             </h3>
             <div className="space-y-6 text-gray-600 leading-relaxed">
               <p>
-                Fundado con la visión de crear un espacio donde el arte y la
-                expresión personal se encuentran, nuestro taller se ha
-                convertido en un referente de calidad y creatividad en el mundo
-                del tatuaje.
+                Fundamos este taller con una visión clara: crear un espacio
+                donde el arte y la expresión personal se encuentren de forma
+                auténtica.
               </p>
               <p>
-                Cada uno de nuestros artistas aporta una perspectiva única,
-                especializada en diferentes estilos que van desde el realismo
-                hasta el minimalismo, pasando por el tradicional y el new
-                school.
+                Creemos profundamente que todas las personas pueden hacer
+                cerámica. Por eso, buscamos ofrecer lo necesario para que
+                cualquiera pueda acercarse al barro, sin importar su experiencia
+                o sus recursos.
               </p>
               <p>
-                Nos enorgullecemos de crear un ambiente acogedor donde cada
-                cliente se siente cómodo para explorar sus ideas y convertirlas
-                en arte permanente.
+                Cada tallerista que forma parte del equipo aporta una mirada
+                propia, con estilos diferentes. Esa diversidad enriquece no solo
+                las piezas que nacen acá, sino también los vínculos que se tejen
+                en cada encuentro.
+              </p>
+              <p>
+                Nos enorgullece haber construido un ambiente cálido, donde cada
+                persona se sienta cómoda para probar, equivocarse, crecer y
+                convertir sus ideas en arte con identidad propia.
               </p>
             </div>
 
@@ -134,23 +132,6 @@ function AboutSection() {
               </p>
             </div>
           ))}
-        </div>
-
-        {/* Stats Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
-          <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Nuestra Trayectoria en Números
-          </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-4xl lg:text-5xl font-bold text-yellow-600 mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
