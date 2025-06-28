@@ -6,6 +6,7 @@ import {
   HiClock,
   HiPaperAirplane,
 } from "react-icons/hi2";
+import { FaWhatsapp, FaFacebook, FaInstagram } from "react-icons/fa";
 
 function ContactSection() {
   const [formData, setFormData] = useState({
@@ -246,15 +247,33 @@ function ContactSection() {
                 promociones especiales.
               </p>
               <div className="flex space-x-4">
-                <button className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                <a
+                  href="https://www.instagram.com/tatutaller"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                >
+                  <FaInstagram className="w-5 h-5" />
                   Instagram
-                </button>
-                <button className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                </a>
+                <a
+                  href="https://www.facebook.com/share/1FshwF9AD9/?mibextid=wwXIfr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                >
+                  <FaFacebook className="w-5 h-5" />
                   Facebook
-                </button>
-                <button className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                </a>
+                <a
+                  href="https://wa.me/59898028302"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                >
+                  <FaWhatsapp className="w-5 h-5" />
                   WhatsApp
-                </button>
+                </a>
               </div>
             </div>
           </div>

@@ -67,7 +67,7 @@ function FAQSection() {
           <div className="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Resolvemos las dudas más comunes sobre nuestros servicios y el
-            proceso de tatuaje
+            proceso de la creación de una pieza.
           </p>
         </div>
 
