@@ -16,15 +16,10 @@ function Register() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading, error, isAuthenticated } = useSelector(
-    (state) => state.auth
-  );
+  const { isLoading, error } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated, navigate]);
+  // Remover el useEffect que redirige automáticamente si isAuthenticated
+  // porque interfiere con el flujo de registro
 
   useEffect(() => {
     return () => {
@@ -66,36 +61,73 @@ function Register() {
       const result = await dispatch(registerUser(userData)).unwrap();
       console.log("Registro exitoso:", result);
 
-      // Si el registro fue exitoso pero no hay token (requiere login)
-      if (result.success && !result.token) {
+      // Limpiar formulario en todos los casos
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+      });
+
+      // SIEMPRE ir a login para flujo normal
+      if (result.token) {
+        // Solo si el backend devuelve token (auto-login habilitado)
         toast.success(
-          "¡Cuenta creada exitosamente! Por favor, inicia sesión con tus credenciales.",
-          {
-            id: toastId,
-            duration: 5000,
-          }
-        );
-        navigate("/login");
-      } else if (result.token) {
-        // Si hay token, el usuario está autenticado
-        toast.success(
-          "¡Bienvenido! Tu cuenta ha sido creada y has iniciado sesión.",
+          "¡Bienvenido! Tu cuenta ha sido creada y has iniciado sesión automáticamente.",
           { id: toastId }
         );
         navigate("/");
       } else {
-        // Respuesta inesperada
-        toast.success("Cuenta creada. Por favor, inicia sesión.", {
-          id: toastId,
-        });
+        // Flujo normal - registro exitoso, ir a login
+        toast.success(
+          "¡Cuenta creada exitosamente! Ahora inicia sesión con tus credenciales.",
+          {
+            id: toastId,
+            duration: 6000,
+          }
+        );
         navigate("/login");
       }
-    } catch (error) {
-      console.error("Error en registro:", error);
-      toast.error(
-        error.message || "Error al crear la cuenta. Inténtalo de nuevo.",
-        { id: toastId }
+    } catch (rejectedValueOrSerializedError) {
+      console.error(
+        "Error en registro completo:",
+        rejectedValueOrSerializedError
       );
+
+      // El error que viene de unwrap() puede tener diferentes estructuras
+      let errorMessage = "Error al crear la cuenta. Inténtalo de nuevo.";
+
+      // Caso 1: Error directo como string (el más común con rejectWithValue)
+      if (typeof rejectedValueOrSerializedError === "string") {
+        errorMessage = rejectedValueOrSerializedError;
+      }
+      // Caso 2: Error con propiedad message
+      else if (rejectedValueOrSerializedError?.message) {
+        errorMessage = rejectedValueOrSerializedError.message;
+      }
+      // Caso 3: Error serializado de Redux Toolkit
+      else if (rejectedValueOrSerializedError?.error?.message) {
+        errorMessage = rejectedValueOrSerializedError.error.message;
+      }
+      // Caso 4: Si tiene payload (estructura de Redux)
+      else if (rejectedValueOrSerializedError?.payload) {
+        if (typeof rejectedValueOrSerializedError.payload === "string") {
+          errorMessage = rejectedValueOrSerializedError.payload;
+        } else if (rejectedValueOrSerializedError.payload?.message) {
+          errorMessage = rejectedValueOrSerializedError.payload.message;
+        }
+      }
+
+      console.log("Mensaje de error procesado:", errorMessage);
+
+      toast.error(errorMessage, {
+        id: toastId,
+        duration: 6000,
+      });
+
+      // Limpiar cualquier estado de autenticación residual
+      dispatch(clearError());
     }
   };
 

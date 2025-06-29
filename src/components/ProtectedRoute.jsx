@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const ProtectedRoute = ({
@@ -6,9 +6,10 @@ const ProtectedRoute = ({
   requireAdmin = false,
   requireAdminOrTeacher = false,
 }) => {
-  const { isAuthenticated, isAdmin, isTeacher, isLoading } = useSelector(
+  const { isAuthenticated, isAdmin, isTeacher, isLoading, user } = useSelector(
     (state) => state.auth
   );
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -21,6 +22,22 @@ const ProtectedRoute = ({
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // ✅ NUEVA LÓGICA: Verificar si debe cambiar contraseña
+  // Solo verificar en rutas que NO sean la página de cambio de contraseña
+  if (location.pathname !== "/change-password") {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (
+      user?.mustChangePassword === true ||
+      storedUser.mustChangePassword === true
+    ) {
+      console.log(
+        "Usuario debe cambiar contraseña, redirigiendo desde ProtectedRoute"
+      );
+      return <Navigate to="/change-password" replace />;
+    }
   }
 
   if (requireAdmin && !isAdmin) {

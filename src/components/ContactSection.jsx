@@ -164,11 +164,21 @@ function ContactSection() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                 >
-                  <option value="consulta">Consulta general</option>
-                  <option value="cowork">Alquiler de espacio de trabajo</option>
-                  <option value="clase">Información sobre clases</option>
-                  <option value="pieza">Encargo de pieza personalizada</option>
-                  <option value="coccion">Servicio de cocción</option>
+                  <option key="consulta" value="consulta">
+                    Consulta general
+                  </option>
+                  <option key="cowork" value="cowork">
+                    Alquiler de espacio de trabajo
+                  </option>
+                  <option key="clase" value="clase">
+                    Información sobre clases
+                  </option>
+                  <option key="pieza" value="pieza">
+                    Encargo de pieza personalizada
+                  </option>
+                  <option key="coccion" value="coccion">
+                    Servicio de cocción
+                  </option>
                 </select>
               </div>
 

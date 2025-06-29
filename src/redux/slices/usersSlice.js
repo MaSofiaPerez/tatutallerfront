@@ -23,9 +23,30 @@ export const createUser = createAsyncThunk(
       const response = await apiClient.post('/admin/users', userData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al crear el usuario'
-      );
+      console.error('Error en createUser:', error);
+      console.error('Error response:', error.response);
+      console.error('Error response data:', error.response?.data);
+      
+      // Priorizar diferentes fuentes de mensaje de error
+      let errorMessage = 'Error al crear el usuario';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data) {
+        // Si data es una string directamente
+        if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data;
+        } else if (error.response.data.msg) {
+          errorMessage = error.response.data.msg;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      console.error('Mensaje de error final:', errorMessage);
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -183,7 +204,7 @@ export const fetchMyStudents = createAsyncThunk(
           const allUsers = usersResponse.data.users || usersResponse.data;
           const students = allUsers.filter(user => {
             const role = user.role?.toLowerCase();
-            return role === 'student' || role === 'estudiante' || (!user.role && user.role !== 'admin' && user.role !== 'teacher');
+            return role === 'user' || role === 'student' || role === 'estudiante' || role === 'usuario' || !role;
           });
           
           console.log('👥 Estudiantes filtrados (temporal):', students);
@@ -273,9 +294,23 @@ const usersSlice = createSlice({
       })
       .addCase(createUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.users.push(action.payload);
-        state.currentUser = action.payload;
-        state.totalUsers += 1;
+        
+        // Manejar diferentes estructuras de respuesta del backend
+        const newUser = action.payload.user || action.payload;
+        
+        console.log('Usuario creado - payload completo:', action.payload);
+        console.log('Usuario creado - newUser:', newUser);
+        
+        if (newUser && newUser.id) {
+          // Solo agregar si el usuario tiene ID (es válido)
+          state.users.push(newUser);
+          state.currentUser = newUser;
+          state.totalUsers += 1;
+          console.log('✅ Usuario agregado al estado:', newUser);
+        } else {
+          console.warn('⚠️ Usuario creado pero sin estructura válida:', action.payload);
+        }
+        
         state.error = null;
       })
       .addCase(createUser.rejected, (state, action) => {

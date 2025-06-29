@@ -8,12 +8,13 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Home from "./features/Home";
-import Login from "./features/Login";
-import Register from "./features/Register";
-import AdminPanel from "./features/AdminPanel";
-import Tienda from "./features/Tienda";
-import Clases from "./features/Clases";
+import Home from "./Features/Home";
+import Login from "./Features/Login";
+import Register from "./Features/Register";
+import ChangePasswordPage from "./Features/ChangePasswordPage";
+import AdminPanel from "./Features/AdminPanel";
+import Tienda from "./Features/Tienda";
+import Clases from "./Features/Clases";
 
 function App() {
   const dispatch = useDispatch();
@@ -45,6 +46,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/tienda" element={<Tienda />} />
           <Route path="/clases" element={<Clases />} />
           <Route

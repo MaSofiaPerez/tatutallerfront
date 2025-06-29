@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, clearError } from "../redux/slices/authSlice";
+import { loginUser, googleLogin, clearError } from "../redux/slices/authSlice";
 import toast from "react-hot-toast";
 
 function Login() {
@@ -19,6 +19,15 @@ function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
+      // Verificar si el usuario necesita cambiar contraseña
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+      if (storedUser.mustChangePassword === true) {
+        console.log("Usuario autenticado pero debe cambiar contraseña");
+        navigate("/change-password");
+        return;
+      }
+
       // Redirigir según el rol del usuario
       if (isAdmin) {
         navigate("/admin");
@@ -34,6 +43,57 @@ function Login() {
       dispatch(clearError());
     };
   }, [dispatch]);
+  // Inicializar Google OAuth tradicional (más estable)
+  useEffect(() => {
+    const initializeGoogleAuth = () => {
+      if (window.google && window.google.accounts) {
+        // Configurar el callback global
+        window.googleCallbackHandler = handleGoogleResponse;
+
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+          auto_select: false,
+          cancel_on_tap_outside: false,
+          // NO usar FedCM por ahora para evitar errores
+          use_fedcm_for_prompt: false,
+        });
+
+        console.log("✅ Google OAuth inicializado correctamente");
+      } else {
+        // Si el script aún no se ha cargado, intentar de nuevo en un momento
+        setTimeout(initializeGoogleAuth, 100);
+      }
+    };
+
+    initializeGoogleAuth();
+
+    // Cleanup
+    return () => {
+      if (window.googleCallbackHandler) {
+        window.googleCallbackHandler = null;
+      }
+    };
+  }, []);
+
+  const handleGoogleResponse = async (response) => {
+    const toastId = toast.loading("Iniciando sesión con Google...");
+
+    try {
+      const result = await dispatch(googleLogin(response.credential)).unwrap();
+      toast.success("¡Bienvenido! Has iniciado sesión con Google.", {
+        id: toastId,
+      });
+      console.log("Google login exitoso:", result);
+    } catch (error) {
+      console.error("Error en Google login:", error);
+      toast.error(
+        error.message ||
+          "Error al iniciar sesión con Google. Inténtalo de nuevo.",
+        { id: toastId }
+      );
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -54,12 +114,20 @@ function Login() {
       console.log("Datos del usuario:", result.user);
       console.log("Rol del usuario:", result.user?.role);
       console.log("Es admin?:", result.user?.role?.toLowerCase() === "admin");
+      console.log("Debe cambiar contraseña?:", result.user?.mustChangePassword);
 
       toast.success("¡Bienvenido! Has iniciado sesión correctamente", {
         id: toastId,
       });
 
-      // Redirigir según el rol del usuario
+      // ✅ NUEVA LÓGICA: Verificar si debe cambiar contraseña
+      if (result.user?.mustChangePassword === true) {
+        console.log("Usuario debe cambiar contraseña, redirigiendo...");
+        navigate("/change-password");
+        return;
+      }
+
+      // Login normal - redirigir según el rol del usuario
       if (
         result.user?.isAdmin ||
         result.isAdmin ||
@@ -88,9 +156,41 @@ function Login() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Aquí irá la lógica de Google OAuth
-    console.log("Google login attempt");
+  const handleGoogleLogin = async () => {
+    console.log("🔄 Iniciando Google One Tap...");
+
+    try {
+      // Usar solo Google One Tap tradicional (más estable)
+      if (window.google && window.google.accounts) {
+        console.log("� Mostrando prompt de Google One Tap");
+
+        // Mostrar el prompt de Google OAuth
+        window.google.accounts.id.prompt((notification) => {
+          console.log("📋 Notification:", notification);
+
+          if (notification.isNotDisplayed()) {
+            console.log("❌ Prompt no se mostró");
+            toast.error(
+              "No se pudo mostrar el login de Google. Verifica que no tengas bloqueadores de pop-ups."
+            );
+          } else if (notification.isSkippedMoment()) {
+            console.log("⏭️ Usuario omitió el prompt");
+            toast.info("Selecciona 'Iniciar con Google' para continuar.");
+          } else if (notification.isDismissedMoment()) {
+            console.log("❌ Usuario cerró el prompt");
+            toast.info("Login cancelado. Puedes intentar de nuevo.");
+          }
+        });
+      } else {
+        console.error("❌ Google OAuth no está disponible");
+        toast.error(
+          "Google OAuth no está disponible. Verifica tu conexión a internet."
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error en Google login:", error);
+      toast.error("Error al conectar con Google. Inténtalo de nuevo.");
+    }
   };
 
   return (

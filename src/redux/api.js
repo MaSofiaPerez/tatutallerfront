@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 // Base URL de tu API - Spring Boot backend
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 // Configurar axios interceptor para incluir token en todas las requests
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/api`,
   timeout: 10000, // 10 segundos de timeout
   headers: {
     'Content-Type': 'application/json',

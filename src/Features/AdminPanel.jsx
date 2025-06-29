@@ -45,6 +45,33 @@ function AdminPanel() {
 
   const dispatch = useDispatch();
 
+  // Función para traducir roles para la interfaz de usuario
+  const translateRole = (role) => {
+    // Manejar casos nulos, undefined o vacíos
+    if (!role) {
+      return "Alumno"; // Por defecto, usuarios sin rol son alumnos
+    }
+
+    // Normalizar el rol: convertir a minúsculas y quitar espacios
+    const normalizedRole = role.toString().toLowerCase().trim();
+
+    const roleTranslations = {
+      user: "Alumno",
+      usuario: "Alumno", // Por si viene en español
+      student: "Alumno",
+      estudiante: "Alumno", // Por si viene en español
+      admin: "Administrador",
+      administrador: "Administrador",
+      administrator: "Administrador",
+      teacher: "Tallerista",
+      profesor: "Tallerista",
+      instructor: "Tallerista",
+      tallerista: "Tallerista",
+    };
+
+    return roleTranslations[normalizedRole] || "Alumno"; // Por defecto "Alumno" si no encuentra el rol
+  };
+
   // Función para filtrar usuarios según el rol del usuario logueado
   const filterUsersByRole = (allUsers) => {
     if (isAdmin) {
@@ -58,6 +85,8 @@ function AdminPanel() {
       return allUsers.filter((userItem) => {
         const role = userItem.role?.toLowerCase();
         return (
+          role === "user" ||
+          role === "usuario" ||
           role === "student" ||
           role === "estudiante" ||
           (!role && userItem.role !== "admin" && userItem.role !== "teacher")
@@ -395,7 +424,7 @@ function AdminPanel() {
                           Acciones
                         </th>
                       </tr>
-                    </thead>{" "}
+                    </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {getUsersList() && getUsersList().length > 0 ? (
                         getUsersList().map((user) => (
@@ -416,7 +445,7 @@ function AdminPanel() {
                                     : "bg-gray-100 text-gray-800"
                                 }`}
                               >
-                                {user.role}
+                                {translateRole(user.role)}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -695,10 +724,18 @@ function AdminPanel() {
                                     : "bg-red-100 text-red-800"
                                 }`}
                               >
-                                <option value="pending">Pendiente</option>
-                                <option value="confirmed">Confirmada</option>
-                                <option value="cancelled">Cancelada</option>
-                                <option value="completed">Completada</option>
+                                <option key="pending" value="pending">
+                                  Pendiente
+                                </option>
+                                <option key="confirmed" value="confirmed">
+                                  Confirmada
+                                </option>
+                                <option key="cancelled" value="cancelled">
+                                  Cancelada
+                                </option>
+                                <option key="completed" value="completed">
+                                  Completada
+                                </option>
                               </select>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
