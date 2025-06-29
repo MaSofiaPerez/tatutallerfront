@@ -5,41 +5,42 @@ function ImageSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  // Imágenes del carrusel - usando placeholders por ahora
+  // Imágenes del carrusel
   const slides = [
     {
       id: 1,
       image:
-        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1965&q=80",
-      title: "Arte en Cerámica",
-      subtitle: "Piezas únicas y personalizadas",
+        "/img/slider/hacer-una-olla-de-barro-hecha-mano-leccion-de-ceramica-hobby.jpg",
+      title: "Clases de Cerámica",
+      subtitle: "Disfrutá de la modalidad que más te guste",
       description:
-        "Cada pieza cuenta una historia. Déjanos ser parte de la tuya.",
+        "Clases para niños y adultos de todo nivel. Aprende desde cero o perfecciona tus habilidades.",
     },
     {
       id: 2,
-      image:
-        "https://images.unsplash.com/photo-1594736797933-d0902e3a17b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2139&q=80",
-      title: "Profesionalismo y Calidad",
-      subtitle: "Máximos estándares en cada pieza",
+      image: "/img/slider/composicion-de-elementos-de-alfareria-en-taller.jpg",
+      title: "Coworking Cerámico",
+      subtitle: "Trabaja a tu ritmo en un ambiente creativo",
       description:
-        "Materiales de primera calidad y técnicas tradicionales perfeccionadas.",
+        "Contamos con espacios de trabajo compartidos equipados con todo lo necesario para que puedas desarrollar tus proyectos cerámicos.",
     },
     {
       id: 3,
       image:
-        "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?ixlib=rb-4.0.3&auto=format&fit=crop&w=2053&q=80",
-      title: "Expertos Ceramistas",
-      subtitle: "Más de 10 años de experiencia",
-      description: "Artistas especializados en diversas técnicas cerámicas.",
+        "/img/slider/primer-plano-del-alfarero-femenino-arreglando-las-placas-de-ceramica.jpg",
+      title: "Horneamos tus piezas",
+      subtitle: "Contamos con hornos de alta calidad y diferentes tamaños",
+      description:
+        "Puedes cocer tus piezas desde cualquiera de nuestros hornos eléctricos. Precios por horneada completo o fracción según tamaño.",
     },
     {
       id: 4,
       image:
-        "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-      title: "Tu Visión, Nuestro Arte",
-      subtitle: "Clases personalizadas",
-      description: "Trabajamos contigo para crear la pieza perfecta.",
+        "/img/slider/primer-plano-de-masa-amasada-florero-de-ceramica-en-la-mesa.jpg",
+      title: "Tatú Shop Cerámica",
+      subtitle: "Tienda online de insumos cerámicos",
+      description:
+        "Contamos con variedad de insumos para que puedas crear desde tu hogar o taller.",
     },
   ];
 
@@ -102,10 +103,13 @@ function ImageSlider() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">
-                    Reservar Cita
+                    Reservar Clase
                   </button>
                   <button className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors shadow-lg">
                     Ver Galería
+                  </button>
+                  <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">
+                    Ir a Tienda
                   </button>
                 </div>
               </div>

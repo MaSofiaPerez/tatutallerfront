@@ -8,10 +8,10 @@ function FAQSection() {
     {
       question: "¿Cómo prepararme para mi primera clase de cerámica?",
       answer:
-        "Solo necesitas traer ropa cómoda que se pueda ensuciar o un delantal. Nosotros proporcionamos todos los materiales: arcilla, herramientas y acceso al torno. Es recomendable llegar con las uñas cortas y el cabello recogido.",
+        "Solo necesitas ganas de aprender y divertirte, traer ropa cómoda que se pueda ensuciar o un delantal. Nosotros proporcionamos todo el resto.",
     },
     {
-      question: "¿Cuánto tiempo tarda en cocerse una pieza?",
+      question: "¿Cuánto tiempo tarda terminar una pieza?",
       answer:
         "El proceso completo incluye secado (1-2 semanas), primera cocción o bizcochado (8-12 horas), esmaltado y segunda cocción (8-10 horas). En total, una pieza puede tardar entre 3-4 semanas desde su creación hasta estar lista.",
     },
@@ -23,32 +23,27 @@ function FAQSection() {
     {
       question: "¿Es difícil aprender a usar el torno?",
       answer:
-        "El torno requiere práctica y paciencia, pero con nuestras clases progresivas cualquier persona puede aprender. Comenzamos con técnicas básicas de centrado y vamos avanzando gradualmente. La mayoría logra hacer su primera pieza en las primeras clases.",
+        "El torno requiere práctica y paciencia, pero con nuestras clases progresivas cualquier persona puede aprender.",
     },
     {
       question: "¿Puedo crear mis propios diseños?",
       answer:
-        "¡Absolutamente! Nos encanta trabajar con las ideas de nuestros estudiantes. Puedes traer referencias, bocetos o ideas para tus piezas. Nuestros ceramistas te ayudarán a adaptar y perfeccionar el diseño según las posibilidades técnicas de la cerámica.",
+        "¡Claro! Nos encanta trabajar con las ideas de nuestros alumnos. Puedes traer referencias, bocetos o ideas para tus piezas. Nosotros te ayudamos a adaptar y perfeccionar el diseño según las posibilidades de la cerámica.",
     },
     {
       question: "¿Qué incluye el precio de las clases?",
       answer:
-        "El precio incluye todos los materiales (arcilla, herramientas, esmaltes), uso del torno, cocción de las piezas y asesoramiento personalizado. También incluye las primeras cocciones y los materiales básicos para comenzar.",
+        "El precio incluye todos los materiales (arcilla, herramientas, esmaltes), uso del torno, cocción de las piezas y asesoramiento personalizado.",
     },
     {
       question: "¿Hay clases para niños?",
       answer:
-        "Sí, ofrecemos clases especiales para niños a partir de 8 años con técnicas adaptadas a su edad. Los menores de 12 años deben estar acompañados por un adulto. Tenemos programas específicos para diferentes grupos etarios.",
-    },
-    {
-      question: "¿Qué medidas de seguridad toman en el taller?",
-      answer:
-        "Mantenemos un ambiente seguro con ventilación adecuada, equipos de protección personal, protocolos de manejo de hornos y materiales, y todas las medidas de seguridad industrial necesarias para el trabajo con cerámica.",
+        "Sí, ofrecemos clases especiales para niños  de 4 a 12 años con técnicas adaptadas a su edad. Las clases son de 1 hora para niños entre 4 y 8 años y de 1 hora y media para niños de 9 a 12 años. Los grupos siempre son reducidos.",
     },
     {
       question: "¿Cómo reservo una clase?",
       answer:
-        "Puedes reservar tu clase llamando al taller, enviando un WhatsApp, o usando nuestro sistema de reservas online. Recomendamos agendar con anticipación, especialmente para cursos intensivos o masterclasses.",
+        "Puedes reservar tu clase llamando al taller, enviando un WhatsApp, o usando nuestro sistema de reservas online. Recomendamos agendar con anticipación.",
     },
     {
       question: "¿Qué pasa si necesito cancelar o reprogramar mi clase?",
@@ -72,7 +67,7 @@ function FAQSection() {
           <div className="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Resolvemos las dudas más comunes sobre nuestros servicios y el
-            proceso de tatuaje
+            proceso de la creación de una pieza.
           </p>
         </div>
 
@@ -122,14 +117,14 @@ function FAQSection() {
               Nuestro equipo está aquí para ayudarte con cualquier duda
               adicional
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors">
-                Contactar por WhatsApp
-              </button>
-              <button className="border-2 border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors">
-                Llamar al Taller
-              </button>
-            </div>
+            <a
+              href="https://wa.me/59898028302?text=Hola,%20tengo%20una%20consulta%20sobre%20las%20clases%20de%20cerámica"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors inline-block text-center"
+            >
+              Contactar por WhatsApp
+            </a>
           </div>
         </div>
       </div>

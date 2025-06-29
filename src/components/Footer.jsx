@@ -82,11 +82,6 @@ function Footer() {
                 Tatú Taller
               </h3>
             </div>
-            <p className="text-gray-300 mb-6 leading-relaxed">
-              Tu taller de cerámica de confianza. Creamos piezas únicas y
-              ofrecemos clases profesionales con los más altos estándares de
-              calidad y técnicas tradicionales.
-            </p>
 
             {/* Social Media */}
             <div className="flex space-x-4">
@@ -155,7 +150,9 @@ function Footer() {
                 <HiMapPin className="w-5 h-5 text-yellow-500 mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-gray-300">
-                    Av. 18 de Julio 1234
+                    Canelones 1033
+                    <br />
+                    Wilson Ferreira Aldunate 1238
                     <br />
                     Montevideo, Uruguay
                   </p>
@@ -164,50 +161,24 @@ function Footer() {
 
               <div className="flex items-center space-x-3">
                 <HiPhone className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                <p className="text-gray-300">+598 2xxx xxxx</p>
+                <p className="text-gray-300">+598 028 302</p>
               </div>
 
               <div className="flex items-center space-x-3">
                 <HiEnvelope className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                <p className="text-gray-300">info@tatutaller.com</p>
+                <p className="text-gray-300">tatutaller@gmail.com</p>
               </div>
 
               <div className="flex items-start space-x-3">
                 <HiClock className="w-5 h-5 text-yellow-500 mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-gray-300">
-                    Lun - Sáb: 10:00 - 20:00
+                    Lun - Vi: 10:00 - 20:00
                     <br />
-                    Dom: Cerrado
+                    Sáb - Dom: Cerrado
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Newsletter Section */}
-      <div className="border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="md:flex md:items-center md:justify-between">
-            <div className="mb-6 md:mb-0">
-              <h4 className="text-lg font-semibold text-yellow-500 mb-2">
-                ¡Mantente al día!
-              </h4>
-              <p className="text-gray-300">
-                Suscríbete para recibir noticias, promociones y tips de cerámica
-              </p>
-            </div>
-            <div className="flex max-w-md">
-              <input
-                type="email"
-                placeholder="Tu email"
-                className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-white placeholder-gray-400"
-              />
-              <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-2 rounded-r-lg font-semibold transition-colors">
-                Suscribirse
-              </button>
             </div>
           </div>
         </div>
@@ -259,7 +230,7 @@ function Footer() {
                   href="#"
                   className="text-yellow-500 hover:text-yellow-400 transition-colors"
                 >
-                  Tu Equipo de Desarrollo
+                  María Sofía Pérez
                 </a>
               </div>
             </div>

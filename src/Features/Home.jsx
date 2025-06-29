@@ -21,8 +21,8 @@ function Home() {
             </h2>
             <div className="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Ofrecemos una amplia gama de servicios especializados en arte
-              corporal
+              Ofrecemos una amplia gama de servicios y herramientas para que
+              disfrutes de la cerámica como quieras.
             </p>
           </div>
 
@@ -44,11 +44,11 @@ function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900">
-                Piezas Personalizadas
+                Piezas y moldes personalizados
               </h3>
               <p className="text-gray-600 mb-4">
-                Creaciones únicas en cerámica diseñadas especialmente para ti,
-                adaptadas a tu estilo y necesidades.
+                Creamos moldes de yeso y piezas a medida adaptadas a tu estilo y
+                necesidades.
               </p>
               <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
                 Ver más →
@@ -72,11 +72,11 @@ function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900">
-                Esmaltado Profesional
+                Cursos libres y para compartir
               </h3>
               <p className="text-gray-600 mb-4">
-                Técnicas avanzadas de esmaltado con máxima calidad y acabados
-                perfectos para tus piezas.
+                Clases adaptadas a tu ritmo sin importar tu nivel de
+                experiencia.
               </p>
               <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
                 Ver más →
@@ -100,11 +100,11 @@ function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900">
-                Cocción y Acabados
+                Alquiler de espacio y Cocción.
               </h3>
               <p className="text-gray-600 mb-4">
-                Servicio completo de cocción y asesoramiento para el perfecto
-                acabado de tus piezas cerámicas.
+                Servicio completo de cocción y espacio para poder crear tus
+                propias piezas sin necesidad de montar tu propio taller.
               </p>
               <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
                 Ver más →
@@ -121,8 +121,9 @@ function Home() {
             ¿Quieres aprender el arte de la cerámica?
           </h2>
           <p className="text-xl text-gray-800 mb-8 max-w-3xl mx-auto">
-            Únete a nuestras clases con instructores profesionales. Desde
-            principiantes hasta técnicas avanzadas de modelado.
+            Ya sea que quieras pasar un día divertido o estar todo un mes con
+            las manos en el barro, ¡Tenemos el plan perfecto para vos! Clases
+            libres y flexibles, adaptadas a tu ritmo y nivel de experiencia.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
