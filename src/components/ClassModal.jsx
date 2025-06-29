@@ -198,9 +198,15 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               >
-                <option value="Principiante">Principiante</option>
-                <option value="Intermedio">Intermedio</option>
-                <option value="Avanzado">Avanzado</option>
+                <option key="Principiante" value="Principiante">
+                  Principiante
+                </option>
+                <option key="Intermedio" value="Intermedio">
+                  Intermedio
+                </option>
+                <option key="Avanzado" value="Avanzado">
+                  Avanzado
+                </option>
               </select>
             </div>
 
@@ -221,7 +227,7 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
                 disabled={teachersLoading}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent disabled:opacity-50"
               >
-                <option value="">
+                <option key="" value="">
                   {teachersLoading
                     ? "Cargando profesores..."
                     : "Selecciona un profesor"}

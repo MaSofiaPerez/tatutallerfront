@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUser, createUser } from "../redux/slices/usersSlice";
+import { updateUser, createUser, fetchUsers } from "../redux/slices/usersSlice";
 import toast from "react-hot-toast";
 
 function UserModal({ isOpen, onClose, userData, isEditing }) {
@@ -13,7 +13,7 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "student",
+    role: "user", // Cambié "student" a "user"
     lastName: "",
     phone: "",
     address: "",
@@ -23,18 +23,18 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
   // Roles disponibles según el tipo de usuario logueado
   const availableRoles = isAdmin
     ? [
-        { value: "student", label: "Estudiante" },
+        { value: "user", label: "Estudiante" }, // Cambié "student" a "user"
         { value: "teacher", label: "Profesor" },
         { value: "admin", label: "Administrador" },
       ]
-    : [{ value: "student", label: "Estudiante" }];
+    : [{ value: "user", label: "Estudiante" }]; // Cambié "student" a "user"
 
   useEffect(() => {
     if (isEditing && userData) {
       setFormData({
         name: userData.name || "",
         email: userData.email || "",
-        role: userData.role || "student",
+        role: userData.role || "user", // Cambié "student" a "user"
         lastName: userData.lastName || "",
         phone: userData.phone || "",
         address: userData.address || "",
@@ -43,7 +43,7 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
       setFormData({
         name: "",
         email: "",
-        role: "student",
+        role: "user", // Cambié "student" a "user"
         lastName: "",
         phone: "",
         address: "",
@@ -69,7 +69,8 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
         const updateData = { ...formData };
 
         // Los profesores solo pueden cambiar roles de estudiantes
-        if (isTeacher && formData.role !== "student") {
+        if (isTeacher && formData.role !== "user") {
+          // Cambié "student" a "user"
           toast.error(
             "Los profesores solo pueden asignar el rol de estudiante"
           );
@@ -92,14 +93,56 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
         }
 
         const result = await dispatch(createUser(formData)).unwrap();
-        toast.success("Usuario creado exitosamente");
+
+        // Mostrar mensaje sin la contraseña temporal por seguridad
+        if (result.temporaryPassword) {
+          toast.success(
+            `Usuario creado exitosamente!\n\nSe ha enviado un email a ${
+              result.user?.email || formData.email
+            } con las credenciales de acceso.`,
+            {
+              duration: 6000,
+              style: {
+                maxWidth: "400px",
+              },
+            }
+          );
+        } else {
+          toast.success("Usuario creado exitosamente");
+        }
+
         console.log("Usuario creado:", result);
+
+        // Recargar la lista de usuarios para asegurar que se muestre inmediatamente
+        dispatch(fetchUsers());
       }
 
       onClose();
     } catch (error) {
       console.error("Error al guardar usuario:", error);
-      toast.error(error || "Error al guardar el usuario");
+      console.error("Error completo:", JSON.stringify(error, null, 2));
+
+      // Extraer el mensaje de error específico del backend
+      let errorMessage = "Error al guardar el usuario";
+
+      // Redux Toolkit a menudo envuelve errores en diferentes propiedades
+      if (typeof error === "string") {
+        errorMessage = error;
+      } else if (error?.message && error.message !== "Rejected") {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.response?.data) {
+        // Si data es una string directamente
+        if (typeof error.response.data === "string") {
+          errorMessage = error.response.data;
+        }
+      }
+
+      console.error("Mensaje de error final en modal:", errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

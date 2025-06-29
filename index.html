@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tatú Taller - Cerámica y Arte</title>
+
+    <!-- Google OAuth Script con soporte FedCM -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+      // Configuración global para FedCM
+      window.handleCredentialResponse = function(response) {
+        if (window.googleCallbackHandler) {
+          window.googleCallbackHandler(response);
+        }
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
