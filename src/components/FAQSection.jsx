@@ -117,14 +117,14 @@ function FAQSection() {
               Nuestro equipo está aquí para ayudarte con cualquier duda
               adicional
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors">
-                Contactar por WhatsApp
-              </button>
-              <button className="border-2 border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors">
-                Llamar al Taller
-              </button>
-            </div>
+            <a
+              href="https://wa.me/59898028302?text=Hola,%20tengo%20una%20consulta%20sobre%20las%20clases%20de%20cerámica"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors inline-block text-center"
+            >
+              Contactar por WhatsApp
+            </a>
           </div>
         </div>
       </div>
