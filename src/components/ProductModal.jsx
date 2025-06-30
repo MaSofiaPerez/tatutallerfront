@@ -6,14 +6,14 @@ import toast from "react-hot-toast";
 function ProductModal({ isOpen, onClose, productData, isEditing }) {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.products);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
     stock: "",
     category: "",
-    status: "AVAILABLE", // ProductStatus del backend
+    status: "Activo", // ProductStatus del backend
     imageUrl: "",
   });
 
@@ -21,20 +21,18 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
 
   // Categorías que coinciden con ProductCategory del backend
   const categories = [
-    { id: "CERAMICS", name: "Cerámica" },
-    { id: "POTTERY", name: "Alfarería" },
-    { id: "DECORATIVE", name: "Decorativo" },
-    { id: "FUNCTIONAL", name: "Funcional" },
-    { id: "ARTISTIC", name: "Artístico" },
-    { id: "TOOLS", name: "Herramientas" },
-    { id: "MATERIALS", name: "Materiales" },
+    { id: "Cerámica", name: "Cerámica" },
+    { id: "Herramientas", name: "Herramientas" },
+    { id: "Materiales", name: "Materiales" },
+    { id: "Decoración", name: "Decoración" },
+    { id: "Otros", name: "Otros" },
   ];
 
   // Estados del producto según ProductStatus del backend
   const statuses = [
-    { id: "AVAILABLE", name: "Disponible" },
-    { id: "OUT_OF_STOCK", name: "Sin Stock" },
-    { id: "DISCONTINUED", name: "Descontinuado" },
+    { id: "Activo", name: "Activo" },
+    { id: "Inactico", name: "Inactico" },
+    { id: "Sin stock", name: "Sin stock" },
   ];
 
   useEffect(() => {
@@ -45,7 +43,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         price: productData.price || "",
         stock: productData.stock || "",
         category: productData.category || "",
-        status: productData.status || "AVAILABLE",
+        status: productData.status || "Activo",
         imageUrl: productData.imageUrl || "",
       });
     } else {
@@ -55,7 +53,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         price: "",
         stock: "",
         category: "",
-        status: "AVAILABLE",
+        status: "Activo",
         imageUrl: "",
       });
     }
@@ -258,11 +256,18 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
           </div>
 
           <div className="bg-gray-50 p-4 rounded-md">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Información importante:</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              Información importante:
+            </h4>
             <ul className="text-xs text-gray-600 space-y-1">
-              <li>• El estado "Disponible" hará que el producto aparezca en la tienda</li>
+              <li>
+                • El estado "Disponible" hará que el producto aparezca en la
+                tienda
+              </li>
               <li>• El estado "Sin Stock" ocultará el botón de compra</li>
-              <li>• El estado "Descontinuado" ocultará completamente el producto</li>
+              <li>
+                • El estado "Descontinuado" ocultará completamente el producto
+              </li>
             </ul>
           </div>
 
