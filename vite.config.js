@@ -5,7 +5,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    preserveSymlinks: true
+    preserveSymlinks: true,
+    alias: {
+      '@': '/src',
+      '@features': '/src/Features',
+      '@components': '/src/components'
+    }
   },
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
