@@ -32,6 +32,7 @@ import {
 import ClassModal from "../components/ClassModal";
 import UserModal from "../components/UserModal";
 import ProductModal from "../components/ProductModal";
+import toast from "react-hot-toast";
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -196,12 +197,15 @@ function AdminPanel() {
       switch (type) {
         case "producto":
           await dispatch(deleteProduct(id)).unwrap();
+          toast.success("Producto eliminado exitosamente");
           break;
         case "usuario":
           await dispatch(deleteUser(id)).unwrap();
+          toast.success("Usuario eliminado exitosamente");
           break;
         case "clase":
           await dispatch(deleteClass(id)).unwrap();
+          toast.success("Clase eliminada exitosamente");
           break;
         default:
           break;
@@ -561,12 +565,16 @@ function AdminPanel() {
                                       src={product.imageUrl}
                                       alt={product.name}
                                       onError={(e) => {
-                                        e.target.style.display = 'none';
+                                        e.target.style.display = "none";
                                       }}
                                     />
                                   ) : (
                                     <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-4">
-                                      <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                      <svg
+                                        className="h-6 w-6 text-gray-400"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                      >
                                         <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" />
                                       </svg>
                                     </div>
@@ -583,7 +591,7 @@ function AdminPanel() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                  {product.category || 'Sin categoría'}
+                                  {product.category || "Sin categoría"}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
@@ -592,28 +600,35 @@ function AdminPanel() {
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                  product.stock > 10 
-                                    ? 'bg-green-100 text-green-800'
-                                    : product.stock > 0
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}>
+                                <span
+                                  className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                    product.stock > 10
+                                      ? "bg-green-100 text-green-800"
+                                      : product.stock > 0
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}
+                                >
                                   {product.stock || 0}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                  product.status === 'AVAILABLE' 
-                                    ? 'bg-green-100 text-green-800'
-                                    : product.status === 'OUT_OF_STOCK'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}>
-                                  {product.status === 'AVAILABLE' ? 'Disponible' :
-                                   product.status === 'OUT_OF_STOCK' ? 'Sin Stock' :
-                                   product.status === 'DISCONTINUED' ? 'Descontinuado' : 
-                                   product.status || 'Desconocido'}
+                                <span
+                                  className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                    product.status === "AVAILABLE"
+                                      ? "bg-green-100 text-green-800"
+                                      : product.status === "OUT_OF_STOCK"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {product.status === "AVAILABLE"
+                                    ? "Disponible"
+                                    : product.status === "OUT_OF_STOCK"
+                                    ? "Sin Stock"
+                                    : product.status === "DISCONTINUED"
+                                    ? "Descontinuado"
+                                    : product.status || "Desconocido"}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -643,10 +658,22 @@ function AdminPanel() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
                       </svg>
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">No hay productos</h3>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">
+                        No hay productos
+                      </h3>
                       <p className="mt-1 text-sm text-gray-500">
                         Comienza creando tu primer producto.
                       </p>

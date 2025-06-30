@@ -4,16 +4,16 @@ function ProductCard({ product, onEdit, onDelete, showActions = false }) {
   const [imageError, setImageError] = useState(false);
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('es-UY', {
-      style: 'currency',
-      currency: 'UYU'
+    return new Intl.NumberFormat("es-UY", {
+      style: "currency",
+      currency: "UYU",
     }).format(price);
   };
 
   const getCategoryName = (categoryId) => {
     const categories = {
       vasijas: "Vasijas y Jarrones",
-      platos: "Platos y Vajilla", 
+      platos: "Platos y Vajilla",
       tazas: "Tazas y Mugs",
       decorativo: "Artículos Decorativos",
       macetas: "Macetas y Contenedores",
@@ -21,15 +21,17 @@ function ProductCard({ product, onEdit, onDelete, showActions = false }) {
       cuencos: "Cuencos y Bowls",
       herramientas: "Herramientas de Cerámica",
       materiales: "Materiales y Arcillas",
-      otros: "Otros"
+      otros: "Otros",
     };
     return categories[categoryId] || categoryId;
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border-l-4 ${
-      product.isActive ? 'border-green-500' : 'border-red-500'
-    }`}>
+    <div
+      className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border-l-4 ${
+        product.isActive ? "border-green-500" : "border-red-500"
+      }`}
+    >
       {/* Imagen del producto */}
       <div className="relative h-48 bg-gray-200">
         {product.imageUrl && !imageError ? (
@@ -41,7 +43,7 @@ function ProductCard({ product, onEdit, onDelete, showActions = false }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <svg 
+            <svg
               className="w-16 h-16 text-gray-400"
               fill="currentColor"
               viewBox="0 0 20 20"
@@ -50,15 +52,17 @@ function ProductCard({ product, onEdit, onDelete, showActions = false }) {
             </svg>
           </div>
         )}
-        
+
         {/* Badge de estado */}
         <div className="absolute top-2 right-2">
-          <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-            product.isActive 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {product.isActive ? 'Disponible' : 'No disponible'}
+          <span
+            className={`px-2 py-1 text-xs rounded-full font-medium ${
+              product.isActive
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {product.isActive ? "Disponible" : "No disponible"}
           </span>
         </div>
       </div>
@@ -87,13 +91,15 @@ function ProductCard({ product, onEdit, onDelete, showActions = false }) {
           <span className="text-2xl font-bold text-green-600">
             {formatPrice(product.price)}
           </span>
-          <span className={`text-sm px-2 py-1 rounded font-medium ${
-            product.stock > 10 
-              ? 'bg-green-100 text-green-800'
-              : product.stock > 0
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-red-100 text-red-800'
-          }`}>
+          <span
+            className={`text-sm px-2 py-1 rounded font-medium ${
+              product.stock > 10
+                ? "bg-green-100 text-green-800"
+                : product.stock > 0
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
             Stock: {product.stock || 0}
           </span>
         </div>
@@ -124,8 +130,8 @@ function ProductCard({ product, onEdit, onDelete, showActions = false }) {
         )}
 
         {!showActions && (!product.isActive || product.stock === 0) && (
-          <button 
-            disabled 
+          <button
+            disabled
             className="w-full bg-gray-300 text-gray-500 py-2 px-4 rounded-md cursor-not-allowed font-medium"
           >
             No Disponible

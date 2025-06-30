@@ -31,7 +31,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
   // Estados del producto según ProductStatus del backend
   const statuses = [
     { id: "Activo", name: "Activo" },
-    { id: "Inactico", name: "Inactico" },
+    { id: "Inactivo", name: "Inactivo" },
     { id: "Sin stock", name: "Sin stock" },
   ];
 
