@@ -13,13 +13,15 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
     name: "",
     description: "",
     price: "",
-    duration: "",
     maxCapacity: "",
-    level: "Principiante",
+    level: "Todos los Niveles",
     materials: "",
     requirements: "",
-    imageUrl: "",
     teacherId: "",
+    dayOfWeek: "",
+    startTime: "",
+    endTime: "",
+    duration: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,26 +79,30 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
         name: classData.name || "",
         description: classData.description || "",
         price: classData.price || "",
-        duration: classData.duration || "",
         maxCapacity: classData.maxCapacity || "",
-        level: classData.level || "Principiante",
+        level: classData.level || "Todos los Niveles",
         materials: classData.materials || "",
         requirements: classData.requirements || "",
-        imageUrl: classData.imageUrl || "",
-        teacherId: classData.teacherId || "",
+        teacherId: classData.instructor?.id || "",
+        dayOfWeek: classData.dayOfWeek || "",
+        startTime: classData.startTime || "",
+        endTime: classData.endTime || "",
+        duration: classData.duration || "",
       });
     } else {
       setFormData({
         name: "",
         description: "",
         price: "",
-        duration: "",
         maxCapacity: "",
         level: "Principiante",
         materials: "",
         requirements: "",
-        imageUrl: "",
         teacherId: "",
+        dayOfWeek: "",
+        startTime: "",
+        endTime: "",
+        duration: "",
       });
     }
   }, [isEditing, classData, isOpen]);
@@ -117,8 +123,12 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
       const classPayload = {
         ...formData,
         price: parseFloat(formData.price),
-        duration: parseInt(formData.duration),
         maxCapacity: parseInt(formData.maxCapacity),
+        duration: formData.duration || null,
+        dayOfWeek: formData.dayOfWeek,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        teacherId: parseInt(formData.teacherId),
       };
 
       if (isEditing) {
@@ -207,6 +217,9 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
                 <option key="Avanzado" value="Avanzado">
                   Avanzado
                 </option>
+                <option key="Todos los Niveles" value="Todos los Niveles">
+                  Todos los Niveles
+                </option>
               </select>
             </div>
 
@@ -251,6 +264,69 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
                   <br />• O implementa el endpoint /admin/teachers en tu backend
                 </p>
               )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Día de la Semana *
+              </label>
+              <select
+                name="dayOfWeek"
+                value={formData.dayOfWeek}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              >
+                <option key="default" value="">
+                  Selecciona un día
+                </option>
+                <option key="MONDAY" value="MONDAY">
+                  Lunes
+                </option>
+                <option key="TUESDAY" value="TUESDAY">
+                  Martes
+                </option>
+                <option key="WEDNESDAY" value="WEDNESDAY">
+                  Miércoles
+                </option>
+                <option key="THURSDAY" value="THURSDAY">
+                  Jueves
+                </option>
+                <option key="FRIDAY" value="FRIDAY">
+                  Viernes
+                </option>
+                <option key="SATURDAY" value="SATURDAY">
+                  Sábado
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Hora de inicio *
+              </label>
+              <input
+                type="time"
+                name="startTime"
+                value={formData.startTime}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Hora de Fin *
+              </label>
+              <input
+                type="time"
+                name="endTime"
+                value={formData.endTime}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              />
             </div>
           </div>
 
@@ -346,20 +422,6 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
               rows={2}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               placeholder="Ninguno para principiantes, experiencia básica para cursos avanzados..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              URL de Imagen
-            </label>
-            <input
-              type="url"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-              placeholder="https://example.com/imagen-clase.jpg"
             />
           </div>
 
