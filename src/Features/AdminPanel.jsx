@@ -31,6 +31,8 @@ import {
 } from "../redux/slices/bookingSlice";
 import ClassModal from "../components/ClassModal";
 import UserModal from "../components/UserModal";
+import ProductModal from "../components/ProductModal";
+import toast from "react-hot-toast";
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -195,12 +197,15 @@ function AdminPanel() {
       switch (type) {
         case "producto":
           await dispatch(deleteProduct(id)).unwrap();
+          toast.success("Producto eliminado exitosamente");
           break;
         case "usuario":
           await dispatch(deleteUser(id)).unwrap();
+          toast.success("Usuario eliminado exitosamente");
           break;
         case "clase":
           await dispatch(deleteClass(id)).unwrap();
+          toast.success("Clase eliminada exitosamente");
           break;
         default:
           break;
@@ -523,52 +528,167 @@ function AdminPanel() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-white shadow overflow-hidden sm:rounded-md">
                   {products && products.length > 0 ? (
-                    products.map((product) => (
-                      <div
-                        key={product.id}
-                        className="bg-white p-6 rounded-lg shadow"
-                      >
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                          {product.name}
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                          {product.description}
-                        </p>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-2xl font-bold text-green-600">
-                            ${product.price}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            Stock: {product.stock || "Disponible"}
-                          </span>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setModalType("edit");
-                              setSelectedItem(product);
-                              setShowModal(true);
-                            }}
-                            className="flex-1 bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleDeleteItem("producto", product.id)
-                            }
-                            className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Producto
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Categoría
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Precio
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Stock
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Estado
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Acciones
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {products.map((product) => (
+                            <tr key={product.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  {product.imageUrl ? (
+                                    <img
+                                      className="h-12 w-12 rounded-lg object-cover mr-4"
+                                      src={product.imageUrl}
+                                      alt={product.name}
+                                      onError={(e) => {
+                                        e.target.style.display = "none";
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-4">
+                                      <svg
+                                        className="h-6 w-6 text-gray-400"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                      >
+                                        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {product.name}
+                                    </div>
+                                    <div className="text-sm text-gray-500 max-w-xs truncate">
+                                      {product.description}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                  {product.category || "Sin categoría"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  ${product.price}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                    product.stock > 10
+                                      ? "bg-green-100 text-green-800"
+                                      : product.stock > 0
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {product.stock || 0}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                    product.status === "AVAILABLE"
+                                      ? "bg-green-100 text-green-800"
+                                      : product.status === "OUT_OF_STOCK"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {product.status === "AVAILABLE"
+                                    ? "Disponible"
+                                    : product.status === "OUT_OF_STOCK"
+                                    ? "Sin Stock"
+                                    : product.status === "DISCONTINUED"
+                                    ? "Descontinuado"
+                                    : product.status || "Desconocido"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button
+                                  onClick={() => {
+                                    setModalType("edit");
+                                    setSelectedItem(product);
+                                    setShowModal(true);
+                                  }}
+                                  className="text-yellow-600 hover:text-yellow-900 bg-yellow-100 hover:bg-yellow-200 px-3 py-1 rounded-md transition-colors"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteItem("producto", product.id)
+                                  }
+                                  className="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md transition-colors"
+                                >
+                                  Eliminar
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : (
-                    <div className="col-span-3 text-center py-8 text-gray-500">
-                      No hay productos registrados
+                    <div className="text-center py-12">
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">
+                        No hay productos
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Comienza creando tu primer producto.
+                      </p>
+                      <div className="mt-6">
+                        <button
+                          onClick={() => {
+                            setModalType("create");
+                            setSelectedItem(null);
+                            setShowModal(true);
+                          }}
+                          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700"
+                        >
+                          Agregar Producto
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -769,6 +889,20 @@ function AdminPanel() {
           )}
         </div>
       </div>
+
+      {/* Modal para Crear/Editar Productos */}
+      {activeTab === "productos" && (
+        <ProductModal
+          isOpen={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedItem(null);
+            setModalType("");
+          }}
+          productData={selectedItem}
+          isEditing={modalType === "edit"}
+        />
+      )}
 
       {/* Modal para Crear/Editar Clases */}
       {activeTab === "clases" && (
