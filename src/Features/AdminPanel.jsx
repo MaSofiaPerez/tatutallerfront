@@ -814,21 +814,21 @@ function AdminPanel() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               <div>
                                 <div className="font-medium">
-                                  {booking.customerName}
+                                  {booking.userName}
                                 </div>
                                 <div className="text-gray-500">
-                                  {booking.customerEmail}
+                                  {booking.userEmail}
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {booking.serviceName}
+                              {booking.className}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {booking.date}
+                              {booking.bookingDate}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {booking.time}
+                              {booking.startTime}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <select

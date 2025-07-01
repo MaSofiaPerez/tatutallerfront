@@ -64,7 +64,7 @@ const staticClasses = [
 function Clases() {
   const [selectedClass, setSelectedClass] = useState(null);
 
-  // USANDO DATOS ESTÁTICOS PARA EVITAR BUCLE INFINITO
+  // USANDO SOLO DATOS ESTÁTICOS PARA LA VISTA DE CURSOS
   const classes = staticClasses;
   const isLoading = false;
   const error = null;
