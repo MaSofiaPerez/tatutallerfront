@@ -32,6 +32,7 @@ import {
 import ClassModal from "../components/ClassModal";
 import UserModal from "../components/UserModal";
 import ProductModal from "../components/ProductModal";
+import BookingDetailModal from "../components/BookingDetailModal";
 import toast from "react-hot-toast";
 
 function AdminPanel() {
@@ -44,6 +45,8 @@ function AdminPanel() {
   const [showUserModal, setShowUserModal] = useState(false);
   const [userModalType, setUserModalType] = useState(""); // 'create' or 'edit'
   const [selectedUser, setSelectedUser] = useState(null);
+
+  const [showBookingDetail, setShowBookingDetail] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -217,11 +220,21 @@ function AdminPanel() {
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
-      await dispatch(
+      const response = await dispatch(
         updateBookingStatus({ bookingId, status: newStatus })
       ).unwrap();
+
+      // Mostrar el mensaje del backend en un toast
+      if (response && response.message) {
+        toast.success(response.message);
+      } else {
+        toast.success("Estado actualizado correctamente");
+      }
+
+      // Refrescar la lista de reservas desde el backend (actualización real)
+      dispatch(fetchBookings());
     } catch (error) {
-      alert(`Error al actualizar estado: ${error}`);
+      toast.error(error?.message || "Error al actualizar estado de la reserva");
     }
   };
 
@@ -797,7 +810,7 @@ function AdminPanel() {
                           Fecha
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Hora
+                          Tallerista
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                           Estado
@@ -814,47 +827,52 @@ function AdminPanel() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               <div>
                                 <div className="font-medium">
-                                  {booking.customerName}
+                                  {booking.userName}
                                 </div>
                                 <div className="text-gray-500">
-                                  {booking.customerEmail}
+                                  {booking.userEmail}
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {booking.serviceName}
+                              {booking.className}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {booking.date}
+                              {booking.bookingDate}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {booking.time}
+                              {booking.startTime}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <select
                                 value={booking.status}
-                                onChange={(e) =>
-                                  handleStatusChange(booking.id, e.target.value)
-                                }
-                                className={`px-2 py-1 text-xs rounded-full border-0 ${
-                                  booking.status === "confirmed"
-                                    ? "bg-green-100 text-green-800"
-                                    : booking.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
+                                onChange={async (e) => {
+                                  const newStatus = e.target.value;
+                                  await handleStatusChange(
+                                    booking.id,
+                                    newStatus
+                                  );
+                                }}
+                                className={`px-2 py-1 text-xs rounded-full border-0 focus:outline-none focus:ring-2 focus:ring-yellow-500
+                                  ${
+                                    booking.status === "CONFIRMED"
+                                      ? "bg-green-100 text-green-800"
+                                      : booking.status === "PENDING"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : booking.status === "REJECTED"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-gray-100 text-gray-800"
+                                  }
+                                `}
                               >
-                                <option key="pending" value="pending">
+                                <option key="pending" value="PENDING">
                                   Pendiente
                                 </option>
-                                <option key="confirmed" value="confirmed">
+                                <option key="confirmed" value="CONFIRMED">
                                   Confirmada
                                 </option>
-                                <option key="cancelled" value="cancelled">
-                                  Cancelada
-                                </option>
-                                <option key="completed" value="completed">
-                                  Completada
+                                <option key="rejected" value="REJECTED">
+                                  Rechazada
                                 </option>
                               </select>
                             </td>
@@ -862,7 +880,7 @@ function AdminPanel() {
                               <button
                                 onClick={() => {
                                   setSelectedItem(booking);
-                                  setShowModal(true);
+                                  setShowBookingDetail(true);
                                 }}
                                 className="text-yellow-600 hover:text-yellow-900"
                               >
@@ -929,6 +947,28 @@ function AdminPanel() {
           }}
           userData={selectedUser}
           isEditing={userModalType === "edit"}
+        />
+      )}
+
+      {/* Modal para Detalles de Reserva */}
+      {activeTab === "reservas" && (
+        <BookingDetailModal
+          isOpen={showBookingDetail}
+          onClose={() => {
+            setShowBookingDetail(false);
+            setSelectedItem(null);
+          }}
+          booking={selectedItem}
+          onSave={() => {
+            setShowBookingDetail(false);
+            setSelectedItem(null);
+            dispatch(fetchBookings());
+          }}
+          onCancel={() => {
+            setShowBookingDetail(false);
+            setSelectedItem(null);
+            dispatch(fetchBookings());
+          }}
         />
       )}
     </div>

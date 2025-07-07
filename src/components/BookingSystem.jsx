@@ -7,20 +7,25 @@ import {
   HiPhone,
   HiEnvelope,
 } from "react-icons/hi2";
-import {
-  createBookingWithNotification,
-  clearError,
-} from "../redux/slices/bookingSlice";
+import { createBooking, clearError } from "../redux/slices/bookingSlice";
 import { fetchPublicClasses } from "../redux/slices/classesSlice";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import esAR from "date-fns/locale/es";
 
 function BookingSystem({ selectedService }) {
   const [step, setStep] = useState(1);
   const [bookingData, setBookingData] = useState({
     classEntity: { id: "" },
     bookingDate: "",
-    bookingTime: "",
+    startTime: "",
+    endTime: "",
+    bookingType: "PUNTUAL",
+    recurrenceEndDate: "",
     notes: "",
   });
+  const [showSummary, setShowSummary] = useState(false);
 
   const dispatch = useDispatch();
   const {
@@ -39,25 +44,71 @@ function BookingSystem({ selectedService }) {
     dispatch(fetchPublicClasses());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (selectedService) {
-      setBookingData((prev) => ({
-        ...prev,
-        classEntity: { id: selectedService.id },
-      }));
-    }
-  }, [selectedService]);
-
-  const timeSlots = [
-    "09:00:00",
-    "10:30:00",
-    "14:00:00",
-    "15:30:00",
-    "17:00:00",
-    "18:30:00",
+  // Declarar weekDays y allTalleristas solo una vez, al inicio del componente
+  const weekDays = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
   ];
+  const [classesGrid, setClassesGrid] = useState([]);
+  const allTalleristas = Array.from(
+    new Set(classesGrid.map((cls) => cls.instructor))
+  ).filter(Boolean);
 
-  // Usar clases del backend o datos por defecto
+  useEffect(() => {
+    // Consumir el nuevo endpoint para la grilla de clases
+    const fetchClassesGrid = async () => {
+      try {
+        const res = await fetch("/api/public/classes-grid");
+        if (!res.ok) throw new Error("No se pudieron obtener las clases");
+        const data = await res.json();
+        setClassesGrid(data);
+        console.log(
+          "Clases traídas del endpoint /api/public/classes-grid:",
+          data
+        );
+      } catch (e) {
+        setClassesGrid([]);
+        console.error("Error al obtener clases para la grilla:", e);
+      }
+    };
+    fetchClassesGrid();
+  }, []);
+
+  // Mapear clases a una estructura por día y tallerista
+  const scheduleByDay = {};
+  weekDays.forEach((day) => {
+    scheduleByDay[day] = {};
+    allTalleristas.forEach((tallerista) => {
+      scheduleByDay[day][tallerista] = [];
+    });
+  });
+  classesGrid.forEach((cls) => {
+    if (cls.weekDay && cls.instructor) {
+      scheduleByDay[cls.weekDay][cls.instructor].push(cls);
+    }
+  });
+
+  const [selectedClass, setSelectedClass] = useState(null);
+
+  // Helper para mostrar horario en formato amigable usando startTime y endTime
+  function formatTimeRange(start, end) {
+    if (!start || !end) return "";
+    return `${start} - ${end}`;
+  }
+
+  const handleClassClick = (cls) => {
+    setSelectedClass(cls);
+    handleInputChange("classEntity", { id: cls.id });
+    handleInputChange("bookingDate", cls.date || "");
+    handleInputChange("startTime", cls.startTime || "");
+    handleInputChange("endTime", cls.endTime || "");
+    setStep(2);
+  };
+
   const services =
     classes.length > 0
       ? classes.map((cls) => ({
@@ -128,6 +179,7 @@ function BookingSystem({ selectedService }) {
   ];
 
   const availableTimes = [
+    "09:00",
     "10:00",
     "11:00",
     "12:00",
@@ -154,45 +206,81 @@ function BookingSystem({ selectedService }) {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = async (e) => {
+  // Validaciones y resumen antes de enviar
+  const handleSummary = (e) => {
     e.preventDefault();
-
     if (!isAuthenticated) {
       alert("Debes iniciar sesión para realizar una reserva");
       return;
     }
+    if (
+      !bookingData.classEntity.id ||
+      !bookingData.bookingDate ||
+      !bookingData.startTime ||
+      !bookingData.endTime
+    ) {
+      alert("Completa todos los campos obligatorios.");
+      return;
+    }
+    if (bookingData.endTime <= bookingData.startTime) {
+      alert("La hora de fin debe ser mayor a la de inicio.");
+      return;
+    }
+    if (
+      bookingData.bookingType === "RECURRENTE" &&
+      !bookingData.recurrenceEndDate
+    ) {
+      alert("Debes seleccionar la fecha de fin de recurrencia.");
+      return;
+    }
+    setShowSummary(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      alert("Debes iniciar sesión para realizar una reserva");
+      return;
+    }
     try {
       const bookingPayload = {
         classId: bookingData.classEntity.id,
         bookingDate: bookingData.bookingDate,
-        bookingTime: bookingData.bookingTime,
+        startTime:
+          bookingData.startTime.length === 5
+            ? bookingData.startTime + ":00"
+            : bookingData.startTime,
+        endTime:
+          bookingData.endTime.length === 5
+            ? bookingData.endTime + ":00"
+            : bookingData.endTime,
+        bookingType: bookingData.bookingType,
+        recurrenceEndDate:
+          bookingData.bookingType === "RECURRENTE" &&
+          bookingData.recurrenceEndDate
+            ? bookingData.recurrenceEndDate
+            : null,
         notes: bookingData.notes || "",
       };
-
-      const result = await dispatch(
-        createBookingWithNotification(bookingPayload)
-      ).unwrap();
-      console.log("Reserva creada exitosamente:", result);
-
-      // Reset form
+      console.log(
+        "Payload enviado al backend:",
+        JSON.stringify(bookingPayload, null, 2)
+      );
+      await dispatch(createBooking(bookingPayload)).unwrap();
       setBookingData({
         classEntity: { id: "" },
         bookingDate: "",
-        bookingTime: "",
+        startTime: "",
+        endTime: "",
+        bookingType: "PUNTUAL",
+        recurrenceEndDate: "",
         notes: "",
       });
       setStep(1);
-
-      // Mostrar mensaje basado en el estado de la notificación
-      const notificationMessage =
-        notificationStatus === "sent"
-          ? "¡Reserva enviada exitosamente! El profesor ha sido notificado por email y te contactará para confirmar."
-          : "¡Reserva enviada exitosamente! Te contactaremos para confirmar.";
-
-      alert(notificationMessage);
+      setShowSummary(false);
+      alert("¡Reserva enviada exitosamente! Te contactaremos para confirmar.");
     } catch (error) {
-      console.error("Error al crear reserva:", error);
       alert("Error al enviar la reserva. Por favor, intenta nuevamente.");
     }
   };
@@ -204,100 +292,169 @@ function BookingSystem({ selectedService }) {
     return tomorrow.toISOString().split("T")[0];
   };
 
+  const locales = {
+    "es-AR": esAR,
+  };
+  const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+    getDay,
+    locales,
+  });
+
+  // Convert classes to calendar events
+  const calendarEvents = classes.map((cls) => ({
+    id: cls.id,
+    title: cls.name + (cls.description ? ` - ${cls.description}` : ""),
+    start: new Date(cls.date + "T" + cls.startTime),
+    end: new Date(cls.date + "T" + cls.endTime),
+    resource: cls,
+  }));
+
+  // Semana típica: Lunes a Sábado, 8:00 a 20:00 (bloques de 2 horas)
+  const timeSlots = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+
+  // Mapear clases a una estructura por día y horario
+  const schedule = {};
+  weekDays.forEach((day) => {
+    schedule[day] = {};
+    timeSlots.forEach((slot) => {
+      schedule[day][slot] = null;
+    });
+  });
+  // Mostrar solo las clases que tengan weekDay y startTime definidos
+  classes.forEach((cls) => {
+    if (cls.weekDay && cls.startTime) {
+      schedule[cls.weekDay][cls.startTime] = cls;
+    }
+  });
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Selecciona tu servicio
+              Selecciona una clase de la semana
             </h3>
-            <div className="grid gap-4">
-              {services.map((service) => (
-                <div
-                  key={service.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    bookingData.classEntity.id === service.id
-                      ? "border-yellow-500 bg-yellow-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                  onClick={() =>
-                    handleInputChange("classEntity", { id: service.id })
-                  }
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold text-gray-900">
-                        {service.name}
-                      </h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {service.description}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-yellow-600">
-                        ${service.price}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {service.duration}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {classes.length === 0 && (
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-4">
+                No hay clases agendadas para mostrar en este momento.
+              </div>
+            )}
+            <div className="overflow-x-auto">
+              <table className="min-w-full border text-center">
+                <thead>
+                  <tr>
+                    <th className="p-2 border bg-gray-100">Día</th>
+                    {/* Eliminado: nombres de talleristas en la cabecera */}
+                  </tr>
+                </thead>
+                <tbody>
+                  {weekDays.map((day) => (
+                    <tr key={day}>
+                      <td className="p-2 border font-semibold bg-gray-50">
+                        {day}
+                      </td>
+                      {/* Mostrar solo las clases de ese día, agrupadas por tallerista */}
+                      <td className="p-2 border text-left">
+                        {allTalleristas
+                          .map((tallerista) => scheduleByDay[day][tallerista])
+                          .flat()
+                          .filter(Boolean).length === 0 ? (
+                          <span className="text-gray-300">-</span>
+                        ) : (
+                          allTalleristas.map((tallerista) =>
+                            scheduleByDay[day][tallerista].map((cls) => (
+                              <button
+                                key={cls.id}
+                                className={`block w-full mb-1 rounded-lg px-2 py-1 shadow font-semibold transition text-gray-900 ${
+                                  selectedClass?.id === cls.id
+                                    ? "bg-yellow-400"
+                                    : "bg-yellow-200 hover:bg-yellow-400"
+                                }`}
+                                onClick={() => handleClassClick(cls)}
+                              >
+                                <div>
+                                  <span className="font-bold text-xs text-gray-700 mr-2">
+                                    {cls.instructor}:
+                                  </span>
+                                  {cls.name}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {formatTimeRange(cls.startTime, cls.endTime)}
+                                </div>
+                              </button>
+                            ))
+                          )
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+            <p className="text-gray-500 text-sm mt-2">
+              Haz click en una clase para reservar.
+            </p>
           </div>
         );
 
       case 2:
+        // Lógica para fechas y horas válidas
+        const validDates = selectedClass
+          ? getValidDatesForClassWeekDay(selectedClass, bookingData.bookingType)
+          : [];
+        const validStartTimes = selectedClass
+          ? getValidStartTimes(selectedClass)
+          : [];
+        // Si es recurrente, autoseleccionar la primer fecha válida
+        if (
+          bookingData.bookingType === "RECURRENTE" &&
+          selectedClass &&
+          validDates.length > 0 &&
+          bookingData.bookingDate !== validDates[0]
+        ) {
+          handleInputChange("bookingDate", validDates[0]);
+        }
+        // Si no hay fechas válidas, mostrar mensaje
+        const noValidDates = selectedClass && validDates.length === 0;
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Fecha, hora y artista
+              Fecha, hora y tipo de reserva
             </h3>
-
-            {/* Artista */}
+            {/* Tipo de reserva */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Selecciona un instructor (opcional)
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tipo de reserva *
               </label>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div
-                  className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                    bookingData.instructorId === ""
-                      ? "border-yellow-500 bg-yellow-50"
-                      : "border-gray-200 hover:border-gray-300"
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  className={`px-4 py-2 rounded-md border font-medium transition-colors ${
+                    bookingData.bookingType === "PUNTUAL"
+                      ? "bg-yellow-500 text-gray-900 border-yellow-500"
+                      : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                   }`}
-                  onClick={() => handleInputChange("instructorId", "")}
+                  onClick={() => handleInputChange("bookingType", "PUNTUAL")}
                 >
-                  <div className="font-medium text-gray-900">
-                    Sin preferencia
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Te asignaremos el mejor instructor
-                  </div>
-                </div>
-                {artists.map((artist) => (
-                  <div
-                    key={artist.id}
-                    className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                      bookingData.instructorId === artist.id
-                        ? "border-yellow-500 bg-yellow-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => handleInputChange("instructorId", artist.id)}
-                  >
-                    <div className="font-medium text-gray-900">
-                      {artist.name}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {artist.specialty} • {artist.experience}
-                    </div>
-                  </div>
-                ))}
+                  Puntual
+                </button>
+                <button
+                  type="button"
+                  className={`px-4 py-2 rounded-md border font-medium transition-colors ${
+                    bookingData.bookingType === "RECURRENTE"
+                      ? "bg-yellow-500 text-gray-900 border-yellow-500"
+                      : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                  }`}
+                  onClick={() => handleInputChange("bookingType", "RECURRENTE")}
+                >
+                  Recurrente
+                </button>
               </div>
             </div>
-
             {/* Fecha */}
             <div>
               <label
@@ -306,41 +463,123 @@ function BookingSystem({ selectedService }) {
               >
                 Fecha preferida *
               </label>
-              <input
-                type="date"
-                id="date"
-                value={bookingData.bookingDate}
-                onChange={(e) =>
-                  handleInputChange("bookingDate", e.target.value)
-                }
-                min={getMinDate()}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                required
-              />
+              {noValidDates ? (
+                <div className="text-red-500 text-sm mb-2">
+                  No hay fechas disponibles para esta clase. Por favor
+                  comunícate con el taller.
+                </div>
+              ) : selectedClass ? (
+                <select
+                  id="date"
+                  value={bookingData.bookingDate}
+                  onChange={(e) =>
+                    handleInputChange("bookingDate", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  required
+                  disabled={bookingData.bookingType === "RECURRENTE"}
+                >
+                  <option value="">Selecciona una fecha</option>
+                  {validDates.map((date) => (
+                    <option key={date} value={date}>
+                      {date}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="date"
+                  id="date"
+                  value={bookingData.bookingDate}
+                  onChange={(e) =>
+                    handleInputChange("bookingDate", e.target.value)
+                  }
+                  min={getMinDate()}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  required
+                  disabled={!!selectedClass}
+                />
+              )}
             </div>
-
-            {/* Hora */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hora preferida *
-              </label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-                {availableTimes.map((time) => (
-                  <button
-                    key={time}
-                    type="button"
-                    className={`px-3 py-2 text-sm rounded-md transition-all ${
-                      bookingData.bookingTime === time
-                        ? "bg-yellow-500 text-gray-900"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                    onClick={() => handleInputChange("bookingTime", time)}
+            {/* Hora inicio y fin */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hora de inicio *
+                </label>
+                {selectedClass ? (
+                  <select
+                    value={bookingData.startTime}
+                    onChange={(e) => {
+                      handleInputChange("startTime", e.target.value);
+                      handleInputChange(
+                        "endTime",
+                        getEndTimeFromStart(e.target.value)
+                      );
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
                   >
-                    {time}
-                  </button>
-                ))}
+                    <option value="">Selecciona hora</option>
+                    {validStartTimes.map((h) => (
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="time"
+                    value={bookingData.startTime}
+                    onChange={(e) =>
+                      handleInputChange("startTime", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                    disabled={!!selectedClass}
+                  />
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hora de fin *
+                </label>
+                <input
+                  type="time"
+                  value={bookingData.endTime}
+                  readOnly
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+                />
               </div>
             </div>
+            {/* Fecha de fin de recurrencia */}
+            {bookingData.bookingType === "RECURRENTE" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha de fin de recurrencia *
+                </label>
+                <input
+                  type="date"
+                  value={getLastDayOfMonth()}
+                  readOnly
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  La recurrencia finaliza automáticamente el último día del mes.
+                </div>
+              </div>
+            )}
+            {step === 2 && selectedClass && (
+              <div className="text-sm text-gray-500 mb-2">
+                Reservarás para la clase: <b>{selectedClass.name}</b> el{" "}
+                <b>{bookingData.bookingDate}</b> de{" "}
+                <b>
+                  {formatTimeRange(bookingData.startTime, bookingData.endTime)}
+                </b>
+              </div>
+            )}
           </div>
         );
 
@@ -385,7 +624,7 @@ function BookingSystem({ selectedService }) {
                 </div>
 
                 {/* Resumen */}
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gray-50 rounded-lg p-4 mt-4">
                   <h4 className="font-semibold text-gray-900 mb-3">
                     Resumen de tu reserva
                   </h4>
@@ -407,11 +646,28 @@ function BookingSystem({ selectedService }) {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Hora:</span>
+                      <span className="text-gray-600">Horario:</span>
                       <span className="font-medium">
-                        {bookingData.bookingTime}
+                        {bookingData.startTime} - {bookingData.endTime}
                       </span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Tipo:</span>
+                      <span className="font-medium">
+                        {bookingData.bookingType === "RECURRENTE"
+                          ? "Recurrente"
+                          : "Puntual"}
+                      </span>
+                    </div>
+                    {bookingData.bookingType === "RECURRENTE" &&
+                      bookingData.recurrenceEndDate && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Hasta:</span>
+                          <span className="font-medium">
+                            {bookingData.recurrenceEndDate}
+                          </span>
+                        </div>
+                      )}
                     {bookingData.notes && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Observaciones:</span>
@@ -435,13 +691,134 @@ function BookingSystem({ selectedService }) {
       case 1:
         return bookingData.classEntity.id !== "";
       case 2:
-        return bookingData.bookingDate !== "" && bookingData.bookingTime !== "";
+        return (
+          bookingData.bookingDate !== "" &&
+          bookingData.startTime !== "" &&
+          bookingData.endTime !== "" &&
+          (bookingData.bookingType === "PUNTUAL" ||
+            (bookingData.bookingType === "RECURRENTE" &&
+              bookingData.recurrenceEndDate !== ""))
+        );
       case 3:
-        return isAuthenticated; // Solo necesita estar autenticado
+        return isAuthenticated;
       default:
         return false;
     }
   };
+
+  // Helpers para fechas y horarios válidos
+  function getValidDatesForWeekDay(weekDay, isRecurrent) {
+    // weekDay: "Lunes", "Martes", ...
+    // Devuelve fechas del mes actual (o próximas 30 días) que caen en ese weekDay
+    const weekDayMap = {
+      Lunes: 1,
+      Martes: 2,
+      Miércoles: 3,
+      Jueves: 4,
+      Viernes: 5,
+      Sábado: 6,
+      Domingo: 0,
+    };
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const result = [];
+    // Si es recurrente, solo permitir fechas en las primeras 2 semanas del mes
+    const maxDay = isRecurrent ? 14 : 31;
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(year, month, day);
+      if (d.getMonth() !== month) break;
+      if (d.getDay() === weekDayMap[weekDay] && day <= maxDay && d >= today) {
+        result.push(d.toISOString().split("T")[0]);
+      }
+    }
+    return result;
+  }
+
+  // Helpers para fechas y horarios válidos
+  function getValidDatesForClass(cls) {
+    // Si la clase tiene un campo date, devolverlo como único valor
+    if (!cls) return [];
+    if (Array.isArray(cls.date)) return cls.date; // por si en el futuro hay varias fechas
+    if (cls.date) return [cls.date];
+    return [];
+  }
+
+  function getValidStartTimes(cls) {
+    // Permitir cualquier horario de inicio entre startTime y endTime - 2h
+    if (!cls || !cls.startTime || !cls.endTime) return [];
+    const start = cls.startTime;
+    const end = cls.endTime;
+    // Convertir a minutos
+    const [sh, sm] = start.split(":").map(Number);
+    const [eh, em] = end.split(":").map(Number);
+    const startMin = sh * 60 + sm;
+    const endMin = eh * 60 + em;
+    const valid = [];
+    for (let min = startMin; min <= endMin - 120; min += 30) {
+      const h = Math.floor(min / 60)
+        .toString()
+        .padStart(2, "0");
+      const m = (min % 60).toString().padStart(2, "0");
+      valid.push(`${h}:${m}`);
+    }
+    return valid;
+  }
+
+  function getEndTimeFromStart(start) {
+    // Suma 2 horas a la hora de inicio
+    if (!start) return "";
+    const [h, m] = start.split(":").map(Number);
+    const date = new Date(2000, 0, 1, h, m);
+    date.setHours(date.getHours() + 2);
+    return date.toTimeString().slice(0, 5);
+  }
+
+  function getLastDayOfMonth() {
+    // Si hay bookingDate, usar ese mes, si no, el actual
+    const refDate = bookingData.bookingDate
+      ? new Date(bookingData.bookingDate)
+      : new Date();
+    const year = refDate.getFullYear();
+    const month = refDate.getMonth();
+    const lastDay = new Date(year, month + 1, 0);
+    return lastDay.toISOString().split("T")[0];
+  }
+
+  function getValidDatesForClassWeekDay(cls, bookingType = "PUNTUAL") {
+    // Devuelve fechas del mes actual y siguiente (si es puntual), solo del mes actual si es recurrente
+    if (!cls || !cls.weekDay) return [];
+    const weekDayMap = {
+      Domingo: 0,
+      Lunes: 1,
+      Martes: 2,
+      Miércoles: 3,
+      Jueves: 4,
+      Viernes: 5,
+      Sábado: 6,
+    };
+    const targetDay = weekDayMap[cls.weekDay];
+    const today = new Date();
+    const result = [];
+    let monthsToShow = bookingType === "PUNTUAL" ? 2 : 1;
+    for (let m = 0; m < monthsToShow; m++) {
+      const year = today.getFullYear();
+      const month = today.getMonth() + m;
+      for (let day = 1; day <= 31; day++) {
+        const d = new Date(year, month, day);
+        if (d.getMonth() !== month % 12) break;
+        if (d.getDay() === targetDay && d >= today) {
+          result.push(d.toISOString().split("T")[0]);
+        }
+      }
+    }
+    return result;
+  }
+
+  function getFirstValidDateOfMonth(cls) {
+    const validDates = getValidDatesForClassWeekDay(cls);
+    return validDates.length > 0 ? validDates[0] : null;
+  }
 
   return (
     <section className="py-16 bg-white">
@@ -535,7 +912,7 @@ function BookingSystem({ selectedService }) {
 
         {/* Form */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={showSummary ? handleSubmit : handleSummary}
           className="bg-white rounded-xl shadow-lg p-8"
         >
           {renderStepContent()}
@@ -554,7 +931,6 @@ function BookingSystem({ selectedService }) {
             >
               Anterior
             </button>
-
             {step < 3 ? (
               <button
                 type="button"
@@ -578,7 +954,7 @@ function BookingSystem({ selectedService }) {
                 }`}
                 disabled={!isStepValid()}
               >
-                Enviar Reserva
+                {showSummary ? "Enviar Reserva" : "Ver Resumen"}
               </button>
             )}
           </div>
@@ -596,13 +972,8 @@ function BookingSystem({ selectedService }) {
                 • El profesor será notificado automáticamente por email sobre tu
                 reserva
               </p>
-              <p>• Te contactarán en 24 horas para confirmar tu cita</p>
-              <p>• Las consultas de diseño son gratuitas y sin compromiso</p>
               <p>
-                • Puedes cancelar o reprogramar con 24 horas de anticipación
-              </p>
-              <p>
-                • Trae referencias e ideas para aprovechar mejor la consulta
+                • Te contactarán en 24 horas para confirmar tu primera clase
               </p>
             </div>
           </div>

@@ -173,9 +173,13 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+// Leer usuario y token de localStorage al iniciar
+const storedToken = localStorage.getItem('token');
+const storedUser = localStorage.getItem('user');
+
 const initialState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: storedToken,
   isAuthenticated: false,
   isAdmin: false,
   isTeacher: false,
@@ -319,6 +323,7 @@ const authSlice = createSlice({
         state.isTeacher = false;
         // Limpiar localStorage en caso de error
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
       })
       .addCase(verifyToken.pending, (state) => {
         state.isLoading = true;
