@@ -135,13 +135,24 @@ function Navbar() {
                 Tienda Online
               </Link>
             </li>
+            {isAuthenticated && (
+              <li>
+                <Link
+                  to="/mi-cuenta"
+                  className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                  onClick={closeMenus}
+                >
+                  Mi Cuenta
+                </Link>
+              </li>
+            )}
             <li>
               <Link
                 to="/account"
                 className="block text-gray-700 hover:text-yellow-600 transition-colors"
                 onClick={closeMenus}
               >
-                Mi Cuenta
+                Información de Cuenta
               </Link>
             </li>
           </ul>
@@ -189,6 +200,19 @@ function Navbar() {
                       <HiCog6Tooth className="w-4 h-4" />
                       <span className="hidden lg:inline text-sm">
                         {isAdmin ? "Admin" : "Panel"}
+                      </span>
+                    </Link>
+                  )}
+
+                  {/* User Panel Button - Para usuarios normales */}
+                  {!isAdmin && !isTeacher && (
+                    <Link
+                      to="/mi-cuenta"
+                      className="flex items-center space-x-1 bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      <HiUser className="w-4 h-4" />
+                      <span className="hidden lg:inline text-sm">
+                        Mi Cuenta
                       </span>
                     </Link>
                   )}

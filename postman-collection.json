@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "UserPanel - TatuTaller API",
+    "description": "Endpoints necesarios para el UserPanel del frontend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "tu_jwt_token_aqui",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Obtener Perfil Usuario",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/users/profile",
+          "host": ["{{base_url}}"],
+          "path": ["users", "profile"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": 1,\n  \"name\": \"María González\",\n  \"email\": \"maria.gonzalez@email.com\",\n  \"phone\": \"+598 99 123 456\",\n  \"address\": \"Av. 18 de Julio 1234, Apto 5B, Montevideo, Uruguay\",\n  \"role\": \"user\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-12-01T14:22:00Z\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "2. Actualizar Perfil Usuario",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"María González Pérez\",\n  \"email\": \"maria.nueva@email.com\",\n  \"phone\": \"+598 99 987 654\",\n  \"address\": \"Nueva Calle 456, Apt 2, Montevideo, Uruguay\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/users/profile",
+          "host": ["{{base_url}}"],
+          "path": ["users", "profile"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"success\": true,\n  \"message\": \"Perfil actualizado exitosamente\",\n  \"user\": {\n    \"id\": 1,\n    \"name\": \"María González Pérez\",\n    \"email\": \"maria.nueva@email.com\",\n    \"phone\": \"+598 99 987 654\",\n    \"address\": \"Nueva Calle 456, Apt 2, Montevideo, Uruguay\",\n    \"role\": \"user\",\n    \"createdAt\": \"2024-01-15T10:30:00Z\",\n    \"updatedAt\": \"2024-12-07T16:45:00Z\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "3. Cambiar Contraseña",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"miPasswordActual123\",\n  \"newPassword\": \"miNuevoPassword456\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/users/change-password",
+          "host": ["{{base_url}}"],
+          "path": ["users", "change-password"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"success\": true,\n  \"message\": \"Contraseña actualizada exitosamente\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "4. Obtener Clases del Usuario",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/users/classes?limit=10&offset=0",
+          "host": ["{{base_url}}"],
+          "path": ["users", "classes"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "status",
+              "value": "confirmada",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"id\": 1,\n    \"classId\": 101,\n    \"className\": \"Introducción a la Cerámica\",\n    \"description\": \"Clase básica para principiantes en el mundo de la cerámica\",\n    \"teacherName\": \"Ana Rodríguez\",\n    \"date\": \"2024-12-15T10:00:00Z\",\n    \"endDate\": \"2024-12-15T12:00:00Z\",\n    \"duration\": 120,\n    \"participants\": 1,\n    \"maxParticipants\": 8,\n    \"price\": 1200,\n    \"status\": \"confirmada\",\n    \"location\": \"Taller Principal\",\n    \"materials\": \"Incluye arcilla y herramientas básicas\",\n    \"notes\": \"Traer ropa que se pueda ensuciar\",\n    \"bookingDate\": \"2024-11-20T09:15:00Z\",\n    \"paymentStatus\": \"pagado\",\n    \"special\": false,\n    \"prerequisites\": null,\n    \"cancellationReason\": null,\n    \"cancellationDate\": null\n  }\n]"
+        }
+      ]
+    }
+  ]
+}
