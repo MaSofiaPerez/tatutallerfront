@@ -8,9 +8,10 @@ function Tienda() {
 
   const [categories, setCategories] = useState([
     "Todos",
-    "MATERIALES",
-    "HERRAMIENTAS",
-    "PIEZAS",
+    "Pigmentos",
+    "Esmalte",
+    "Materia Prima",
+    "Otros",
   ]);
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,9 +23,9 @@ function Tienda() {
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
       selectedCategory === "Todos" || product.category === selectedCategory;
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
