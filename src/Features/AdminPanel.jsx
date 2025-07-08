@@ -919,6 +919,12 @@ function AdminPanel() {
           }}
           productData={selectedItem}
           isEditing={modalType === "edit"}
+          categories={[
+            "Pigmentos",
+            "Esmalte",
+            "Materia Prima",
+            "Otros"
+          ]}
         />
       )}
 

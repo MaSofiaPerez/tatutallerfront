@@ -21,10 +21,9 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
 
   // Categorías que coinciden con ProductCategory del backend
   const categories = [
-    { id: "Cerámica", name: "Cerámica" },
-    { id: "Herramientas", name: "Herramientas" },
-    { id: "Materiales", name: "Materiales" },
-    { id: "Decoración", name: "Decoración" },
+    { id: "Pigmentos", name: "Pigmentos" },
+    { id: "Esmalte", name: "Esmalte" },
+    { id: "Materia Prima", name: "Materia Prima" },
     { id: "Otros", name: "Otros" },
   ];
 
