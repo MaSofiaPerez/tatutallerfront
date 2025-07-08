@@ -733,54 +733,79 @@ function AdminPanel() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {classes && classes.length > 0 ? (
-                    classes.map((classItem) => (
-                      <div
-                        key={classItem.id}
-                        className="bg-white p-6 rounded-lg shadow"
-                      >
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                          {classItem.name}
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                          {classItem.description}
-                        </p>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-2xl font-bold text-green-600">
-                            ${classItem.price}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {classItem.duration}
-                          </span>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setModalType("edit");
-                              setSelectedItem(classItem);
-                              setShowModal(true);
-                            }}
-                            className="flex-1 bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700"
+                <div className="bg-white shadow overflow-hidden rounded-md">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Profesor
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Clase
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Cupos Disponibles
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Horario
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {classes && classes.length > 0 ? (
+                        classes.map((classItem) => (
+                          <tr key={classItem.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {classItem.instructor?.name || "N/A"}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {classItem.name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {classItem.availableSpots || 0}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {classItem.startTime && classItem.endTime
+                                ? `${classItem.startTime} - ${classItem.endTime}`
+                                : "N/A"}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                              <button
+                                onClick={() => {
+                                  setModalType("edit");
+                                  setSelectedItem(classItem);
+                                  setShowModal(true);
+                                }}
+                                className="text-yellow-600 hover:text-yellow-900"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteItem("clase", classItem.id)
+                                }
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="px-6 py-4 text-center text-gray-500"
                           >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleDeleteItem("clase", classItem.id)
-                            }
-                            className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-3 text-center py-8 text-gray-500">
-                      No hay clases registradas
-                    </div>
-                  )}
+                            No hay clases registradas
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
