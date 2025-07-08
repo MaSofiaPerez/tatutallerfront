@@ -223,16 +223,6 @@ function Footer() {
                   Política de Cookies
                 </Link>
               </div>
-
-              <div className="text-xs text-gray-400">
-                <span>Desarrollado por </span>
-                <a
-                  href="#"
-                  className="text-yellow-500 hover:text-yellow-400 transition-colors"
-                >
-                  María Sofía Pérez
-                </a>
-              </div>
             </div>
           </div>
         </div>
