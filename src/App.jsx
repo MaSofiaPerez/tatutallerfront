@@ -13,6 +13,7 @@ import Login from "./Features/Login";
 import Register from "./Features/Register";
 import ChangePasswordPage from "./Features/ChangePasswordPage";
 import AdminPanel from "./Features/AdminPanel";
+import UserPanel from "./Features/UserPanel";
 import Tienda from "./Features/Tienda";
 import Clases from "./Features/Clases";
 
@@ -54,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute requireAdminOrTeacher={true}>
                 <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mi-cuenta"
+            element={
+              <ProtectedRoute>
+                <UserPanel />
               </ProtectedRoute>
             }
           />
