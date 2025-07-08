@@ -7,6 +7,7 @@ import {
   HiPaperAirplane,
 } from "react-icons/hi2";
 import { FaWhatsapp, FaFacebook, FaInstagram } from "react-icons/fa";
+import InteractiveMap from "./InteractiveMap";
 
 function ContactSection() {
   const [formData, setFormData] = useState({
@@ -233,19 +234,8 @@ function ContactSection() {
             {/* Map placeholder */}
             <div className="bg-white rounded-xl p-6 shadow-lg">
               <h4 className="font-semibold text-gray-900 mb-4">Ubicación</h4>
-              <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden">
-                {/* Placeholder para mapa - en una app real usarías Google Maps o similar */}
-                <div className="w-full h-64 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-                  <div className="text-center text-gray-600">
-                    <HiMapPin className="w-12 h-12 mx-auto mb-2" />
-                    <p className="font-medium">Mapa interactivo</p>
-                    <p className="text-sm">Canelones 1033 esq. Rio Negro</p>
-                    <p className="text-sm">
-                      Wilson Ferreira Aldunate 1238 esq. Soriano
-                    </p>
-                    <p className="text-sm">Montevideo, Uruguay</p>
-                  </div>
-                </div>
+              <div className="h-64 bg-gray-200 rounded-lg overflow-hidden">
+                <InteractiveMap />
               </div>
             </div>
 
