@@ -575,10 +575,20 @@ function AdminPanel() {
                                   {product.imageUrl ? (
                                     <img
                                       className="h-12 w-12 rounded-lg object-cover mr-4"
-                                      src={product.imageUrl}
+                                      src={
+                                        product.imageUrl
+                                          ? product.imageUrl.startsWith("http")
+                                            ? product.imageUrl
+                                            : `http://localhost:8080/api${
+                                                product.imageUrl.startsWith("/")
+                                                  ? ""
+                                                  : "/"
+                                              }${product.imageUrl}`
+                                          : "/placeholder.jpg"
+                                      }
                                       alt={product.name}
                                       onError={(e) => {
-                                        e.target.style.display = "none";
+                                        e.target.src = "/placeholder.jpg";
                                       }}
                                     />
                                   ) : (
