@@ -47,9 +47,9 @@ export const createProduct = createAsyncThunk(
 
 export const updateProduct = createAsyncThunk(
   'products/updateProduct',
-  async ({ id, ...productData }, { rejectWithValue }) => {
+  async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await apiClient.put(`/admin/products/${id}`, productData);
+      const response = await apiClient.put(`/admin/products/${id}`, data);
       return response.data;
     } catch (error) {
       return rejectWithValue(

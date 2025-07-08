@@ -13,25 +13,25 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
     price: "",
     stock: "",
     category: "",
-    status: "Activo", // ProductStatus del backend
+    status: "Disponible",
     imageUrl: "",
+    file: null,
   });
 
   const [localLoading, setLocalLoading] = useState(false);
 
-  // Categorías que coinciden con ProductCategory del backend
+  // Categorías y estados en español
   const categories = [
-    { id: "Pigmentos", name: "Pigmentos" },
-    { id: "Esmalte", name: "Esmalte" },
-    { id: "Materia Prima", name: "Materia Prima" },
-    { id: "Otros", name: "Otros" },
+    "Pigmentos",
+    "Esmalte",
+    "Materia Prima",
+    "Otros"
   ];
 
-  // Estados del producto según ProductStatus del backend
   const statuses = [
-    { id: "Activo", name: "Activo" },
-    { id: "Inactivo", name: "Inactivo" },
-    { id: "Sin stock", name: "Sin stock" },
+    "Disponible",
+    "Sin Stock",
+    "Descontinuado"
   ];
 
   useEffect(() => {
@@ -42,8 +42,9 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         price: productData.price || "",
         stock: productData.stock || "",
         category: productData.category || "",
-        status: productData.status || "Activo",
+        status: productData.status || "Disponible",
         imageUrl: productData.imageUrl || "",
+        file: null,
       });
     } else {
       setFormData({
@@ -52,18 +53,26 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         price: "",
         stock: "",
         category: "",
-        status: "Activo",
+        status: "Disponible",
         imageUrl: "",
+        file: null,
       });
     }
   }, [isEditing, productData, isOpen]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, files } = e.target;
+    if (name === "file") {
+      setFormData((prev) => ({
+        ...prev,
+        file: files[0],
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -71,23 +80,44 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
     setLocalLoading(true);
 
     try {
+      const categoryMap = {
+        "Pigmentos": "CERAMICA",
+        "Esmalte": "HERRAMIENTAS",
+        "Materia Prima": "MATERIALES",
+        "Otros": "OTROS"
+      };
+
+      const statusMap = {
+        "Disponible": "ACTIVE",
+        "Sin Stock": "OUT_OF_STOCK",
+        "Descontinuado": "INACTIVE"
+      };
+
+      // Construir el objeto producto (sin file)
       const productPayload = {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        category: formData.category,
-        status: formData.status,
+        category: categoryMap[formData.category], // <-- Traducción aquí
+        status: statusMap[formData.status],       // <-- Traducción aquí
         imageUrl: formData.imageUrl,
       };
 
+      // Usar FormData para enviar archivo + JSON
+      const formDataToSend = new FormData();
+      formDataToSend.append("product", JSON.stringify(productPayload));
+      if (formData.file) {
+        formDataToSend.append("file", formData.file);
+      }
+
       if (isEditing) {
         await dispatch(
-          updateProduct({ id: productData.id, ...productPayload })
+          updateProduct({ id: productData.id, data: formDataToSend })
         ).unwrap();
         toast.success("Producto actualizado exitosamente");
       } else {
-        await dispatch(createProduct(productPayload)).unwrap();
+        await dispatch(createProduct(formDataToSend)).unwrap();
         toast.success("Producto creado exitosamente");
       }
 
@@ -130,7 +160,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4" encType="multipart/form-data">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -158,13 +188,9 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               >
-                <option key="default" value="">
-                  Selecciona una categoría
-                </option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
+                <option value="">Selecciona una categoría</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
@@ -214,9 +240,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               >
                 {statuses.map((status) => (
-                  <option key={status.id} value={status.id}>
-                    {status.name}
-                  </option>
+                  <option key={status} value={status}>{status}</option>
                 ))}
               </select>
             </div>
@@ -224,18 +248,17 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              URL de Imagen
+              Imagen (archivo)
             </label>
             <input
-              type="url"
-              name="imageUrl"
-              value={formData.imageUrl}
+              type="file"
+              name="file"
+              accept="image/*"
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-              placeholder="https://ejemplo.com/imagen.jpg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
             <p className="text-xs text-gray-500 mt-1">
-              URL de la imagen del producto (opcional)
+              Puedes subir una imagen o ingresar una URL abajo.
             </p>
           </div>
 
@@ -260,8 +283,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
             </h4>
             <ul className="text-xs text-gray-600 space-y-1">
               <li>
-                • El estado "Disponible" hará que el producto aparezca en la
-                tienda
+                • El estado "Disponible" hará que el producto aparezca en la tienda
               </li>
               <li>• El estado "Sin Stock" ocultará el botón de compra</li>
               <li>

@@ -114,8 +114,23 @@ function Tienda() {
               key={product.id}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
             >
-              <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
-                <div className="w-full h-64 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+              <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                {product.imageUrl ? (
+                  <img
+                    src={
+                      product.imageUrl.startsWith("http")
+                        ? product.imageUrl
+                        : `http://localhost:8080/api${
+                            product.imageUrl.startsWith("/") ? "" : "/"
+                          }${product.imageUrl}`
+                    }
+                    alt={product.name}
+                    className="object-cover w-full h-64"
+                    onError={(e) => {
+                      e.target.src = "/placeholder.jpg";
+                    }}
+                  />
+                ) : (
                   <svg
                     className="w-16 h-16 text-gray-400"
                     fill="none"
@@ -129,7 +144,7 @@ function Tienda() {
                       d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                </div>
+                )}
               </div>
 
               <div className="p-4">
