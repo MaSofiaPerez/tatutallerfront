@@ -223,18 +223,9 @@ function AdminPanel() {
       const response = await dispatch(
         updateBookingStatus({ bookingId, status: newStatus })
       ).unwrap();
-
-      // Mostrar el mensaje del backend en un toast
-      if (response && response.message) {
-        toast.success(response.message);
-      } else {
-        toast.success("Estado actualizado correctamente");
-      }
-
-      // Refrescar la lista de reservas desde el backend (actualización real)
-      dispatch(fetchBookings());
+      toast.success(response.message);
     } catch (error) {
-      toast.error(error?.message || "Error al actualizar estado de la reserva");
+      toast.error(error);
     }
   };
 
@@ -929,12 +920,7 @@ function AdminPanel() {
           }}
           productData={selectedItem}
           isEditing={modalType === "edit"}
-          categories={[
-            "Pigmentos",
-            "Esmalte",
-            "Materia Prima",
-            "Otros"
-          ]}
+          categories={["Pigmentos", "Esmalte", "Materia Prima", "Otros"]}
         />
       )}
 

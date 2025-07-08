@@ -20,12 +20,12 @@ function BookingSystem({ selectedService }) {
     classEntity: { id: "" },
     bookingDate: "",
     startTime: "",
-    endTime: "",
     bookingType: "PUNTUAL",
     recurrenceEndDate: "",
     notes: "",
   });
   const [showSummary, setShowSummary] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   const dispatch = useDispatch();
   const {
@@ -216,8 +216,7 @@ function BookingSystem({ selectedService }) {
     if (
       !bookingData.classEntity.id ||
       !bookingData.bookingDate ||
-      !bookingData.startTime ||
-      !bookingData.endTime
+      !bookingData.startTime
     ) {
       alert("Completa todos los campos obligatorios.");
       return;
@@ -243,36 +242,22 @@ function BookingSystem({ selectedService }) {
       alert("Debes iniciar sesión para realizar una reserva");
       return;
     }
+
     try {
-      const bookingPayload = {
-        classId: bookingData.classEntity.id,
-        bookingDate: bookingData.bookingDate,
-        startTime:
-          bookingData.startTime.length === 5
-            ? bookingData.startTime + ":00"
-            : bookingData.startTime,
-        endTime:
-          bookingData.endTime.length === 5
-            ? bookingData.endTime + ":00"
-            : bookingData.endTime,
-        bookingType: bookingData.bookingType,
-        recurrenceEndDate:
-          bookingData.bookingType === "RECURRENTE" &&
-          bookingData.recurrenceEndDate
-            ? bookingData.recurrenceEndDate
-            : null,
-        notes: bookingData.notes || "",
+      const payload = {
+        ...bookingData,
+        classId: bookingData.classEntity.id, // Asegurarse de incluir el classId
+        endTime: availableSlots.find(
+          (slot) => slot.startTime === bookingData.startTime
+        )?.endTime, // Usar el endTime del slot seleccionado
       };
-      console.log(
-        "Payload enviado al backend:",
-        JSON.stringify(bookingPayload, null, 2)
-      );
-      await dispatch(createBooking(bookingPayload)).unwrap();
+
+      // Enviar la reserva al backend
+      await dispatch(createBooking(payload));
       setBookingData({
         classEntity: { id: "" },
         bookingDate: "",
         startTime: "",
-        endTime: "",
         bookingType: "PUNTUAL",
         recurrenceEndDate: "",
         notes: "",
@@ -505,25 +490,26 @@ function BookingSystem({ selectedService }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hora de inicio *
+                  Horario *
                 </label>
                 {selectedClass ? (
                   <select
+                    id="startTime"
                     value={bookingData.startTime}
-                    onChange={(e) => {
-                      handleInputChange("startTime", e.target.value);
-                      handleInputChange(
-                        "endTime",
-                        getEndTimeFromStart(e.target.value)
-                      );
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    onChange={(e) =>
+                      handleInputChange("startTime", e.target.value)
+                    }
                     required
                   >
-                    <option value="">Selecciona hora</option>
-                    {validStartTimes.map((h) => (
-                      <option key={h} value={h}>
-                        {h}
+                    <option value="">Selecciona un horario</option>
+                    {availableSlots.map((slot) => (
+                      <option
+                        key={slot.startTime}
+                        value={slot.startTime}
+                        disabled={!slot.available}
+                      >
+                        {slot.displayText}{" "}
+                        {slot.available ? "" : "(No disponible)"}
                       </option>
                     ))}
                   </select>
@@ -539,18 +525,6 @@ function BookingSystem({ selectedService }) {
                     disabled={!!selectedClass}
                   />
                 )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hora de fin *
-                </label>
-                <input
-                  type="time"
-                  value={bookingData.endTime}
-                  readOnly
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
-                />
               </div>
             </div>
             {/* Fecha de fin de recurrencia */}
@@ -694,7 +668,6 @@ function BookingSystem({ selectedService }) {
         return (
           bookingData.bookingDate !== "" &&
           bookingData.startTime !== "" &&
-          bookingData.endTime !== "" &&
           (bookingData.bookingType === "PUNTUAL" ||
             (bookingData.bookingType === "RECURRENTE" &&
               bookingData.recurrenceEndDate !== ""))
@@ -819,6 +792,29 @@ function BookingSystem({ selectedService }) {
     const validDates = getValidDatesForClassWeekDay(cls);
     return validDates.length > 0 ? validDates[0] : null;
   }
+
+  useEffect(() => {
+    if (bookingData.classEntity.id && bookingData.bookingDate) {
+      const fetchAvailableSlots = async () => {
+        try {
+          const response = await fetch(
+            `/api/public/classes/${bookingData.classEntity.id}/available-slots?date=${bookingData.bookingDate}`
+          );
+          if (!response.ok) {
+            throw new Error("Error al obtener horarios disponibles");
+          }
+          const slots = await response.json();
+          setAvailableSlots(slots);
+        } catch (error) {
+          console.error("Error al obtener horarios disponibles:", error);
+          setAvailableSlots([]); // Asegurarse de limpiar los horarios si hay un error
+        }
+      };
+      fetchAvailableSlots();
+    } else {
+      setAvailableSlots([]); // Limpiar los horarios si no hay clase o fecha seleccionada
+    }
+  }, [bookingData.classEntity.id, bookingData.bookingDate]);
 
   return (
     <section className="py-16 bg-white">
