@@ -33,7 +33,9 @@ import ClassModal from "../components/ClassModal";
 import UserModal from "../components/UserModal";
 import ProductModal from "../components/ProductModal";
 import BookingDetailModal from "../components/BookingDetailModal";
+import ClassDetailsModal from "../components/ClassDetailsModal";
 import toast from "react-hot-toast";
+import apiClient from "../redux/api"; // Corrige la ruta para usar el cliente API existente
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -47,6 +49,8 @@ function AdminPanel() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [showBookingDetail, setShowBookingDetail] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedClassId, setSelectedClassId] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -223,18 +227,30 @@ function AdminPanel() {
       const response = await dispatch(
         updateBookingStatus({ bookingId, status: newStatus })
       ).unwrap();
-
-      // Mostrar el mensaje del backend en un toast
-      if (response && response.message) {
-        toast.success(response.message);
-      } else {
-        toast.success("Estado actualizado correctamente");
-      }
-
-      // Refrescar la lista de reservas desde el backend (actualización real)
-      dispatch(fetchBookings());
+      toast.success(response.message);
     } catch (error) {
-      toast.error(error?.message || "Error al actualizar estado de la reserva");
+      toast.error(error);
+    }
+  };
+
+  const handleBooking = async (classId) => {
+    try {
+      // Simular una reserva en el backend
+      await apiClient.post(`/api/classes/${classId}/book`);
+
+      // Actualizar el estado local de classes
+      dispatch({
+        type: "classes/updateAvailableSpots",
+        payload: {
+          classId,
+          change: -1, // Reducir en 1 el cupo disponible
+        },
+      });
+
+      toast.success("Reserva realizada exitosamente");
+    } catch (error) {
+      console.error("Error al realizar la reserva:", error);
+      toast.error("Error al realizar la reserva");
     }
   };
 
@@ -357,6 +373,87 @@ function AdminPanel() {
               </div>
             </div>
           </>
+        )}
+      </div>
+    );
+  };
+
+  const renderClassesTable = () => {
+    const futureClassesWithReservations = classes.filter((classItem) => {
+      const hasReservations =
+        classItem.reservations && classItem.reservations.length > 0;
+      const isFutureClass = new Date(classItem.startTime) > new Date();
+      return hasReservations || isFutureClass;
+    });
+
+    return (
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Profesor
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Clase
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Horario
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Duración
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {futureClassesWithReservations.map((classItem) => (
+            <tr key={classItem.id}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {classItem.instructor?.name || "Sin asignar"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {classItem.name}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {classItem.startTime} - {classItem.endTime}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {classItem.duration} minutos
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <button
+                  onClick={() => handleViewDetails(classItem)}
+                  className="text-blue-500 hover:underline"
+                >
+                  Ver Detalle
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
+
+  const handleViewDetails = (classItem) => {
+    if (selectedClassId !== classItem.instructor?.id) {
+      setSelectedClassId(classItem.instructor?.id); // Ensure professorId is set correctly
+    }
+    setShowDetailsModal(true);
+  };
+
+  const renderClassesTab = () => {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900">Gestión de Clases</h2>
+        {classesLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+          </div>
+        ) : (
+          renderClassesTable()
         )}
       </div>
     );
@@ -742,54 +839,79 @@ function AdminPanel() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {classes && classes.length > 0 ? (
-                    classes.map((classItem) => (
-                      <div
-                        key={classItem.id}
-                        className="bg-white p-6 rounded-lg shadow"
-                      >
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                          {classItem.name}
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                          {classItem.description}
-                        </p>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-2xl font-bold text-green-600">
-                            ${classItem.price}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {classItem.duration}
-                          </span>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setModalType("edit");
-                              setSelectedItem(classItem);
-                              setShowModal(true);
-                            }}
-                            className="flex-1 bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700"
+                <div className="bg-white shadow overflow-hidden rounded-md">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Profesor
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Clase
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Horario
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {classes && classes.length > 0 ? (
+                        classes.map((classItem) => (
+                          <tr key={classItem.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {classItem.instructor?.name || "N/A"}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {classItem.name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {classItem.startTime && classItem.endTime
+                                ? `${classItem.startTime} - ${classItem.endTime}`
+                                : "N/A"}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                              <button
+                                onClick={() => {
+                                  setModalType("edit");
+                                  setSelectedItem(classItem);
+                                  setShowModal(true);
+                                }}
+                                className="text-yellow-600 hover:text-yellow-900"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteItem("clase", classItem.id)
+                                }
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Eliminar
+                              </button>
+                              <button
+                                onClick={() => handleViewDetails(classItem)}
+                                className="text-blue-600 hover:text-blue-900"
+                              >
+                                Ver Detalle
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="px-6 py-4 text-center text-gray-500"
                           >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleDeleteItem("clase", classItem.id)
-                            }
-                            className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-3 text-center py-8 text-gray-500">
-                      No hay clases registradas
-                    </div>
-                  )}
+                            No hay clases registradas
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -929,12 +1051,7 @@ function AdminPanel() {
           }}
           productData={selectedItem}
           isEditing={modalType === "edit"}
-          categories={[
-            "Pigmentos",
-            "Esmalte",
-            "Materia Prima",
-            "Otros"
-          ]}
+          categories={["Pigmentos", "Esmalte", "Materia Prima", "Otros"]}
         />
       )}
 
@@ -985,6 +1102,14 @@ function AdminPanel() {
             setSelectedItem(null);
             dispatch(fetchBookings());
           }}
+        />
+      )}
+
+      {/* Modal para Detalles de Clases (Reservas de Clases) */}
+      {showDetailsModal && (
+        <ClassDetailsModal
+          professorId={selectedClassId} // Pass the correct professorId
+          onClose={() => setShowDetailsModal(false)}
         />
       )}
     </div>

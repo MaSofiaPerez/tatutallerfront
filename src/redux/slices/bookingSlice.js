@@ -9,9 +9,10 @@ export const createBooking = createAsyncThunk(
       const response = await apiClient.post('/bookings', bookingData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al crear la reserva'
-      );
+      if (error.response?.status === 409) {
+        return rejectWithValue(error.response.data.message);
+      }
+      return rejectWithValue('Error al crear la reserva');
     }
   }
 );
@@ -66,9 +67,7 @@ export const updateBookingStatus = createAsyncThunk(
       const response = await apiClient.put(`/admin/bookings/${bookingId}/status`, { status });
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al actualizar la reserva'
-      );
+      return rejectWithValue(error.response?.data?.message || 'Error al actualizar estado de la reserva');
     }
   }
 );
