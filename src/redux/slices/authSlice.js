@@ -155,10 +155,18 @@ export const verifyToken = createAsyncThunk(
       if (!token) {
         throw new Error('No token found');
       }
-      
+
       const response = await apiClient.get('/auth/verify');
-      return response.data.user;
+      const user = response.data;
+      console.log('Usuario verificado:', user);
+
+      // Manejar el rol del usuario
+      const userRole = user.role?.toLowerCase() || 'guest';
+      console.log('Rol del usuario:', userRole);
+
+      return user;
     } catch (error) {
+      console.error('Error al verificar el token:', error);
       localStorage.removeItem('token');
       return rejectWithValue('Token inválido');
     }
@@ -368,7 +376,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload;
         // Verificar roles del usuario
-        const userRole = action.payload.role?.toLowerCase();
+        const userRole = action.payload.role?.toLowerCase() || 'guest';
         state.isAdmin = userRole === 'admin' || userRole === 'administrator';
         state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
       })
