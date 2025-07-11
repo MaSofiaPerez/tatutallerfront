@@ -30,8 +30,7 @@ function UserPanel() {
 
   // Estados para el formulario de perfil
   const [profileData, setProfileData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     phone: "",
     address: "",
@@ -63,8 +62,7 @@ function UserPanel() {
     } else {
       // Usar datos mock si no hay usuario real
       setProfileData({
-        firstName: mockUserData.firstName,
-        lastName: mockUserData.lastName,
+        name: mockUserData.firstName + (mockUserData.lastName ? " " + mockUserData.lastName : ""),
         email: mockUserData.email,
         phone: mockUserData.phone,
         address: mockUserData.address,
@@ -106,15 +104,8 @@ function UserPanel() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Usar API mock para desarrollo
-      console.log("🔄 Actualizando perfil con datos mock...");
-      const response = await mockAPI.updateUserProfile(profileData);
-
-      // Actualizar estado local con datos mock
-      setMockUser(response.data.user);
-
-      // En producción, descomentar la línea siguiente:
-      // await dispatch(updateUserProfile(profileData)).unwrap();
+      // En producción, usa el dispatch real:
+      await dispatch(updateUserProfile(profileData)).unwrap();
 
       toast.success("Perfil actualizado exitosamente");
       setIsEditing(false);
@@ -137,20 +128,13 @@ function UserPanel() {
     }
 
     try {
-      // Usar API mock para desarrollo
-      console.log("🔄 Cambiando contraseña con datos mock...");
-      await mockAPI.changePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
-
-      // En producción, descomentar las líneas siguientes:
-      // await dispatch(
-      //   changePassword({
-      //     currentPassword: passwordData.currentPassword,
-      //     newPassword: passwordData.newPassword,
-      //   })
-      // ).unwrap();
+      // Llama a la API real:
+      await dispatch(
+        changePassword({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        })
+      ).unwrap();
 
       toast.success("Contraseña actualizada exitosamente");
       setPasswordData({
@@ -159,7 +143,7 @@ function UserPanel() {
         confirmPassword: "",
       });
     } catch (error) {
-      toast.error(error?.message || "Error al cambiar la contraseña");
+      toast.error(error?.message || "Error al actualizar la contraseña");
     }
   };
 
@@ -167,8 +151,7 @@ function UserPanel() {
     setIsEditing(false);
     const currentUser = mockUser || user;
     setProfileData({
-      firstName: currentUser?.firstName || "",
-      lastName: currentUser?.lastName || "",
+      name: currentUser?.name || (currentUser?.firstName ? currentUser.firstName + (currentUser.lastName ? " " + currentUser.lastName : "") : ""),
       email: currentUser?.email || "",
       phone: currentUser?.phone || "",
       address: currentUser?.address || "",
@@ -243,12 +226,12 @@ function UserPanel() {
       <form onSubmit={handleProfileSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre
+            Nombre Completo
           </label>
           <input
             type="text"
-            name="firstName"
-            value={profileData.firstName}
+            name="name"
+            value={profileData.name}
             onChange={handleProfileChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg transition-colors ${
@@ -260,24 +243,7 @@ function UserPanel() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Apellido
-          </label>
-          <input
-            type="text"
-            name="lastName"
-            value={profileData.lastName}
-            onChange={handleProfileChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg transition-colors ${
-              isEditing
-                ? "border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                : "border-gray-200 bg-gray-50"
-            }`}
-            required
-          />
-        </div>
+        {/* Elimina el campo Apellido */}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -595,8 +561,7 @@ function UserPanel() {
               </nav>
             </div>
           </div>
-
-          {/* Main Content */}
+          {/* Contenido principal */}
           <div className="lg:col-span-3">
             {activeTab === "profile" && renderProfile()}
             {activeTab === "bookings" && renderBookings()}
