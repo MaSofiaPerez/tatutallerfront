@@ -1,21 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-function UserDetailsModal({ isOpen, onClose, userData }) {
+function UserDetailsModal({ isOpen, onClose, userId, userData }) {
+  const [reservations, setReservations] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
-  if (!isOpen || !userData) return null;
-
-  const filteredReservations = (userData.reservations || []).filter(
-    (reservation) => {
-      const reservationDate = new Date(reservation.date);
-      if (startDate && reservationDate < startDate) return false;
-      if (endDate && reservationDate > endDate) return false;
-      return true;
+  useEffect(() => {
+    if (isOpen && userId) {
+      // Hacer la solicitud al backend para obtener las reservas
+      fetch(`/api/users/${userId}/reservations`)
+        .then((response) => response.json())
+        .then((data) => setReservations(data))
+        .catch((error) => console.error("Error al obtener reservas:", error));
     }
-  );
+  }, [isOpen, userId]);
+
+  if (!isOpen) return null;
+
+  const filteredReservations = reservations.filter((reservation) => {
+    const reservationDate = new Date(reservation.date);
+    if (startDate && reservationDate < startDate) return false;
+    if (endDate && reservationDate > endDate) return false;
+    return true;
+  });
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -32,24 +41,26 @@ function UserDetailsModal({ isOpen, onClose, userData }) {
           </button>
         </div>
 
+        {/* Datos del Usuario */}
         <div className="mb-4">
           <p>
-            <strong>Nombre:</strong> {userData.name || "N/A"}
+            <strong>Nombre:</strong> {userData?.name || "N/A"}
           </p>
           <p>
-            <strong>Apellido:</strong> {userData.lastName || "N/A"}
+            <strong>Apellido:</strong> {userData?.lastName || "N/A"}
           </p>
           <p>
-            <strong>Email:</strong> {userData.email || "N/A"}
+            <strong>Email:</strong> {userData?.email || "N/A"}
           </p>
           <p>
-            <strong>Teléfono:</strong> {userData.phone || "N/A"}
+            <strong>Teléfono:</strong> {userData?.phone || "N/A"}
           </p>
           <p>
-            <strong>Dirección:</strong> {userData.address || "N/A"}
+            <strong>Dirección:</strong> {userData?.address || "N/A"}
           </p>
         </div>
 
+        {/* Reservas del Usuario */}
         <h4 className="text-md font-semibold text-gray-800 mb-2">
           Clases Reservadas
         </h4>
@@ -84,10 +95,16 @@ function UserDetailsModal({ isOpen, onClose, userData }) {
                   <strong>Clase:</strong> {reservation.className || "N/A"}
                 </p>
                 <p>
+                  <strong>Profesor:</strong> {reservation.teacherName || "N/A"}
+                </p>
+                <p>
                   <strong>Fecha:</strong>{" "}
                   {reservation.date
                     ? new Date(reservation.date).toLocaleDateString()
                     : "N/A"}
+                </p>
+                <p>
+                  <strong>Horario:</strong> {reservation.time || "N/A"}
                 </p>
               </li>
             ))}
