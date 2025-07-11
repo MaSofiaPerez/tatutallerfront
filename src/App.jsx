@@ -21,14 +21,6 @@ function App() {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    // Verificar token al cargar la aplicación
-    const token = localStorage.getItem("token");
-    if (token) {
-      dispatch(verifyToken());
-    }
-  }, [dispatch]);
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser, createUser, fetchUsers } from "../redux/slices/usersSlice";
 import toast from "react-hot-toast";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function UserModal({ isOpen, onClose, userData, isEditing }) {
   const dispatch = useDispatch();
@@ -19,6 +21,8 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
     address: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   // Roles disponibles según el tipo de usuario logueado
   const availableRoles = isAdmin
@@ -276,6 +280,90 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// Corregir problemas de sintaxis en el componente UserDetails
+function UserDetails({ userData, reservations }) {
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
+  const filteredReservations = reservations.filter((reservation) => {
+    const reservationDate = new Date(reservation.date);
+    if (startDate && reservationDate < startDate) return false;
+    if (endDate && reservationDate > endDate) return false;
+    return true;
+  });
+
+  return (
+    <div className="mt-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        Detalles del Usuario
+      </h3>
+      <div className="mb-4">
+        <p>
+          <strong>Nombre:</strong> {userData.name}
+        </p>
+        <p>
+          <strong>Apellido:</strong> {userData.lastName}
+        </p>
+        <p>
+          <strong>Email:</strong> {userData.email}
+        </p>
+        <p>
+          <strong>Teléfono:</strong> {userData.phone}
+        </p>
+        <p>
+          <strong>Dirección:</strong> {userData.address}
+        </p>
+      </div>
+
+      <h4 className="text-md font-semibold text-gray-800 mb-2">
+        Clases Reservadas
+      </h4>
+      <div className="flex gap-4 mb-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Desde
+          </label>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Hasta
+          </label>
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      {filteredReservations.length > 0 ? (
+        <ul className="list-disc pl-5">
+          {filteredReservations.map((reservation) => (
+            <li key={reservation.id} className="mb-2">
+              <p>
+                <strong>Clase:</strong> {reservation.className}
+              </p>
+              <p>
+                <strong>Fecha:</strong>{" "}
+                {new Date(reservation.date).toLocaleDateString()}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-600">
+          No se encontraron clases reservadas en el rango de fechas seleccionado.
+        </p>
+      )}
     </div>
   );
 }
