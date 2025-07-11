@@ -131,7 +131,6 @@ const dashboardSlice = createSlice({
     stats: {
       totalUsers: 0,
       totalBookings: 0,
-      totalRevenue: 0,
       totalClasses: 0,
       totalProducts: 0,
       activeUsers: 0,
@@ -139,11 +138,6 @@ const dashboardSlice = createSlice({
       completedBookings: 0,
     },
     recentBookings: [],
-    // Los siguientes campos se pueden agregar más tarde cuando se implementen en el backend
-    // monthlyRevenue: [],
-    // popularClasses: [],
-    // userGrowth: [],
-    // bookingsByStatus: [],
     isLoading: false,
     error: null,
     lastUpdated: null,
@@ -176,28 +170,7 @@ const dashboardSlice = createSlice({
       .addCase(fetchDashboardStats.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      })
-      
-      // Fetch recent bookings
-      .addCase(fetchRecentBookings.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchRecentBookings.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.recentBookings = action.payload;
-        state.error = null;
-      })
-      .addCase(fetchRecentBookings.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
       });
-      
-      // Los siguientes reducers se pueden agregar más tarde cuando se implementen en el backend:
-      // - fetchMonthlyRevenue
-      // - fetchPopularClasses  
-      // - fetchUserGrowth
-      // - fetchBookingsByStatus
   },
 });
 

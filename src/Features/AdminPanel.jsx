@@ -2,9 +2,6 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardStats,
-  fetchRecentBookings,
-  fetchMyDashboardStats,
-  fetchMyRecentBookings,
   // fetchMonthlyRevenue y fetchPopularClasses se implementarán más tarde
 } from "../redux/slices/dashboardSlice";
 import {
@@ -121,9 +118,7 @@ function AdminPanel() {
   // Redux state
   const {
     stats,
-    recentBookings,
     myStats,
-    myRecentBookings,
     isLoading: dashboardLoading,
   } = useSelector((state) => state.dashboard);
   const {
@@ -149,11 +144,9 @@ function AdminPanel() {
         if (isTeacher) {
           // Teachers ven solo sus propias estadísticas y reservas
           dispatch(fetchMyDashboardStats());
-          dispatch(fetchMyRecentBookings());
         } else {
           // Admins ven todas las estadísticas
           dispatch(fetchDashboardStats());
-          dispatch(fetchRecentBookings());
         }
         // dispatch(fetchMonthlyRevenue()); // TODO: Implementar en el backend
         // dispatch(fetchPopularClasses()); // TODO: Implementar en el backend
@@ -257,7 +250,6 @@ function AdminPanel() {
   const renderDashboard = () => {
     // Seleccionar los datos apropiados según el rol
     const currentStats = isTeacher ? myStats : stats;
-    const currentBookings = isTeacher ? myRecentBookings : recentBookings;
 
     return (
       <div className="space-y-6">
@@ -291,85 +283,11 @@ function AdminPanel() {
               </div>
               <div className="bg-white p-6 rounded-lg shadow">
                 <h3 className="text-sm font-medium text-gray-500">
-                  {isTeacher ? "Mis Ingresos" : "Ingresos"}
-                </h3>
-                <p className="text-3xl font-bold text-gray-900">
-                  ${currentStats?.totalRevenue || 0}
-                </p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-sm font-medium text-gray-500">
                   {isTeacher ? "Mis Clases" : "Clases Activas"}
                 </h3>
                 <p className="text-3xl font-bold text-gray-900">
                   {currentStats?.totalClasses || 0}
                 </p>
-              </div>
-            </div>
-
-            {/* Recent Bookings */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {isTeacher ? "Mis Reservas Recientes" : "Reservas Recientes"}
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Cliente
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Servicio
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Fecha
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Estado
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {currentBookings && currentBookings.length > 0 ? (
-                      currentBookings.map((booking) => (
-                        <tr key={booking.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {booking.customerName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {booking.serviceName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {booking.date}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span
-                              className={`px-2 py-1 text-xs rounded-full ${
-                                booking.status === "confirmed"
-                                  ? "bg-green-100 text-green-800"
-                                  : booking.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {booking.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="4"
-                          className="px-6 py-4 text-center text-gray-500"
-                        >
-                          No hay reservas recientes
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
               </div>
             </div>
           </>
@@ -1108,7 +1026,7 @@ function AdminPanel() {
       {/* Modal para Detalles de Clases (Reservas de Clases) */}
       {showDetailsModal && (
         <ClassDetailsModal
-          classId={selectedClassId} // Pass the correct classId
+          classId={selectedClassId}
           onClose={() => setShowDetailsModal(false)}
         />
       )}
