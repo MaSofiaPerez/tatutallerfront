@@ -267,7 +267,7 @@ function AdminPanel() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white p-6 rounded-lg shadow">
                 <h3 className="text-sm font-medium text-gray-500">
-                  {isTeacher ? "Mis Estudiantes" : "Total Usuarios"}
+                  {isTeacher ? "Mis Estudiantes" : "Alumnos Registrados"}
                 </h3>
                 <p className="text-3xl font-bold text-gray-900">
                   {currentStats?.totalUsers || 0}
@@ -275,7 +275,7 @@ function AdminPanel() {
               </div>
               <div className="bg-white p-6 rounded-lg shadow">
                 <h3 className="text-sm font-medium text-gray-500">
-                  {isTeacher ? "Mis Reservas" : "Total Reservas"}
+                  {isTeacher ? "Mis Reservas" : "Total de reservas de clases"}
                 </h3>
                 <p className="text-3xl font-bold text-gray-900">
                   {currentStats?.totalBookings || 0}
@@ -283,7 +283,7 @@ function AdminPanel() {
               </div>
               <div className="bg-white p-6 rounded-lg shadow">
                 <h3 className="text-sm font-medium text-gray-500">
-                  {isTeacher ? "Mis Clases" : "Clases Activas"}
+                  Clases Disponibles
                 </h3>
                 <p className="text-3xl font-bold text-gray-900">
                   {currentStats?.totalClasses || 0}
