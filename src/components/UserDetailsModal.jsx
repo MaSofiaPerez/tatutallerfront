@@ -8,18 +8,22 @@ function UserDetailsModal({ isOpen, onClose, userData }) {
 
   if (!isOpen || !userData) return null;
 
-  const filteredReservations = (userData.reservations || []).filter((reservation) => {
-    const reservationDate = new Date(reservation.date);
-    if (startDate && reservationDate < startDate) return false;
-    if (endDate && reservationDate > endDate) return false;
-    return true;
-  });
+  const filteredReservations = (userData.reservations || []).filter(
+    (reservation) => {
+      const reservationDate = new Date(reservation.date);
+      if (startDate && reservationDate < startDate) return false;
+      if (endDate && reservationDate > endDate) return false;
+      return true;
+    }
+  );
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Detalles del Usuario</h2>
+          <h2 className="text-xl font-bold text-gray-900">
+            Detalles del Usuario
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -80,14 +84,18 @@ function UserDetailsModal({ isOpen, onClose, userData }) {
                   <strong>Clase:</strong> {reservation.className || "N/A"}
                 </p>
                 <p>
-                  <strong>Fecha:</strong> {reservation.date ? new Date(reservation.date).toLocaleDateString() : "N/A"}
+                  <strong>Fecha:</strong>{" "}
+                  {reservation.date
+                    ? new Date(reservation.date).toLocaleDateString()
+                    : "N/A"}
                 </p>
               </li>
             ))}
           </ul>
         ) : (
           <p className="text-gray-600">
-            No se encontraron clases reservadas en el rango de fechas seleccionado.
+            No se encontraron clases reservadas en el rango de fechas
+            seleccionado.
           </p>
         )}
       </div>
