@@ -438,8 +438,8 @@ function AdminPanel() {
   };
 
   const handleViewDetails = (classItem) => {
-    if (selectedClassId !== classItem.instructor?.id) {
-      setSelectedClassId(classItem.instructor?.id); // Ensure professorId is set correctly
+    if (selectedClassId !== classItem.id) {
+      setSelectedClassId(classItem.id);
     }
     setShowDetailsModal(true);
   };

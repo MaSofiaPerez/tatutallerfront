@@ -28,8 +28,8 @@ const ClassDetailsModal = ({ classId, onClose }) => {
         const response = await apiClient.get(url);
         const formattedReservations = response.data.map((reservation) => ({
           id: reservation.id,
-          studentName: reservation.studentName,
-          date: reservation.date,
+          studentName: reservation.userName,
+          date: reservation.bookingDate,
           startTime: reservation.startTime,
           endTime: reservation.endTime,
           availableSpots: reservation.availableSpots,
@@ -61,36 +61,6 @@ const ClassDetailsModal = ({ classId, onClose }) => {
     });
     setFilteredReservations(filtered);
   }, [startDate, endDate, reservations]);
-
-  const handleConfirmReservation = async (reservationId) => {
-    try {
-      await apiClient.post(`/admin/reservations/${reservationId}/confirm`);
-      setReservations((prev) =>
-        prev.map((res) =>
-          res.id === reservationId
-            ? { ...res, availableSpots: res.availableSpots - 1 }
-            : res
-        )
-      );
-    } catch (error) {
-      console.error("Error confirming reservation:", error);
-    }
-  };
-
-  const handleCancelReservation = async (reservationId) => {
-    try {
-      await apiClient.post(`/admin/reservations/${reservationId}/cancel`);
-      setReservations((prev) =>
-        prev.map((res) =>
-          res.id === reservationId
-            ? { ...res, availableSpots: res.availableSpots + 1 }
-            : res
-        )
-      );
-    } catch (error) {
-      console.error("Error canceling reservation:", error);
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
@@ -143,9 +113,6 @@ const ClassDetailsModal = ({ classId, onClose }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Cupos Disponibles
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Acciones
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -162,20 +129,6 @@ const ClassDetailsModal = ({ classId, onClose }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {reservation.availableSpots}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <button
-                        onClick={() => handleConfirmReservation(reservation.id)}
-                        className="text-blue-500 hover:underline"
-                      >
-                        Confirmar
-                      </button>
-                      <button
-                        onClick={() => handleCancelReservation(reservation.id)}
-                        className="text-red-500 hover:underline ml-2"
-                      >
-                        Cancelar
-                      </button>
                     </td>
                   </tr>
                 ))}
