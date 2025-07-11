@@ -246,18 +246,20 @@ function Navbar() {
                 </Link>
               )}
 
-              <Link
-                to="/cart"
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 relative transition-colors"
-              >
-                <HiShoppingCart className="w-5 h-5" />
-                <span className="hidden md:inline">Carrito</span>
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
+              {isAdmin ? null : (
+                <Link
+                  to="/cart"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 relative transition-colors"
+                >
+                  <HiShoppingCart className="w-5 h-5" />
+                  <span className="hidden md:inline">Carrito</span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Mobile Menu Button (Right) */}
               <button
