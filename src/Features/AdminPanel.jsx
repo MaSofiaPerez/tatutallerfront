@@ -31,6 +31,7 @@ import UserModal from "../components/UserModal";
 import ProductModal from "../components/ProductModal";
 import BookingDetailModal from "../components/BookingDetailModal";
 import ClassDetailsModal from "../components/ClassDetailsModal";
+import UserDetailsModal from "../components/UserDetailsModal";
 import toast from "react-hot-toast";
 import apiClient from "../redux/api"; // Corrige la ruta para usar el cliente API existente
 
@@ -511,6 +512,16 @@ function AdminPanel() {
                               >
                                 Eliminar
                               </button>
+                              <button
+                                onClick={() => {
+                                  setUserModalType("details");
+                                  setSelectedUser(user);
+                                  setShowUserModal(true);
+                                }}
+                                className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
+                              >
+                                Ver Detalles
+                              </button>
                             </td>
                           </tr>
                         ))
@@ -988,7 +999,7 @@ function AdminPanel() {
       )}
 
       {/* Modal para Crear/Editar Usuarios */}
-      {showUserModal && (
+      {showUserModal && userModalType !== "details" && (
         <UserModal
           isOpen={showUserModal}
           onClose={() => {
@@ -998,6 +1009,19 @@ function AdminPanel() {
           }}
           userData={selectedUser}
           isEditing={userModalType === "edit"}
+        />
+      )}
+
+      {/* Modal para Ver Detalles de Usuario */}
+      {showUserModal && userModalType === "details" && (
+        <UserDetailsModal
+          isOpen={showUserModal}
+          onClose={() => {
+            setShowUserModal(false);
+            setSelectedUser(null);
+            setUserModalType("");
+          }}
+          userData={selectedUser}
         />
       )}
 

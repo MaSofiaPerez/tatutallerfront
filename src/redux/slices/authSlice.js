@@ -237,16 +237,28 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user || {};
         state.token = action.payload.token;
-        // Verificar roles del usuario
-        const userRole = action.payload.user?.role?.toLowerCase();
-        state.isAdmin = userRole === 'admin' || userRole === 'administrator';
-        state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+        // Verificar roles del usuario solo si está autenticado
+        if (state.isAuthenticated) {
+          const userRole = action.payload.user?.role?.toLowerCase() || "";
+          state.isAdmin = userRole === 'admin' || userRole === 'administrator';
+          state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+        } else {
+          state.isAdmin = false;
+          state.isTeacher = false;
+        }
         state.error = null;
         
         // ✅ Guardar usuario en localStorage para acceso al campo mustChangePassword
         if (action.payload.user) {
           localStorage.setItem('user', JSON.stringify(action.payload.user));
         }
+
+        // Agregar console.log dentro de un fulfilled para depuración
+        console.log("Estado de autenticación después de googleLogin:", {
+          isAuthenticated: state.isAuthenticated,
+          user: state.user,
+          role: state.user?.role,
+        });
       })
       .addCase(googleLogin.rejected, (state, action) => {
         state.isLoading = false;
@@ -270,10 +282,15 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user || {};
         state.token = action.payload.token;
-        // Verificar roles del usuario
-        const userRole = action.payload.user?.role?.toLowerCase();
-        state.isAdmin = userRole === 'admin' || userRole === 'administrator';
-        state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+        // Verificar roles del usuario solo si está autenticado
+        if (state.isAuthenticated) {
+          const userRole = action.payload.user?.role?.toLowerCase() || "";
+          state.isAdmin = userRole === 'admin' || userRole === 'administrator';
+          state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+        } else {
+          state.isAdmin = false;
+          state.isTeacher = false;
+        }
         state.error = null;
         
         // ✅ Guardar usuario en localStorage para acceso al campo mustChangePassword
@@ -318,10 +335,15 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.user = action.payload.user || {};
           state.token = action.payload.token;
-          // Verificar roles del usuario
-          const userRole = action.payload.user?.role?.toLowerCase();
-          state.isAdmin = userRole === 'admin' || userRole === 'administrator';
-          state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+          // Verificar roles del usuario solo si está autenticado
+          if (state.isAuthenticated) {
+            const userRole = action.payload.user?.role?.toLowerCase() || "";
+            state.isAdmin = userRole === 'admin' || userRole === 'administrator';
+            state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+          } else {
+            state.isAdmin = false;
+            state.isTeacher = false;
+          }
           state.error = null;
         } else {
           // Respuesta inesperada sin success flag ni token
@@ -353,10 +375,15 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
-        // Verificar roles del usuario
-        const userRole = action.payload.role?.toLowerCase();
-        state.isAdmin = userRole === 'admin' || userRole === 'administrator';
-        state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+        // Verificar roles del usuario solo si está autenticado
+        if (state.isAuthenticated) {
+          const userRole = action.payload.role?.toLowerCase() || "";
+          state.isAdmin = userRole === 'admin' || userRole === 'administrator';
+          state.isTeacher = userRole === 'teacher' || userRole === 'instructor';
+        } else {
+          state.isAdmin = false;
+          state.isTeacher = false;
+        }
       })
       .addCase(verifyToken.rejected, (state) => {
         state.isLoading = false;
