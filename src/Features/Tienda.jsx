@@ -63,15 +63,68 @@ function Tienda() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Nuestra Tienda
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
+            Tatú Shop Cerámica
           </h1>
-          <p className="text-gray-600">
-            Descubre nuestros productos de cerámica
+          <p className="text-gray-700 text-lg">
+            Venta de materiales:{" "}
+            <span className="font-medium">
+              Arcillas, Pastas, Óxidos, Pigmentos, Engobes, Esmaltes
+            </span>
           </p>
+          <div className="flex justify-center gap-6 mt-4 text-gray-600">
+            <div className="flex items-center gap-2">
+              <svg
+                className="w-5 h-5 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 10l1.5 1.5L8 7"
+                />
+              </svg>
+              <span>Hacemos envíos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg
+                className="w-5 h-5 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2"
+                />
+              </svg>
+              <span>Montevideo, Uruguay</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg
+                className="w-5 h-5 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 10l4.5 4.5L15 19"
+                />
+              </svg>
+              <span>📲 099 749 656</span>
+            </div>
+          </div>
         </div>
 
         {/* Filtros */}
@@ -84,7 +137,7 @@ function Tienda() {
                 placeholder="Buscar productos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
 
@@ -94,9 +147,9 @@ function Tienda() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md font-medium transition-colors shadow-sm ${
                     selectedCategory === category
-                      ? "bg-blue-600 text-white"
+                      ? "bg-indigo-600 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
@@ -152,7 +205,7 @@ function Tienda() {
                   <h3 className="text-lg font-semibold text-gray-900">
                     {product.name}
                   </h3>
-                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                  <span className="text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">
                     {product.category}
                   </span>
                 </div>
@@ -167,7 +220,7 @@ function Tienda() {
                   </span>
                   <button
                     onClick={() => handleAddToCart(product)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors shadow-md"
                   >
                     Agregar
                   </button>
