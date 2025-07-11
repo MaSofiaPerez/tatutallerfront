@@ -361,7 +361,8 @@ function UserDetails({ userData, reservations }) {
         </ul>
       ) : (
         <p className="text-gray-600">
-          No se encontraron clases reservadas en el rango de fechas seleccionado.
+          No se encontraron clases reservadas en el rango de fechas
+          seleccionado.
         </p>
       )}
     </div>
