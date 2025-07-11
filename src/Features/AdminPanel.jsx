@@ -1108,7 +1108,7 @@ function AdminPanel() {
       {/* Modal para Detalles de Clases (Reservas de Clases) */}
       {showDetailsModal && (
         <ClassDetailsModal
-          professorId={selectedClassId} // Pass the correct professorId
+          classId={selectedClassId} // Pass the correct classId
           onClose={() => setShowDetailsModal(false)}
         />
       )}
