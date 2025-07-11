@@ -499,7 +499,7 @@ function AdminPanel() {
                                   setSelectedUser(user);
                                   setShowUserModal(true);
                                 }}
-                                className="text-yellow-600 hover:text-yellow-900"
+                                className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
                               >
                                 Editar
                               </button>
@@ -507,7 +507,7 @@ function AdminPanel() {
                                 onClick={() =>
                                   handleDeleteItem("usuario", user.id)
                                 }
-                                className="text-red-600 hover:text-red-900"
+                                className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
                               >
                                 Eliminar
                               </button>
@@ -676,7 +676,7 @@ function AdminPanel() {
                                     setSelectedItem(product);
                                     setShowModal(true);
                                   }}
-                                  className="text-yellow-600 hover:text-yellow-900 bg-yellow-100 hover:bg-yellow-200 px-3 py-1 rounded-md transition-colors"
+                                  className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
                                 >
                                   Editar
                                 </button>
@@ -684,7 +684,7 @@ function AdminPanel() {
                                   onClick={() =>
                                     handleDeleteItem("producto", product.id)
                                   }
-                                  className="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md transition-colors"
+                                  className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
                                 >
                                   Eliminar
                                 </button>
@@ -797,7 +797,7 @@ function AdminPanel() {
                                   setSelectedItem(classItem);
                                   setShowModal(true);
                                 }}
-                                className="text-yellow-600 hover:text-yellow-900"
+                                className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
                               >
                                 Editar
                               </button>
@@ -805,13 +805,13 @@ function AdminPanel() {
                                 onClick={() =>
                                   handleDeleteItem("clase", classItem.id)
                                 }
-                                className="text-red-600 hover:text-red-900"
+                                className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
                               >
                                 Eliminar
                               </button>
                               <button
                                 onClick={() => handleViewDetails(classItem)}
-                                className="text-blue-600 hover:text-blue-900"
+                                className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
                               >
                                 Ver Detalle
                               </button>
@@ -932,7 +932,7 @@ function AdminPanel() {
                                   setSelectedItem(booking);
                                   setShowBookingDetail(true);
                                 }}
-                                className="text-yellow-600 hover:text-yellow-900"
+                                className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
                               >
                                 Ver Detalles
                               </button>
