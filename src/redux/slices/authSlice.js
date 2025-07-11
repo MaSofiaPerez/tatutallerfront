@@ -42,43 +42,29 @@ export const loginUser = createAsyncThunk(
 
 export const googleLogin = createAsyncThunk(
   'auth/googleLogin',
-  async (googleCredential, { rejectWithValue }) => {
+  async (credential, { rejectWithValue }) => {
     try {
-      // Limpiar cualquier token previo
-      localStorage.removeItem('token');
-      
-      const response = await apiClient.post('/auth/google', {
-        credential: googleCredential
+      // Enviar el token de Google al backend
+      const response = await apiClient.post('/auth/login-google', {
+        token: credential,
       });
-      console.log('Response completa del Google login:', response.data);
-      
-      let token, user;
-      
-      if (response.data.token && response.data.user) {
-        token = response.data.token;
-        user = response.data.user;
-      } else if (response.data.access_token) {
-        token = response.data.access_token;
-        user = response.data.user || response.data;
-      } else if (response.data.jwt) {
-        token = response.data.jwt;
-        user = response.data.user || response.data;
-      } else {
-        token = response.data.token || null;
-        user = response.data.user || response.data;
-      }
-      
+
+      let token = response.data.token;
+      let user = response.data.user;
+
       if (token) {
         localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
       }
-      
+
       return { token, user };
     } catch (error) {
-      console.error('Error completo en Google login:', error);
-      // Asegurar que no quede token en caso de error
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       return rejectWithValue(
-        error.response?.data?.message || error.response?.data || 'Error al iniciar sesión con Google'
+        error.response?.data?.message ||
+          error.response?.data ||
+          'Error al iniciar sesión con Google'
       );
     }
   }

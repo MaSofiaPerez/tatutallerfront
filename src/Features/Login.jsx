@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, googleLogin, clearError } from "../redux/slices/authSlice";
 import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -43,38 +44,6 @@ function Login() {
       dispatch(clearError());
     };
   }, [dispatch]);
-  // Inicializar Google OAuth tradicional (más estable)
-  useEffect(() => {
-    const initializeGoogleAuth = () => {
-      if (window.google && window.google.accounts) {
-        // Configurar el callback global
-        window.googleCallbackHandler = handleGoogleResponse;
-
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          callback: handleGoogleResponse,
-          auto_select: false,
-          cancel_on_tap_outside: false,
-          // NO usar FedCM por ahora para evitar errores
-          use_fedcm_for_prompt: false,
-        });
-
-        console.log("✅ Google OAuth inicializado correctamente");
-      } else {
-        // Si el script aún no se ha cargado, intentar de nuevo en un momento
-        setTimeout(initializeGoogleAuth, 100);
-      }
-    };
-
-    initializeGoogleAuth();
-
-    // Cleanup
-    return () => {
-      if (window.googleCallbackHandler) {
-        window.googleCallbackHandler = null;
-      }
-    };
-  }, []);
 
   const handleGoogleResponse = async (response) => {
     const toastId = toast.loading("Iniciando sesión con Google...");
@@ -331,9 +300,13 @@ function Login() {
             </div>
 
             <div className="mt-6">
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  dispatch(googleLogin(credentialResponse.credential));
+                }}
+                onError={() => {
+                  toast.error("Error al iniciar sesión con Google");
+                }}
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -355,7 +328,7 @@ function Login() {
                   />
                 </svg>
                 <span className="ml-2">Google</span>
-              </button>
+              </GoogleLogin>
             </div>
           </div>
         </form>
