@@ -194,6 +194,24 @@ export const changePassword = createAsyncThunk(
   }
 );
 
+export const fetchUserDetails = createAsyncThunk(
+  'auth/fetchUserDetails',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const { token } = getState().auth;
+      const response = await apiClient.get('/users/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener detalles del usuario:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Error al obtener detalles del usuario'
+      );
+    }
+  }
+);
+
 // Leer usuario y token de localStorage al iniciar
 const storedToken = localStorage.getItem('token');
 const storedUser = localStorage.getItem('user');
@@ -292,6 +310,9 @@ const authSlice = createSlice({
           state.isTeacher = false;
         }
         state.error = null;
+        
+        // Log the payload to debug missing fields
+        console.log('Datos del usuario tras iniciar sesión:', action.payload.user);
         
         // ✅ Guardar usuario en localStorage para acceso al campo mustChangePassword
         if (action.payload.user) {
@@ -425,6 +446,19 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(changePassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Fetch User Details
+      .addCase(fetchUserDetails.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserDetails.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = { ...state.user, ...action.payload };
+      })
+      .addCase(fetchUserDetails.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });
