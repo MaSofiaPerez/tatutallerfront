@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile, changePassword } from "../redux/slices/authSlice";
 import { fetchBookings } from "../redux/slices/bookingSlice";
-import { mockAPI, mockUserData, mockUserClasses } from "../utils/mockData";
 import toast from "react-hot-toast";
 import {
   HiUser,
@@ -36,10 +35,6 @@ function UserPanel() {
     address: "",
   });
 
-  // Estados para datos mock
-  const [mockClasses, setMockClasses] = useState([]);
-  const [mockUser, setMockUser] = useState(null);
-
   // Estados para cambio de contraseña
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -48,36 +43,20 @@ function UserPanel() {
   });
 
   useEffect(() => {
-    // Inicializar con datos mock para desarrollo
-    setMockUser(mockUserData);
-    setMockClasses(mockUserClasses);
-
-    if (user) {
+    if (user && !isEditing) {
       setProfileData({
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
         address: user.address || "",
       });
-    } else {
-      // Usar datos mock si no hay usuario real
-      setProfileData({
-        name: mockUserData.firstName + (mockUserData.lastName ? " " + mockUserData.lastName : ""),
-        email: mockUserData.email,
-        phone: mockUserData.phone,
-        address: mockUserData.address,
-      });
     }
-  }, [user]);
+  }, [user, isEditing]);
 
   useEffect(() => {
     if (activeTab === "bookings") {
-      // En desarrollo, usar datos mock
-      console.log("📚 Cargando clases mock para desarrollo");
-      setMockClasses(mockUserClasses);
-
       // En producción, descomentar la línea siguiente:
-      // dispatch(fetchBookings());
+      dispatch(fetchBookings());
     }
   }, [activeTab, dispatch]);
 
@@ -104,8 +83,9 @@ function UserPanel() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
-      // En producción, usa el dispatch real:
-      await dispatch(updateUserProfile(profileData)).unwrap();
+      const updatedUser = await dispatch(
+        updateUserProfile(profileData)
+      ).unwrap();
 
       toast.success("Perfil actualizado exitosamente");
       setIsEditing(false);
@@ -149,9 +129,14 @@ function UserPanel() {
 
   const cancelEdit = () => {
     setIsEditing(false);
-    const currentUser = mockUser || user;
+    const currentUser = user;
     setProfileData({
-      name: currentUser?.name || (currentUser?.firstName ? currentUser.firstName + (currentUser.lastName ? " " + currentUser.lastName : "") : ""),
+      name:
+        currentUser?.name ||
+        (currentUser?.firstName
+          ? currentUser.firstName +
+            (currentUser.lastName ? " " + currentUser.lastName : "")
+          : ""),
       email: currentUser?.email || "",
       phone: currentUser?.phone || "",
       address: currentUser?.address || "",
@@ -204,9 +189,7 @@ function UserPanel() {
 
   // Usar datos mock en desarrollo, datos reales en producción
   const userBookings =
-    mockClasses ||
-    bookings?.filter((booking) => booking.userId === user?.id) ||
-    [];
+    bookings?.filter((booking) => booking.userId === user?.id) || [];
 
   const renderProfile = () => (
     <div className="bg-white rounded-lg shadow-lg p-6">
