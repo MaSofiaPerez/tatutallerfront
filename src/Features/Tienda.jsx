@@ -173,7 +173,7 @@ function Tienda() {
                     src={
                       product.imageUrl.startsWith("http")
                         ? product.imageUrl
-                        : `http://localhost:8080/api${
+                        : `http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com/api${
                             product.imageUrl.startsWith("/") ? "" : "/"
                           }${product.imageUrl}`
                     }

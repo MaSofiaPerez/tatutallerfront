@@ -1,7 +1,7 @@
 // Test con diferentes usuarios y credenciales
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'https://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com/api';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
