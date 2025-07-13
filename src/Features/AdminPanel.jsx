@@ -51,6 +51,7 @@ function AdminPanel() {
   const [selectedClassId, setSelectedClassId] = useState(null);
 
   const dispatch = useDispatch();
+  const [userSearch, setUserSearch] = useState("");
 
   // Función para traducir roles para la interfaz de usuario
   const translateRole = (role) => {
@@ -107,13 +108,14 @@ function AdminPanel() {
 
   // Obtener la lista de usuarios apropiada según el rol
   const getUsersList = () => {
-    if (isTeacher) {
-      // Teachers usan sus estudiantes específicos
-      return myStudents;
-    } else {
-      // Admins usan todos los usuarios filtrados
-      return filterUsersByRole(users);
+    let list = isTeacher ? myStudents : filterUsersByRole(users);
+    if (userSearch.trim() !== "") {
+      const searchLower = userSearch.trim().toLowerCase();
+      list = list.filter(
+        (u) => u.name && u.name.toLowerCase().includes(searchLower)
+      );
     }
+    return list;
   };
 
   // Redux state
@@ -431,6 +433,16 @@ function AdminPanel() {
                     Agregar Usuario
                   </button>
                 )}
+              </div>
+              {/* Filtro por nombre */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
               </div>
 
               {usersLoading ? (
