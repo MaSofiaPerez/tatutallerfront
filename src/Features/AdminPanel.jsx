@@ -35,6 +35,9 @@ import UserDetailsModal from "../components/UserDetailsModal";
 import toast from "react-hot-toast";
 import apiClient from "../redux/api"; // Corrige la ruta para usar el cliente API existente
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showModal, setShowModal] = useState(false);
@@ -614,19 +617,16 @@ function AdminPanel() {
                                     <img
                                       className="h-12 w-12 rounded-lg object-cover mr-4"
                                       src={
-                                        product.imageUrl
-                                          ? product.imageUrl.startsWith("http")
-                                            ? product.imageUrl
-                                            : `http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com/api${
-                                                product.imageUrl.startsWith("/")
-                                                  ? ""
-                                                  : "/"
-                                              }${product.imageUrl}`
-                                          : "/placeholder.jpg"
+                                        product.imageUrl.startsWith("http")
+                                          ? product.imageUrl
+                                          : `${API_BASE_URL}${product.imageUrl.startsWith("/") ? "" : "/"}${product.imageUrl}`
                                       }
                                       alt={product.name}
                                       onError={(e) => {
-                                        e.target.src = "/placeholder.jpg";
+                                        if (!e.target.src.endsWith("/placeholder.jpg")) {
+                                          e.target.onerror = null;
+                                          e.target.src = "/placeholder.jpg";
+                                        }
                                       }}
                                     />
                                   ) : (
