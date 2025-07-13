@@ -50,27 +50,44 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
     }
 
     return (
-      <ul className="list-disc pl-5">
-        {filteredReservations.map((reservation) => (
-          <li key={reservation.id} className="mb-2">
-            <p>
-              <strong>Clase:</strong> {reservation.className || "N/A"}
-            </p>
-            <p>
-              <strong>Profesor:</strong> {reservation.teacherName || "N/A"}
-            </p>
-            <p>
-              <strong>Fecha:</strong>{" "}
-              {reservation.date
-                ? new Date(reservation.date).toLocaleDateString()
-                : "N/A"}
-            </p>
-            <p>
-              <strong>Horario:</strong> {reservation.time || "N/A"}
-            </p>
-          </li>
-        ))}
-      </ul>
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Clase
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Profesor
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Fecha
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Horario
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {filteredReservations.map((reservation) => (
+            <tr key={reservation.id}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {reservation.className || "N/A"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {reservation.teacherName || "N/A"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {reservation.date
+                  ? new Date(reservation.bookingDate).toLocaleDateString()
+                  : "N/A"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {`${reservation.startTime} - ${reservation.endTime}` || "N/A"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
   };
 
@@ -78,7 +95,7 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">
             Detalles del Usuario
