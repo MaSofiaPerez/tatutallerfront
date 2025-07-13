@@ -1,30 +1,80 @@
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserBookings } from "../redux/slices/bookingSlice";
 
 function UserDetailsModal({ isOpen, onClose, userId, userData }) {
-  const [reservations, setReservations] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [filteredReservations, setFilteredReservations] = useState([]);
+  const dispatch = useDispatch();
+  const { userBookings, isLoading } = useSelector((state) => state.booking);
+
+  const handleFilter = () => {
+    if (startDate && endDate) {
+      const filtered = userBookings.filter((reservation) => {
+        const reservationDate = new Date(reservation.date);
+        return reservationDate >= startDate && reservationDate <= endDate;
+      });
+      setFilteredReservations(filtered);
+    } else {
+      setFilteredReservations(userBookings);
+    }
+  };
 
   useEffect(() => {
     if (isOpen && userId) {
-      // Hacer la solicitud al backend para obtener las reservas
-      fetch(`/api/users/${userId}/reservations`)
-        .then((response) => response.json())
-        .then((data) => setReservations(data))
-        .catch((error) => console.error("Error al obtener reservas:", error));
+      console.log("🔍 Dispatching fetchUserBookings with userId:", userId);
+      dispatch(fetchUserBookings(userId));
     }
-  }, [isOpen, userId]);
+  }, [isOpen, userId, dispatch]);
+
+  useEffect(() => {
+    setFilteredReservations(userBookings);
+  }, [userBookings]);
+
+  const renderReservations = () => {
+    if (isLoading) {
+      return <p className="text-gray-600">Cargando reservas...</p>;
+    }
+
+    if (filteredReservations.length === 0) {
+      return (
+        <p className="text-gray-600">
+          {startDate && endDate
+            ? "No se han encontrado reservas entre las fechas seleccionadas."
+            : "No se han encontrado reservas."}
+        </p>
+      );
+    }
+
+    return (
+      <ul className="list-disc pl-5">
+        {filteredReservations.map((reservation) => (
+          <li key={reservation.id} className="mb-2">
+            <p>
+              <strong>Clase:</strong> {reservation.className || "N/A"}
+            </p>
+            <p>
+              <strong>Profesor:</strong> {reservation.teacherName || "N/A"}
+            </p>
+            <p>
+              <strong>Fecha:</strong>{" "}
+              {reservation.date
+                ? new Date(reservation.date).toLocaleDateString()
+                : "N/A"}
+            </p>
+            <p>
+              <strong>Horario:</strong> {reservation.time || "N/A"}
+            </p>
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   if (!isOpen) return null;
-
-  const filteredReservations = reservations.filter((reservation) => {
-    const reservationDate = new Date(reservation.date);
-    if (startDate && reservationDate < startDate) return false;
-    if (endDate && reservationDate > endDate) return false;
-    return true;
-  });
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -64,7 +114,7 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
         <h4 className="text-md font-semibold text-gray-800 mb-2">
           Clases Reservadas
         </h4>
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-4 mb-4 items-end">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Desde
@@ -87,34 +137,7 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
           </div>
         </div>
 
-        {filteredReservations.length > 0 ? (
-          <ul className="list-disc pl-5">
-            {filteredReservations.map((reservation) => (
-              <li key={reservation.id} className="mb-2">
-                <p>
-                  <strong>Clase:</strong> {reservation.className || "N/A"}
-                </p>
-                <p>
-                  <strong>Profesor:</strong> {reservation.teacherName || "N/A"}
-                </p>
-                <p>
-                  <strong>Fecha:</strong>{" "}
-                  {reservation.date
-                    ? new Date(reservation.date).toLocaleDateString()
-                    : "N/A"}
-                </p>
-                <p>
-                  <strong>Horario:</strong> {reservation.time || "N/A"}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-600">
-            No se encontraron clases reservadas en el rango de fechas
-            seleccionado.
-          </p>
-        )}
+        {renderReservations()}
       </div>
     </div>
   );

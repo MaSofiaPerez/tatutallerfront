@@ -53,7 +53,9 @@ export const fetchUserBookings = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await apiClient.get(`/admin/bookings/user/${userId}`);
+      console.log('✅ Reservas del usuario obtenidas:', response.data);
       return response.data;
+    
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Error al obtener las reservas del usuario'

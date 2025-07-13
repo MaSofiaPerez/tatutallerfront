@@ -1022,6 +1022,7 @@ function AdminPanel() {
             setUserModalType("");
           }}
           userData={selectedUser}
+          userId={selectedUser?.id}
         />
       )}
 
