@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile, changePassword } from "../redux/slices/authSlice";
-import { fetchBookings } from "../redux/slices/bookingSlice";
+import { fetchMyBookings } from "../redux/slices/bookingSlice";
 import toast from "react-hot-toast";
 import {
   HiUser,
@@ -23,7 +23,7 @@ function UserPanel() {
 
   const dispatch = useDispatch();
   const { user, isLoading } = useSelector((state) => state.auth);
-  const { bookings, isLoading: bookingsLoading } = useSelector(
+  const { userBookings, isLoading: bookingsLoading } = useSelector(
     (state) => state.booking
   );
 
@@ -55,10 +55,13 @@ function UserPanel() {
 
   useEffect(() => {
     if (activeTab === "bookings") {
-      // En producción, descomentar la línea siguiente:
-      dispatch(fetchBookings());
+      dispatch(fetchMyBookings());
     }
   }, [activeTab, dispatch]);
+
+  useEffect(() => {
+    console.log("Bookings in UserPanel:", userBookings); // Verifica los datos aquí
+  }, [userBookings]);
 
   const tabs = [
     { id: "profile", name: "Mi Perfil", icon: HiUser },
@@ -186,10 +189,6 @@ function UserPanel() {
         return "Desconocido";
     }
   };
-
-  // Usar datos mock en desarrollo, datos reales en producción
-  const userBookings =
-    bookings?.filter((booking) => booking.userId === user?.id) || [];
 
   const renderProfile = () => (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -335,10 +334,10 @@ function UserPanel() {
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <h3 className="font-bold text-lg text-gray-900 mb-1">
-                    {booking.classEntity?.name || "Clase de cerámica"}
+                    {booking.className}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    👨‍🏫 {booking.classEntity?.instructor?.name || "Instructor"}
+                    👨‍🏫 {booking.teacherName}
                   </p>
                 </div>
                 <span
@@ -368,12 +367,6 @@ function UserPanel() {
                     {booking.startTime} - {booking.endTime}
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-500">💰 Precio</p>
-                  <p className="font-medium text-gray-900">
-                    ${booking.classEntity?.price || "0"}
-                  </p>
-                </div>
               </div>
 
               {booking.notes && (
@@ -384,27 +377,6 @@ function UserPanel() {
                   <p className="text-sm text-blue-600">{booking.notes}</p>
                 </div>
               )}
-
-              {booking.status === "CANCELLED" && booking.adminNotes && (
-                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm">
-                    <strong className="text-red-700">
-                      ❌ Motivo de cancelación:
-                    </strong>
-                  </p>
-                  <p className="text-sm text-red-600">{booking.adminNotes}</p>
-                </div>
-              )}
-
-              <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
-                <span>
-                  Reservado:{" "}
-                  {new Date(booking.createdAt).toLocaleDateString("es-ES")}
-                </span>
-                <span className="capitalize">
-                  {booking.type?.toLowerCase() || "puntual"}
-                </span>
-              </div>
             </div>
           ))}
         </div>
