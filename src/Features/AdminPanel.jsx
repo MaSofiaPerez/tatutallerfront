@@ -329,7 +329,7 @@ function AdminPanel() {
               Horario
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Duración
+              Cupos Disponibles
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               Acciones
@@ -337,30 +337,66 @@ function AdminPanel() {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {futureClassesWithReservations.map((classItem) => (
-            <tr key={classItem.id}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.instructor?.name || "Sin asignar"}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.name}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.startTime} - {classItem.endTime}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.duration} minutos
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <button
-                  onClick={() => handleViewDetails(classItem)}
-                  className="text-blue-500 hover:underline"
-                >
-                  Ver Detalle
-                </button>
+          {filteredClasses.length > 0 ? (
+            filteredClasses.map((classItem) => {
+              const capacidadMaxima = classItem.capacity || classItem.maxCapacity || 0;
+              const cantidadUsuarios = bookings.filter(
+                (b) => b.classId === classItem.id
+              ).length;
+              const cuposDisponibles = capacidadMaxima - cantidadUsuarios;
+              return (
+                <tr key={classItem.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {classItem.instructor?.name || "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {classItem.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {classItem.startTime && classItem.endTime
+                      ? `${classItem.startTime} - ${classItem.endTime}`
+                      : "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {cuposDisponibles}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <button
+                      onClick={() => {
+                        setModalType("edit");
+                        setSelectedItem(classItem);
+                        setShowModal(true);
+                      }}
+                      className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem("clase", classItem.id)}
+                      className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
+                    >
+                      Eliminar
+                    </button>
+                    <button
+                      onClick={() => handleViewDetails(classItem)}
+                      className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
+                    >
+                      Ver Detalle
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
+          ) : (
+            <tr>
+              <td
+                colSpan="5"
+                className="px-6 py-4 text-center text-gray-500"
+              >
+                No hay clases registradas
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     );
@@ -844,57 +880,68 @@ function AdminPanel() {
                           Horario
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Cupos Disponibles
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                           Acciones
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredClasses.length > 0 ? (
-                        filteredClasses.map((classItem) => (
-                          <tr key={classItem.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {classItem.instructor?.name || "N/A"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {classItem.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {classItem.startTime && classItem.endTime
-                                ? `${classItem.startTime} - ${classItem.endTime}`
-                                : "N/A"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                              <button
-                                onClick={() => {
-                                  setModalType("edit");
-                                  setSelectedItem(classItem);
-                                  setShowModal(true);
-                                }}
-                                className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
-                              >
-                                Editar
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleDeleteItem("clase", classItem.id)
-                                }
-                                className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
-                              >
-                                Eliminar
-                              </button>
-                              <button
-                                onClick={() => handleViewDetails(classItem)}
-                                className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
-                              >
-                                Ver Detalle
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+                        filteredClasses.map((classItem) => {
+                          const capacidadMaxima = classItem.capacity || classItem.maxCapacity || 0;
+                          const cantidadUsuarios = bookings.filter(
+                            (b) => b.classId === classItem.id
+                          ).length;
+                          const cuposDisponibles = capacidadMaxima - cantidadUsuarios;
+                          return (
+                            <tr key={classItem.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {classItem.instructor?.name || "N/A"}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {classItem.name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {classItem.startTime && classItem.endTime
+                                  ? `${classItem.startTime} - ${classItem.endTime}`
+                                  : "N/A"}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {cuposDisponibles}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button
+                                  onClick={() => {
+                                    setModalType("edit");
+                                    setSelectedItem(classItem);
+                                    setShowModal(true);
+                                  }}
+                                  className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteItem("clase", classItem.id)}
+                                  className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
+                                >
+                                  Eliminar
+                                </button>
+                                <button
+                                  onClick={() => handleViewDetails(classItem)}
+                                  className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
+                                >
+                                  Ver Detalle
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td
-                            colSpan="6"
+                            colSpan="5"
                             className="px-6 py-4 text-center text-gray-500"
                           >
                             No hay clases registradas
