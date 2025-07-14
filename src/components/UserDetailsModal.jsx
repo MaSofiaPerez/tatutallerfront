@@ -11,18 +11,6 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
   const dispatch = useDispatch();
   const { userBookings, isLoading } = useSelector((state) => state.booking);
 
-  const handleFilter = () => {
-    if (startDate && endDate) {
-      const filtered = userBookings.filter((reservation) => {
-        const reservationDate = new Date(reservation.date);
-        return reservationDate >= startDate && reservationDate <= endDate;
-      });
-      setFilteredReservations(filtered);
-    } else {
-      setFilteredReservations(userBookings);
-    }
-  };
-
   useEffect(() => {
     if (isOpen && userId) {
       console.log("🔍 Dispatching fetchUserBookings with userId:", userId);
@@ -33,6 +21,25 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
   useEffect(() => {
     setFilteredReservations(userBookings);
   }, [userBookings]);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const filtered = userBookings.filter((reservation) => {
+        const dateStr = reservation.bookingDate || reservation.date;
+        if (!dateStr) return false;
+        const reservationDate = new Date(dateStr);
+        reservationDate.setHours(0,0,0,0);
+        const start = new Date(startDate);
+        start.setHours(0,0,0,0);
+        const end = new Date(endDate);
+        end.setHours(23,59,59,999);
+        return reservationDate >= start && reservationDate <= end;
+      });
+      setFilteredReservations(filtered);
+    } else {
+      setFilteredReservations(userBookings);
+    }
+  }, [startDate, endDate, userBookings]);
 
   const renderReservations = () => {
     if (isLoading) {
@@ -77,8 +84,8 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
                 {reservation.teacherName || "N/A"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {reservation.date
-                  ? new Date(reservation.bookingDate).toLocaleDateString()
+                {reservation.bookingDate || reservation.date
+                  ? new Date(reservation.bookingDate || reservation.date).toLocaleDateString()
                   : "N/A"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
