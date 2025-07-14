@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../redux/api";
-import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import { isWithinInterval, parseISO } from "date-fns";
 
 const ClassDetailsModal = ({ classId, onClose }) => {
   const [reservations, setReservations] = useState([]);
-  const [startDate, setStartDate] = useState(startOfMonth(new Date()));
-  const [endDate, setEndDate] = useState(endOfMonth(new Date()));
+  const [startDate, setStartDate] = useState(""); // Sin valor inicial
+  const [endDate, setEndDate] = useState("");     // Sin valor inicial
   const [filteredReservations, setFilteredReservations] = useState([]);
   const [error, setError] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
@@ -18,12 +18,10 @@ const ClassDetailsModal = ({ classId, onClose }) => {
         return;
       }
 
-      if (isFetching) return; // Prevent duplicate requests
+      if (isFetching) return;
       setIsFetching(true);
 
       const url = `/admin/classes/${classId}/reservations`;
-      console.log("Fetching reservations from URL:", url);
-
       try {
         const response = await apiClient.get(url);
         const formattedReservations = response.data.map((reservation) => ({
@@ -37,7 +35,6 @@ const ClassDetailsModal = ({ classId, onClose }) => {
         setReservations(formattedReservations);
         setError(null);
       } catch (error) {
-        console.error("Error fetching reservations:", error);
         setError(
           error.response?.status === 500
             ? "Hubo un problema en el servidor. Por favor, inténtalo más tarde."
@@ -52,12 +49,26 @@ const ClassDetailsModal = ({ classId, onClose }) => {
   }, [classId]);
 
   useEffect(() => {
+    // Si no hay fechas, mostrar todas
+    if (!startDate && !endDate) {
+      setFilteredReservations(reservations);
+      return;
+    }
     const filtered = reservations.filter((reservation) => {
       const reservationDate = parseISO(reservation.date);
-      return isWithinInterval(reservationDate, {
-        start: startDate,
-        end: endDate,
-      });
+      if (startDate && !endDate) {
+        return reservationDate >= parseISO(startDate);
+      }
+      if (!startDate && endDate) {
+        return reservationDate <= parseISO(endDate);
+      }
+      if (startDate && endDate) {
+        return isWithinInterval(reservationDate, {
+          start: parseISO(startDate),
+          end: parseISO(endDate),
+        });
+      }
+      return true;
     });
     setFilteredReservations(filtered);
   }, [startDate, endDate, reservations]);
@@ -85,15 +96,17 @@ const ClassDetailsModal = ({ classId, onClose }) => {
               <div className="flex space-x-4">
                 <input
                   type="date"
-                  value={startDate.toISOString().split("T")[0]}
-                  onChange={(e) => setStartDate(new Date(e.target.value))}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
                   className="border border-gray-300 rounded px-3 py-2 w-full"
+                  placeholder="Desde"
                 />
                 <input
                   type="date"
-                  value={endDate.toISOString().split("T")[0]}
-                  onChange={(e) => setEndDate(new Date(e.target.value))}
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
                   className="border border-gray-300 rounded px-3 py-2 w-full"
+                  placeholder="Hasta"
                 />
               </div>
             </div>
@@ -110,9 +123,7 @@ const ClassDetailsModal = ({ classId, onClose }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Horario
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Cupos Disponibles
-                  </th>
+                
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -125,10 +136,7 @@ const ClassDetailsModal = ({ classId, onClose }) => {
                       {reservation.studentName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reservation.startTime} - {reservation.endTime}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reservation.availableSpots}
+                      {reservation.startTime}
                     </td>
                   </tr>
                 ))}
