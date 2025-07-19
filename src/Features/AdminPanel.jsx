@@ -55,6 +55,11 @@ function AdminPanel() {
 
   const dispatch = useDispatch();
   const [userSearch, setUserSearch] = useState("");
+  const [bookingSearch, setBookingSearch] = useState("");
+  const [bookingDateFrom, setBookingDateFrom] = useState("");
+  const [bookingDateTo, setBookingDateTo] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const [classTeacherSearch, setClassTeacherSearch] = useState("");
 
   // Función para traducir roles para la interfaz de usuario
   const translateRole = (role) => {
@@ -324,7 +329,7 @@ function AdminPanel() {
               Horario
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Duración
+              Cupos Disponibles
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               Acciones
@@ -332,30 +337,66 @@ function AdminPanel() {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {futureClassesWithReservations.map((classItem) => (
-            <tr key={classItem.id}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.instructor?.name || "Sin asignar"}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.name}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.startTime} - {classItem.endTime}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {classItem.duration} minutos
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <button
-                  onClick={() => handleViewDetails(classItem)}
-                  className="text-blue-500 hover:underline"
-                >
-                  Ver Detalle
-                </button>
+          {filteredClasses.length > 0 ? (
+            filteredClasses.map((classItem) => {
+              const capacidadMaxima = classItem.capacity || classItem.maxCapacity || 0;
+              const cantidadUsuarios = bookings.filter(
+                (b) => b.classId === classItem.id
+              ).length;
+              const cuposDisponibles = capacidadMaxima - cantidadUsuarios;
+              return (
+                <tr key={classItem.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {classItem.instructor?.name || "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {classItem.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {classItem.startTime && classItem.endTime
+                      ? `${classItem.startTime} - ${classItem.endTime}`
+                      : "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {cuposDisponibles}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <button
+                      onClick={() => {
+                        setModalType("edit");
+                        setSelectedItem(classItem);
+                        setShowModal(true);
+                      }}
+                      className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem("clase", classItem.id)}
+                      className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
+                    >
+                      Eliminar
+                    </button>
+                    <button
+                      onClick={() => handleViewDetails(classItem)}
+                      className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
+                    >
+                      Ver Detalle
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
+          ) : (
+            <tr>
+              <td
+                colSpan="5"
+                className="px-6 py-4 text-center text-gray-500"
+              >
+                No hay clases registradas
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     );
@@ -382,6 +423,33 @@ function AdminPanel() {
       </div>
     );
   };
+
+  // Filtrado
+  const filteredBookings = bookings.filter((booking) => {
+    const matchesName =
+      booking.userName?.toLowerCase().includes(bookingSearch.toLowerCase());
+
+    let matchesDate = true;
+    if (bookingDateFrom) {
+      matchesDate = booking.bookingDate >= bookingDateFrom;
+    }
+    if (matchesDate && bookingDateTo) {
+      matchesDate = booking.bookingDate <= bookingDateTo;
+    }
+    return matchesName && matchesDate;
+  });
+
+  // Filtrado de productos por nombre
+  const filteredProducts = products.filter((product) =>
+    product.name?.toLowerCase().includes(productSearch.toLowerCase())
+  );
+
+  // Filtrado de clases por profesor
+  const filteredClasses = classes.filter((classItem) =>
+    classItem.instructor?.name
+      ?.toLowerCase()
+      .includes(classTeacherSearch.toLowerCase())
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -576,14 +644,23 @@ function AdminPanel() {
                   Agregar Producto
                 </button>
               </div>
-
+              {/* Filtro por nombre de producto */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre de producto..."
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+              </div>
               {productsLoading ? (
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
                 </div>
               ) : (
                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                  {products && products.length > 0 ? (
+                  {filteredProducts && filteredProducts.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -609,7 +686,7 @@ function AdminPanel() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {products.map((product) => (
+                          {filteredProducts.map((product) => (
                             <tr key={product.id} className="hover:bg-gray-50">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
@@ -774,7 +851,16 @@ function AdminPanel() {
                   Agregar Clase
                 </button>
               </div>
-
+              {/* Filtro por profesor */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Buscar por profesor..."
+                  value={classTeacherSearch}
+                  onChange={(e) => setClassTeacherSearch(e.target.value)}
+                  className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+              </div>
               {classesLoading ? (
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
@@ -794,57 +880,68 @@ function AdminPanel() {
                           Horario
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Cupos Disponibles
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                           Acciones
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {classes && classes.length > 0 ? (
-                        classes.map((classItem) => (
-                          <tr key={classItem.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {classItem.instructor?.name || "N/A"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {classItem.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {classItem.startTime && classItem.endTime
-                                ? `${classItem.startTime} - ${classItem.endTime}`
-                                : "N/A"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                              <button
-                                onClick={() => {
-                                  setModalType("edit");
-                                  setSelectedItem(classItem);
-                                  setShowModal(true);
-                                }}
-                                className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
-                              >
-                                Editar
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleDeleteItem("clase", classItem.id)
-                                }
-                                className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
-                              >
-                                Eliminar
-                              </button>
-                              <button
-                                onClick={() => handleViewDetails(classItem)}
-                                className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
-                              >
-                                Ver Detalle
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+                      {filteredClasses.length > 0 ? (
+                        filteredClasses.map((classItem) => {
+                          const capacidadMaxima = classItem.capacity || classItem.maxCapacity || 0;
+                          const cantidadUsuarios = bookings.filter(
+                            (b) => b.classId === classItem.id
+                          ).length;
+                          const cuposDisponibles = capacidadMaxima - cantidadUsuarios;
+                          return (
+                            <tr key={classItem.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {classItem.instructor?.name || "N/A"}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {classItem.name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {classItem.startTime && classItem.endTime
+                                  ? `${classItem.startTime} - ${classItem.endTime}`
+                                  : "N/A"}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {cuposDisponibles}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button
+                                  onClick={() => {
+                                    setModalType("edit");
+                                    setSelectedItem(classItem);
+                                    setShowModal(true);
+                                  }}
+                                  className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteItem("clase", classItem.id)}
+                                  className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
+                                >
+                                  Eliminar
+                                </button>
+                                <button
+                                  onClick={() => handleViewDetails(classItem)}
+                                  className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
+                                >
+                                  Ver Detalle
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td
-                            colSpan="6"
+                            colSpan="5"
                             className="px-6 py-4 text-center text-gray-500"
                           >
                             No hay clases registradas
@@ -863,6 +960,39 @@ function AdminPanel() {
               <h2 className="text-2xl font-bold text-gray-900">
                 Gestión de Reservas
               </h2>
+
+              {/* Filtros para reservas */}
+              <div className="flex flex-col md:flex-row gap-4 mb-4">
+                <input
+                  type="text"
+                  placeholder="Buscar por cliente..."
+                  value={bookingSearch}
+                  onChange={(e) => setBookingSearch(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+                <div className="flex flex-col">
+                  <label htmlFor="date-from" className="text-xs text-gray-600 mb-1">Desde</label>
+                  <input
+                    id="date-from"
+                    type="date"
+                    value={bookingDateFrom}
+                    onChange={(e) => setBookingDateFrom(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    placeholder="Desde"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="date-to" className="text-xs text-gray-600 mb-1">Hasta</label>
+                  <input
+                    id="date-to"
+                    type="date"
+                    value={bookingDateTo}
+                    onChange={(e) => setBookingDateTo(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    placeholder="Hasta"
+                  />
+                </div>
+              </div>
 
               {bookingsLoading ? (
                 <div className="flex justify-center py-8">
@@ -894,8 +1024,8 @@ function AdminPanel() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {bookings && bookings.length > 0 ? (
-                        bookings.map((booking) => (
+                      {filteredBookings && filteredBookings.length > 0 ? (
+                        filteredBookings.map((booking) => (
                           <tr key={booking.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               <div>

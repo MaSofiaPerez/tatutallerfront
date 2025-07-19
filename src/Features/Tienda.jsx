@@ -171,16 +171,19 @@ function Tienda() {
                 {product.imageUrl ? (
                   <img
                     src={
-                      product.imageUrl.startsWith("http")
-                        ? product.imageUrl
-                        : `http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com/api${
-                            product.imageUrl.startsWith("/") ? "" : "/"
-                          }${product.imageUrl}`
+                      product.imageUrl
+                        ? (product.imageUrl.startsWith("http")
+                            ? product.imageUrl
+                            : `${import.meta.env.VITE_API_URL || "http://localhost:8080/api"}${product.imageUrl.startsWith("/") ? "" : "/"}${product.imageUrl}`)
+                        : "/placeholder.jpg"
                     }
                     alt={product.name}
                     className="object-cover w-full h-64"
                     onError={(e) => {
-                      e.target.src = "/placeholder.jpg";
+                      if (!e.target.src.endsWith("/placeholder.jpg")) {
+                        e.target.onerror = null;
+                        e.target.src = "/placeholder.jpg";
+                      }
                     }}
                   />
                 ) : (
