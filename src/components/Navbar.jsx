@@ -296,11 +296,11 @@ function Navbar() {
               </li>
               <li>
                 <Link
-                  to="/cowork"
-                  className="text-gray-700 hover:text-yellow-600 font-medium transition-colors relative group"
+                  to="/cowork-ceramico"
+                  className="text-gray-700 hover:text-red-600 font-medium transition-colors relative group"
                 >
-                  Cowork
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-600 transition-all group-hover:w-full"></span>
+                  Cowork Cerámico
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 transition-all group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
