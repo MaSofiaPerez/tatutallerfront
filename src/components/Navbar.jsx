@@ -90,7 +90,7 @@ function Navbar() {
             <li>
               <Link
                 to="/cowork-ceramico"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                className="block text-gray-700 hover:text-red-600 transition-colors"
                 onClick={closeMenus}
               >
                 Cowork Cerámico
@@ -99,7 +99,7 @@ function Navbar() {
             <li>
               <Link
                 to="/alquiler-hornos"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                className="block text-gray-700 hover:text-green-600 transition-colors"
                 onClick={closeMenus}
               >
                 Alquiler de Hornos
