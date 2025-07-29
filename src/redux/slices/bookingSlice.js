@@ -6,13 +6,42 @@ export const createBooking = createAsyncThunk(
   'booking/createBooking',
   async (bookingData, { rejectWithValue }) => {
     try {
+      console.log('📤 Enviando datos de reserva:', bookingData);
       const response = await apiClient.post('/bookings', bookingData);
+      console.log('✅ Reserva creada exitosamente:', response.data);
       return response.data;
     } catch (error) {
+      console.error('❌ Error completo en createBooking:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error response data:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      
       if (error.response?.status === 409) {
-        return rejectWithValue(error.response.data.message);
+        // Extraer mensaje específico del error 409
+        const errorMessage = error.response.data?.message || 
+                           error.response.data?.error || 
+                           error.response.data || 
+                           'Ya existe una reserva para esta clase o no hay cupos disponibles';
+        
+        console.log('🔍 Mensaje de error 409 extraído:', errorMessage);
+        return rejectWithValue(errorMessage);
       }
-      return rejectWithValue('Error al crear la reserva');
+      
+      // Otros errores HTTP
+      if (error.response?.status === 400) {
+        return rejectWithValue(error.response.data?.message || 'Datos de reserva inválidos');
+      }
+      
+      if (error.response?.status === 401) {
+        return rejectWithValue('Debes iniciar sesión para hacer una reserva');
+      }
+      
+      if (error.response?.status === 403) {
+        return rejectWithValue('No tienes permisos para realizar esta reserva');
+      }
+      
+      // Error por defecto
+      return rejectWithValue(error.response?.data?.message || 'Error al crear la reserva');
     }
   }
 );

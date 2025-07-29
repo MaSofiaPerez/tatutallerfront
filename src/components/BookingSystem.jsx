@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   HiCalendarDays,
@@ -8,6 +8,7 @@ import {
   HiEnvelope,
 } from "react-icons/hi2";
 import { createBooking, clearError } from "../redux/slices/bookingSlice";
+import toast from "react-hot-toast";
 import { fetchPublicClasses } from "../redux/slices/classesSlice";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -26,6 +27,7 @@ function BookingSystem({ selectedService }) {
   });
   const [showSummary, setShowSummary] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
+  const hasFetchedRef = useRef(false);
 
   const dispatch = useDispatch();
   const {
@@ -59,9 +61,13 @@ function BookingSystem({ selectedService }) {
   ).filter(Boolean);
 
   useEffect(() => {
+    // Evitar llamadas duplicadas en modo desarrollo
+    if (hasFetchedRef.current) return;
+
     // Consumir el nuevo endpoint para la grilla de clases
     const fetchClassesGrid = async () => {
       try {
+        hasFetchedRef.current = true;
         const res = await fetch("/api/public/classes-grid");
         if (!res.ok) throw new Error("No se pudieron obtener las clases");
         const data = await res.json();
@@ -77,6 +83,15 @@ function BookingSystem({ selectedService }) {
     };
     fetchClassesGrid();
   }, []);
+
+  // Efecto para mostrar errores de reserva
+  useEffect(() => {
+    if (bookingError) {
+      toast.error(`Error de reserva: ${bookingError}`);
+      // Limpiar el error después de mostrarlo
+      dispatch(clearError());
+    }
+  }, [bookingError, dispatch]);
 
   // Mapear clases a una estructura por día y tallerista
   const scheduleByDay = {};
@@ -239,7 +254,7 @@ function BookingSystem({ selectedService }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert("Debes iniciar sesión para realizar una reserva");
+      toast.error("Debes iniciar sesión para realizar una reserva");
       return;
     }
 
@@ -253,20 +268,42 @@ function BookingSystem({ selectedService }) {
       };
 
       // Enviar la reserva al backend
-      await dispatch(createBooking(payload));
-      setBookingData({
-        classEntity: { id: "" },
-        bookingDate: "",
-        startTime: "",
-        bookingType: "PUNTUAL",
-        recurrenceEndDate: "",
-        notes: "",
-      });
-      setStep(1);
-      setShowSummary(false);
-      alert("¡Reserva enviada exitosamente! Te contactaremos para confirmar.");
+      const result = await dispatch(createBooking(payload));
+
+      if (createBooking.fulfilled.match(result)) {
+        setBookingData({
+          classEntity: { id: "" },
+          bookingDate: "",
+          startTime: "",
+          bookingType: "PUNTUAL",
+          recurrenceEndDate: "",
+          notes: "",
+        });
+        setStep(1);
+        setShowSummary(false);
+        toast.success(
+          "¡Reserva enviada exitosamente! Te contactaremos para confirmar."
+        );
+      } else {
+        // Manejar errores específicos
+        const errorMessage = result.payload || "Error desconocido";
+
+        if (
+          errorMessage.toLowerCase().includes("conflict") ||
+          errorMessage.toLowerCase().includes("conflicto") ||
+          errorMessage.toLowerCase().includes("ya existe") ||
+          errorMessage.toLowerCase().includes("cupo")
+        ) {
+          toast.error("⚠️ No se pudo crear la reserva: " + errorMessage);
+        } else {
+          toast.error("Error al crear la reserva: " + errorMessage);
+        }
+      }
     } catch (error) {
-      alert("Error al enviar la reserva. Por favor, intenta nuevamente.");
+      console.error("Error en handleSubmit:", error);
+      toast.error(
+        "Error inesperado al enviar la reserva. Por favor, intenta nuevamente."
+      );
     }
   };
 

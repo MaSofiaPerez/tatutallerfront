@@ -89,11 +89,11 @@ function Navbar() {
             </li>
             <li>
               <Link
-                to="/cowork"
+                to="/cowork-ceramico"
                 className="block text-gray-700 hover:text-yellow-600 transition-colors"
                 onClick={closeMenus}
               >
-                Cowork
+                Cowork Cerámico
               </Link>
             </li>
             <li>

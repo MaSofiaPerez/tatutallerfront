@@ -16,6 +16,9 @@ import AdminPanel from "./Features/AdminPanel";
 import UserPanel from "./Features/UserPanel";
 import Tienda from "./Features/Tienda";
 import Clases from "./Features/Clases";
+import CicloFormacion from "./Features/CicloFormacion";
+import CoworkCeramico from "./Features/CoworkCeramico";
+import AlquilerHornos from "./Features/AlquilerHornos";
 
 function App() {
   const dispatch = useDispatch();
@@ -42,6 +45,9 @@ function App() {
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/tienda" element={<Tienda />} />
           <Route path="/clases" element={<Clases />} />
+          <Route path="/ciclo-formacion" element={<CicloFormacion />} />
+          <Route path="/cowork-ceramico" element={<CoworkCeramico />} />
+          <Route path="/alquiler-hornos" element={<AlquilerHornos />} />
           <Route
             path="/admin"
             element={
