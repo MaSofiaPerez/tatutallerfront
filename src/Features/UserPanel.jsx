@@ -241,12 +241,8 @@ function UserPanel() {
             name="email"
             value={profileData.email}
             onChange={handleProfileChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg transition-colors ${
-              isEditing
-                ? "border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                : "border-gray-200 bg-gray-50"
-            }`}
+            disabled
+            className={`w-full px-4 py-3 border rounded-lg transition-colors border-gray-200 bg-gray-50`}
             required
           />
         </div>
