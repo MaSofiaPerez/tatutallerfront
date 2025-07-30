@@ -54,9 +54,14 @@ function UserPanel() {
   }, [user, isEditing]);
 
   useEffect(() => {
+    let interval;
     if (activeTab === "bookings") {
-      dispatch(fetchMyBookings());
+      dispatch(fetchMyBookings()); // fetch inicial
+      interval = setInterval(() => {
+        dispatch(fetchMyBookings());
+      }, 10000); 
     }
+    return () => clearInterval(interval);
   }, [activeTab, dispatch]);
 
   useEffect(() => {
