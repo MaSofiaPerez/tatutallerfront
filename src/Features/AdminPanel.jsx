@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardStats,
@@ -147,6 +147,37 @@ function AdminPanel() {
   const { bookings, isLoading: bookingsLoading } = useSelector(
     (state) => state.booking
   );
+  const { token } = useSelector((state) => state.auth); // Agrega esta línea
+
+  const prevCount = useRef(bookings.length);
+
+  useEffect(() => {
+    prevCount.current = bookings.length;
+  }, [bookings.length]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:8080/api/admin/bookings/count",
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await res.json();
+        if (data.count !== prevCount.current) {
+          dispatch(fetchBookings());
+          dispatch(fetchClasses()); // <-- Agrega esto
+        }
+      } catch (e) {
+        // Opcional: manejar error
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [dispatch, token]);
 
   useEffect(() => {
     // Cargar datos iniciales según la tab activa y el rol del usuario
@@ -182,6 +213,13 @@ function AdminPanel() {
         break;
     }
   }, [activeTab, dispatch, isAdmin, isTeacher]);
+
+  useEffect(() => {
+    if (activeTab === "clases") {
+      dispatch(fetchClasses());
+      dispatch(fetchBookings());
+    }
+  }, [activeTab, dispatch]);
 
   const tabs = [
     { id: "dashboard", name: "Dashboard", icon: "📊" },
@@ -387,7 +425,7 @@ function AdminPanel() {
                 </tr>
               );
             })
-          ) : (
+           ) : (
             <tr>
               <td
                 colSpan="5"
@@ -412,8 +450,20 @@ function AdminPanel() {
   const renderClassesTab = () => {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">Gestión de Clases</h2>
-        {classesLoading ? (
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">Gestión de Clases</h2>
+          <button
+            onClick={() => {
+              setModalType("create");
+              setSelectedItem(null);
+              setShowModal(true);
+            }}
+            className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
+          >
+            Agregar Clase
+          </button>
+        </div>
+        {classesLoading || bookingsLoading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
           </div>
@@ -834,126 +884,7 @@ function AdminPanel() {
             </div>
           )}
 
-          {activeTab === "clases" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Gestión de Clases
-                </h2>
-                <button
-                  onClick={() => {
-                    setModalType("create");
-                    setSelectedItem(null);
-                    setShowModal(true);
-                  }}
-                  className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
-                >
-                  Agregar Clase
-                </button>
-              </div>
-              {/* Filtro por profesor */}
-              <div className="mb-4">
-                <input
-                  type="text"
-                  placeholder="Buscar por profesor..."
-                  value={classTeacherSearch}
-                  onChange={(e) => setClassTeacherSearch(e.target.value)}
-                  className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                />
-              </div>
-              {classesLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
-                </div>
-              ) : (
-                <div className="bg-white shadow overflow-hidden rounded-md">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Profesor
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Clase
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Horario
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Cupos Disponibles
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Acciones
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredClasses.length > 0 ? (
-                        filteredClasses.map((classItem) => {
-                          const capacidadMaxima = classItem.capacity || classItem.maxCapacity || 0;
-                          const cantidadUsuarios = bookings.filter(
-                            (b) => b.classId === classItem.id
-                          ).length;
-                          const cuposDisponibles = capacidadMaxima - cantidadUsuarios;
-                          return (
-                            <tr key={classItem.id}>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {classItem.instructor?.name || "N/A"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {classItem.name}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {classItem.startTime && classItem.endTime
-                                  ? `${classItem.startTime} - ${classItem.endTime}`
-                                  : "N/A"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {cuposDisponibles}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <button
-                                  onClick={() => {
-                                    setModalType("edit");
-                                    setSelectedItem(classItem);
-                                    setShowModal(true);
-                                  }}
-                                  className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm transition-colors"
-                                >
-                                  Editar
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteItem("clase", classItem.id)}
-                                  className="bg-red-700 text-white px-3 py-1 rounded-md hover:bg-red-800 text-sm transition-colors"
-                                >
-                                  Eliminar
-                                </button>
-                                <button
-                                  onClick={() => handleViewDetails(classItem)}
-                                  className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
-                                >
-                                  Ver Detalle
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan="5"
-                            className="px-6 py-4 text-center text-gray-500"
-                          >
-                            No hay clases registradas
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+          {activeTab === "clases" && renderClassesTab()}
 
           {activeTab === "reservas" && (
             <div className="space-y-6">
@@ -1134,6 +1065,9 @@ function AdminPanel() {
             setShowModal(false);
             setSelectedItem(null);
             setModalType("");
+            // Refresca clases y reservas al cerrar el modal (tras crear o editar)
+            dispatch(fetchClasses());
+            dispatch(fetchBookings());
           }}
           classData={selectedItem}
           isEditing={modalType === "edit"}
