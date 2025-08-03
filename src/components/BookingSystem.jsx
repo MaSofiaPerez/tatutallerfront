@@ -20,7 +20,6 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import esAR from "date-fns/locale/es";
-import { mockClassesGrid } from "../utils/mockData";
 
 function BookingSystem() {
   const [step, setStep] = useState(1);
@@ -28,6 +27,7 @@ function BookingSystem() {
     classEntity: { id: "" },
     bookingDate: "",
     startTime: "",
+    endTime: "",
     bookingType: "PUNTUAL",
     recurrenceEndDate: "",
     notes: "",
@@ -54,12 +54,26 @@ function BookingSystem() {
   useEffect(() => {
     setLoading(true);
     fetch("/api/public/classes-grid")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al cargar clases");
+        return res.json();
+      })
       .then((data) => {
         setClassesGrid(data);
         setLoading(false);
+        console.log(
+          "Clases traídas del endpoint /api/public/classes-grid:",
+          data
+        );
       })
-      .catch(() => setClassesGrid([]));
+      .catch((error) => {
+        console.error("Error al cargar clases:", error);
+        setClassesGrid([]);
+        setLoading(false);
+        toast.error(
+          "Error al cargar las clases. Verifica la conexión con el backend."
+        );
+      });
   }, []);
 
   const weekDays = [
@@ -76,37 +90,10 @@ function BookingSystem() {
     new Set(classesGrid.map((cls) => cls.instructor))
   ).filter(Boolean);
 
-  useEffect(() => {
-    // Evitar llamadas duplicadas en modo desarrollo
-    if (hasFetchedRef.current) return;
-
-    // Consumir el nuevo endpoint para la grilla de clases
-    const fetchClassesGrid = async () => {
-      try {
-        hasFetchedRef.current = true;
-        const res = await fetch("/api/public/classes-grid");
-        if (!res.ok) throw new Error("No se pudieron obtener las clases");
-        const data = await res.json();
-        setClassesGrid(data);
-        console.log(
-          "Clases traídas del endpoint /api/public/classes-grid:",
-          data
-        );
-      } catch (e) {
-        // Si la API falla, usar datos mock
-        console.warn("API no disponible, usando datos mock para clases grid");
-        setClassesGrid(mockClassesGrid);
-        console.log("Usando datos mock para clases grid:", mockClassesGrid);
-      }
-    };
-    fetchClassesGrid();
-  }, []);
-
   // Efecto para mostrar errores de reserva
   useEffect(() => {
     if (bookingError) {
       toast.error(`Error de reserva: ${bookingError}`);
-      // Limpiar el error después de mostrarlo
       dispatch(clearBookingError());
     }
   }, [bookingError, dispatch]);
@@ -119,9 +106,13 @@ function BookingSystem() {
       scheduleByDay[day][tallerista] = [];
     });
   });
+
   classesGrid.forEach((cls) => {
-    if (cls.weekDay && cls.instructor) {
-      scheduleByDay[cls.weekDay][cls.instructor].push(cls);
+    const dayName = cls.weekDay || cls.dayOfWeek;
+    if (dayName && cls.instructor) {
+      if (scheduleByDay[dayName] && scheduleByDay[dayName][cls.instructor]) {
+        scheduleByDay[dayName][cls.instructor].push(cls);
+      }
     }
   });
 
@@ -133,11 +124,13 @@ function BookingSystem() {
 
   // Click en clase: selecciona y avanza
   const handleClassClick = (cls) => {
+    console.log("Clase seleccionada:", cls);
     setSelectedClass(cls);
     setBookingData((prev) => ({
       ...prev,
       classEntity: { id: cls.id },
       startTime: "",
+      endTime: "",
       bookingDate: "",
     }));
     setStep(2);
@@ -145,7 +138,12 @@ function BookingSystem() {
 
   // Helpers para fechas válidas
   function getValidDatesForClassWeekDay(cls, bookingType = "PUNTUAL") {
-    if (!cls || !cls.weekDay) return [];
+    if (!cls) return [];
+
+    // Obtener el día de la semana (usar weekDay o dayOfWeek)
+    const dayName = cls.weekDay || cls.dayOfWeek;
+    if (!dayName) return [];
+
     const weekDayMap = {
       Domingo: 0,
       Lunes: 1,
@@ -155,16 +153,21 @@ function BookingSystem() {
       Viernes: 5,
       Sábado: 6,
     };
-    const targetDay = weekDayMap[cls.weekDay];
+    const targetDay = weekDayMap[dayName];
+
+    if (targetDay === undefined) return [];
+
     const today = new Date();
     const result = [];
     let monthsToShow = bookingType === "PUNTUAL" ? 2 : 1;
+
     for (let m = 0; m < monthsToShow; m++) {
       const year = today.getFullYear();
       const month = today.getMonth() + m;
-      for (let day = 1; day <= 31; day++) {
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
         const d = new Date(year, month, day);
-        if (d.getMonth() !== month % 12) break;
         if (d.getDay() === targetDay && d >= today) {
           result.push(d.toISOString().split("T")[0]);
         }
@@ -173,30 +176,105 @@ function BookingSystem() {
     return result;
   }
 
+  // Función para calcular fecha de inicio automática para recurrentes
+  function getRecurrentStartDate(cls) {
+    if (!cls) return null;
+
+    const dayName = cls.weekDay || cls.dayOfWeek;
+    if (!dayName) return null;
+
+    const weekDayMap = {
+      Domingo: 0,
+      Lunes: 1,
+      Martes: 2,
+      Miércoles: 3,
+      Jueves: 4,
+      Viernes: 5,
+      Sábado: 6,
+    };
+    const targetDay = weekDayMap[dayName];
+
+    if (targetDay === undefined) return null;
+
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    // Determinar si estamos después de la segunda semana (día 14)
+    const isAfterSecondWeek = currentDay > 14;
+
+    // Si estamos después de la segunda semana, buscar en el mes siguiente
+    const targetMonth = isAfterSecondWeek ? currentMonth + 1 : currentMonth;
+    const targetYear = targetMonth > 11 ? currentYear + 1 : currentYear;
+    const adjustedMonth = targetMonth > 11 ? 0 : targetMonth;
+
+    // Encontrar el primer día de ese tipo en el mes objetivo
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(targetYear, adjustedMonth, day);
+      if (d.getMonth() !== adjustedMonth) break; // Mes cambió, salir
+      if (d.getDay() === targetDay) {
+        return {
+          date: d.toISOString().split("T")[0],
+          isNextMonth: isAfterSecondWeek,
+        };
+      }
+    }
+
+    return null;
+  }
+
+  function getRecurrentEndDate(startDate) {
+    if (!startDate) return "";
+
+    const start = new Date(startDate);
+    const year = start.getFullYear();
+    const month = start.getMonth();
+    const lastDay = new Date(year, month + 1, 0);
+    return lastDay.toISOString().split("T")[0];
+  }
+
   // Horarios válidos para la clase seleccionada
   function getValidStartTimes(cls) {
-    if (!cls || !cls.startTime || !cls.endTime) return [];
+    if (!cls || !cls.startTime || !cls.endTime) {
+      console.log("getValidStartTimes: Clase inválida o sin horarios", cls);
+      return [];
+    }
+
+    console.log("getValidStartTimes: Procesando clase", cls);
+    console.log("Horario de clase:", cls.startTime, "a", cls.endTime);
+
     const [sh, sm] = cls.startTime.split(":").map(Number);
     const [eh, em] = cls.endTime.split(":").map(Number);
     const startMin = sh * 60 + sm;
     const endMin = eh * 60 + em;
+
+    console.log("Minutos de inicio:", startMin, "Minutos de fin:", endMin);
+
     const valid = [];
+    // Generar slots cada 30 minutos, cada slot dura 2 horas
     for (let min = startMin; min <= endMin - 120; min += 30) {
       const h = Math.floor(min / 60)
         .toString()
         .padStart(2, "0");
       const m = (min % 60).toString().padStart(2, "0");
-      valid.push(`${h}:${m}`);
+      valid.push(`${h}:${m}:00`); // Agregar segundos para el backend
     }
+
+    console.log("Horarios válidos generados:", valid);
     return valid;
   }
 
   function getEndTimeFromStart(start) {
     if (!start) return "";
-    const [h, m] = start.split(":").map(Number);
+    const timeParts = start.split(":");
+    const h = parseInt(timeParts[0]);
+    const m = parseInt(timeParts[1]);
     const date = new Date(2000, 0, 1, h, m);
     date.setHours(date.getHours() + 2);
-    return date.toTimeString().slice(0, 5);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}:00`; // Devolver con segundos para el backend
   }
 
   function getLastDayOfMonth() {
@@ -209,17 +287,39 @@ function BookingSystem() {
     return lastDay.toISOString().split("T")[0];
   }
 
+  // Efecto para actualizar fechas automáticas en reservas recurrentes
+  useEffect(() => {
+    if (bookingData.bookingType === "RECURRENTE" && selectedClass) {
+      const recurrentInfo = getRecurrentStartDate(selectedClass);
+      if (recurrentInfo) {
+        const endDate = getRecurrentEndDate(recurrentInfo.date);
+        setBookingData((prev) => ({
+          ...prev,
+          bookingDate: recurrentInfo.date,
+          recurrenceEndDate: endDate,
+        }));
+      }
+    }
+  }, [bookingData.bookingType, selectedClass]);
+
   // Slots disponibles
   useEffect(() => {
     if (bookingData.classEntity.id && bookingData.bookingDate) {
       if (selectedClass) {
+        console.log("Calculando slots disponibles para:", selectedClass);
+        console.log("Fecha seleccionada:", bookingData.bookingDate);
+
         const validTimes = getValidStartTimes(selectedClass);
+        console.log("Horarios válidos:", validTimes);
+
         setAvailableSlots(
           validTimes.map((startTime) => ({
             startTime,
             endTime: getEndTimeFromStart(startTime),
             available: true,
-            displayText: `${startTime} - ${getEndTimeFromStart(startTime)}`,
+            displayText: `${startTime.substring(0, 5)} - ${getEndTimeFromStart(
+              startTime
+            ).substring(0, 5)}`, // Mostrar sin segundos al usuario
           }))
         );
       }
@@ -275,68 +375,74 @@ function BookingSystem() {
     }
 
     try {
-      const payload = {
-        ...bookingData,
-        classId: bookingData.classEntity.id,
-        endTime: availableSlots.find(
-          (slot) => slot.startTime === bookingData.startTime
-        )?.endTime,
+      const bookingPayload = {
+        classId: parseInt(bookingData.classEntity.id),
+        bookingDate: bookingData.bookingDate,
+        startTime: bookingData.startTime,
+        endTime: bookingData.endTime,
+        bookingType: bookingData.bookingType,
+        notes: bookingData.notes || "",
+        ...(bookingData.bookingType === "RECURRENTE" && {
+          recurrenceEndDate: bookingData.recurrenceEndDate,
+        }),
       };
 
-      // Enviar la reserva al backend
-      const resultAction = await dispatch(createBooking(payload));
+      console.log("🔍 Datos completos antes de enviar:");
+      console.log("- bookingData:", bookingData);
+      console.log("- selectedClass:", selectedClass);
+      console.log("- bookingPayload final:", bookingPayload);
 
-      if (createBooking.fulfilled.match(resultAction)) {
-        dispatch(fetchMyBookings());
-
-        setBookingData({
-          classEntity: { id: "" },
-          bookingDate: "",
-          startTime: "",
-          bookingType: "PUNTUAL",
-          recurrenceEndDate: "",
-          notes: "",
-        });
-        setStep(1);
-        setShowSummary(false);
-        toast.success(
-          "¡Reserva enviada exitosamente! Te contactaremos para confirmar."
-        );
-      } else {
-        // Manejar errores específicos
-        const errorMessage = resultAction.payload || "Error desconocido";
-
-        if (
-          errorMessage.toLowerCase().includes("conflict") ||
-          errorMessage.toLowerCase().includes("conflicto") ||
-          errorMessage.toLowerCase().includes("ya existe") ||
-          errorMessage.toLowerCase().includes("cupo")
-        ) {
-          toast.error("⚠️ No se pudo crear la reserva: " + errorMessage);
-        } else {
-          toast.error("Error al crear la reserva: " + errorMessage);
-        }
+      // Validar que todos los campos requeridos estén presentes
+      if (!bookingPayload.classId) {
+        toast.error("Error: ID de clase no válido");
+        return;
       }
-    } catch (error) {
-      console.error("Error en handleSubmit:", error);
-      toast.error(
-        "Error inesperado al enviar la reserva. Por favor, intenta nuevamente."
+      if (!bookingPayload.bookingDate) {
+        toast.error("Error: Fecha de reserva requerida");
+        return;
+      }
+      if (!bookingPayload.startTime) {
+        toast.error("Error: Hora de inicio requerida");
+        return;
+      }
+      if (!bookingPayload.endTime) {
+        toast.error("Error: Hora de fin requerida");
+        return;
+      }
+
+      await dispatch(createBooking(bookingPayload)).unwrap();
+      toast.success(
+        "¡Reserva enviada exitosamente! Te llegará un email de confirmación con los detalles.",
+        {
+          duration: 5000,
+        }
       );
+
+      // Reset form
+      setStep(1);
+      setBookingData({
+        classEntity: { id: "" },
+        bookingDate: "",
+        startTime: "",
+        endTime: "",
+        bookingType: "PUNTUAL",
+        recurrenceEndDate: "",
+        notes: "",
+      });
+      setSelectedClass(null);
+      setShowSummary(false);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      toast.error(error.message || "Error al crear la reserva");
     }
   };
 
-  const toastShown = useRef(false);
-
-  // Notificación de éxito
+  // Reset success state
   useEffect(() => {
-    if (success && !toastShown.current) {
-      toastShown.current = true;
-      toast.success("¡Reserva realizada con éxito!");
-      dispatch(clearBookingSuccess());
-      dispatch(fetchBookings());
+    if (success) {
       setTimeout(() => {
-        toastShown.current = false;
-      }, 500);
+        dispatch(clearBookingSuccess());
+      }, 3000);
     }
   }, [success, dispatch]);
 
@@ -412,6 +518,17 @@ function BookingSystem() {
           ? getValidDatesForClassWeekDay(selectedClass, bookingData.bookingType)
           : [];
         const noValidDates = selectedClass && validDates.length === 0;
+
+        console.log("Paso 2 - Clase seleccionada:", selectedClass);
+        console.log("Fechas válidas calculadas:", validDates);
+        console.log("Slots disponibles:", availableSlots);
+        console.log("Tipo de reserva:", bookingData.bookingType);
+
+        if (bookingData.bookingType === "RECURRENTE" && selectedClass) {
+          const recurrentInfo = getRecurrentStartDate(selectedClass);
+          console.log("Info recurrente:", recurrentInfo);
+        }
+
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
@@ -458,57 +575,85 @@ function BookingSystem() {
               </div>
             </div>
             {/* Fecha */}
-            <div>
-              <label
-                htmlFor="date"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Fecha preferida *
-              </label>
-              {noValidDates ? (
-                <div className="text-red-500 text-sm mb-2">
-                  No hay fechas disponibles para esta clase. Por favor
-                  comunícate con el taller.
-                </div>
-              ) : selectedClass ? (
-                <select
-                  id="date"
-                  value={bookingData.bookingDate}
-                  onChange={(e) =>
-                    setBookingData((prev) => ({
-                      ...prev,
-                      bookingDate: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  required
-                  disabled={bookingData.bookingType === "RECURRENTE"}
+            {bookingData.bookingType === "PUNTUAL" ? (
+              <div>
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  <option value="">Selecciona una fecha</option>
-                  {validDates.map((date) => (
-                    <option key={date} value={date}>
-                      {date}
-                    </option>
-                  ))}
-                </select>
-              ) : (
+                  Fecha preferida *
+                </label>
+                {noValidDates ? (
+                  <div className="text-red-500 text-sm mb-2">
+                    No hay fechas disponibles para esta clase. Por favor
+                    comunícate con el taller.
+                  </div>
+                ) : selectedClass ? (
+                  <select
+                    id="date"
+                    value={bookingData.bookingDate}
+                    onChange={(e) =>
+                      setBookingData((prev) => ({
+                        ...prev,
+                        bookingDate: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                  >
+                    <option value="">Selecciona una fecha</option>
+                    {validDates.map((date) => (
+                      <option key={date} value={date}>
+                        {date}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="date"
+                    id="date"
+                    value={bookingData.bookingDate}
+                    onChange={(e) =>
+                      setBookingData((prev) => ({
+                        ...prev,
+                        bookingDate: e.target.value,
+                      }))
+                    }
+                    min={new Date().toISOString().split("T")[0]}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                    disabled={!!selectedClass}
+                  />
+                )}
+              </div>
+            ) : (
+              // Para RECURRENTE - mostrar fecha calculada automáticamente
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha de inicio (calculada automáticamente)
+                </label>
                 <input
                   type="date"
-                  id="date"
                   value={bookingData.bookingDate}
-                  onChange={(e) =>
-                    setBookingData((prev) => ({
-                      ...prev,
-                      bookingDate: e.target.value,
-                    }))
-                  }
-                  min={new Date().toISOString().split("T")[0]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  required
-                  disabled={!!selectedClass}
+                  readOnly
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
                 />
-              )}
-            </div>
+                {selectedClass &&
+                  getRecurrentStartDate(selectedClass)?.isNextMonth && (
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-blue-800 text-sm">
+                        <strong>📅 Inicio en el próximo mes:</strong> Como
+                        estamos después de la segunda semana, tu clase
+                        recurrente comenzará el próximo mes. Si deseas asistir a
+                        clases en el mes actual, puedes reservarlas como{" "}
+                        <strong>clases puntuales</strong> (se abonan por
+                        separado).
+                      </p>
+                    </div>
+                  )}
+              </div>
+            )}
             {/* Hora inicio y fin */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -563,27 +708,63 @@ function BookingSystem() {
             {bookingData.bookingType === "RECURRENTE" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha de fin de recurrencia *
+                  Fecha de finalización *
                 </label>
                 <input
                   type="date"
-                  value={getLastDayOfMonth()}
+                  value={bookingData.recurrenceEndDate}
                   readOnly
                   disabled
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
                 />
                 <div className="text-xs text-gray-500 mt-1">
-                  La recurrencia finaliza automáticamente el último día del mes.
+                  La clase se repetirá semanalmente hasta el último día del mes
+                  correspondiente.
                 </div>
               </div>
             )}
-            {step === 2 && selectedClass && (
+            {step === 2 && selectedClass && bookingData.bookingDate && (
               <div className="text-sm text-gray-500 mb-2">
-                Reservarás para la clase: <b>{selectedClass.name}</b> el{" "}
-                <b>{bookingData.bookingDate}</b> de{" "}
-                <b>
-                  {formatTimeRange(bookingData.startTime, bookingData.endTime)}
-                </b>
+                {bookingData.bookingType === "PUNTUAL" ? (
+                  <>
+                    Reservarás para la clase: <b>{selectedClass.name}</b> el{" "}
+                    <b>{bookingData.bookingDate}</b>
+                    {bookingData.startTime && (
+                      <>
+                        {" "}
+                        de{" "}
+                        <b>
+                          {formatTimeRange(
+                            bookingData.startTime,
+                            bookingData.endTime
+                          )}
+                        </b>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    Reservarás la clase <b>{selectedClass.name}</b> de forma
+                    recurrente
+                    {bookingData.startTime && (
+                      <>
+                        {" "}
+                        los {selectedClass.weekDay}s de{" "}
+                        <b>
+                          {formatTimeRange(
+                            bookingData.startTime,
+                            bookingData.endTime
+                          )}
+                        </b>
+                      </>
+                    )}
+                    <br />
+                    <span className="text-blue-600">
+                      Desde el {bookingData.bookingDate} hasta el{" "}
+                      {bookingData.recurrenceEndDate}
+                    </span>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -644,6 +825,8 @@ function BookingSystem() {
                       <span className="text-gray-600">Fecha:</span>
                       <span className="font-medium">
                         {bookingData.bookingDate}
+                        {bookingData.bookingType === "RECURRENTE" &&
+                          " (inicio automático)"}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -692,13 +875,12 @@ function BookingSystem() {
       case 1:
         return bookingData.classEntity.id !== "";
       case 2:
-        return (
-          bookingData.bookingDate !== "" &&
-          bookingData.startTime !== "" &&
-          (bookingData.bookingType === "PUNTUAL" ||
-            (bookingData.bookingType === "RECURRENTE" &&
-              bookingData.recurrenceEndDate !== ""))
-        );
+        if (bookingData.bookingType === "PUNTUAL") {
+          return bookingData.bookingDate !== "" && bookingData.startTime !== "";
+        } else {
+          // Para recurrente, solo necesita horario (fecha se calcula automáticamente)
+          return bookingData.startTime !== "";
+        }
       case 3:
         return isAuthenticated;
       default:
@@ -754,22 +936,30 @@ function BookingSystem() {
 
         {/* Loading State */}
         {bookingLoading && (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-            <span className="ml-3 text-gray-600">Procesando...</span>
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Procesando tu reserva...</p>
+          </div>
+        )}
+
+        {/* Success State */}
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md mb-6">
+            🎉 ¡Reserva creada exitosamente! Te contactaremos pronto para
+            confirmar los detalles.
           </div>
         )}
 
         {/* Progress Indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-center space-x-4">
+          <div className="flex items-center justify-center space-x-4 mb-4">
             {[1, 2, 3].map((stepNumber) => (
               <div key={stepNumber} className="flex items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                     step >= stepNumber
-                      ? "bg-yellow-500 text-gray-900"
-                      : "bg-gray-200 text-gray-500"
+                      ? "bg-yellow-500 text-white"
+                      : "bg-gray-300 text-gray-600"
                   }`}
                 >
                   {stepNumber}
@@ -777,22 +967,21 @@ function BookingSystem() {
                 {stepNumber < 3 && (
                   <div
                     className={`w-16 h-1 mx-2 ${
-                      step > stepNumber ? "bg-yellow-500" : "bg-gray-200"
+                      step > stepNumber ? "bg-yellow-500" : "bg-gray-300"
                     }`}
                   />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex justify-center mt-4 space-x-8 text-sm text-gray-600">
-            <span className={step >= 1 ? "font-medium text-yellow-600" : ""}>
-              Servicio
-            </span>
-            <span className={step >= 2 ? "font-medium text-yellow-600" : ""}>
-              Fecha y Hora
-            </span>
-            <span className={step >= 3 ? "font-medium text-yellow-600" : ""}>
-              Contacto
+          <div className="text-center">
+            <span className="text-sm text-gray-500">
+              Paso {step} de 3:{" "}
+              {step === 1
+                ? "Seleccionar Clase"
+                : step === 2
+                ? "Fecha y Hora"
+                : "Confirmación"}
             </span>
           </div>
         </div>
@@ -800,46 +989,44 @@ function BookingSystem() {
         {/* Form */}
         <form
           onSubmit={showSummary ? handleSubmit : handleSummary}
-          className="bg-white rounded-xl shadow-lg p-8"
+          className="bg-white rounded-lg shadow-lg p-8 mb-8"
         >
           {renderStepContent()}
 
-          {/* Navigation Buttons */}
+          {/* Navigation */}
           <div className="flex justify-between mt-8">
-            <button
-              type="button"
-              onClick={prevStep}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                step === 1
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-              disabled={step === 1}
-            >
-              Anterior
-            </button>
-            {step < 3 ? (
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Anterior
+              </button>
+            )}
+            {step < 3 && (
               <button
                 type="button"
                 onClick={nextStep}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                disabled={!isStepValid()}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ml-auto ${
                   isStepValid()
                     ? "bg-yellow-500 hover:bg-yellow-600 text-gray-900"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
-                disabled={!isStepValid()}
               >
                 Siguiente
               </button>
-            ) : (
+            )}
+            {step === 3 && (
               <button
                 type="submit"
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                disabled={!isStepValid()}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ml-auto ${
                   isStepValid()
                     ? "bg-yellow-500 hover:bg-yellow-600 text-gray-900"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
-                disabled={!isStepValid()}
               >
                 {showSummary ? "Enviar Reserva" : "Ver Resumen"}
               </button>
