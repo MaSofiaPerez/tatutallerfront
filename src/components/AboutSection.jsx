@@ -4,6 +4,7 @@ import {
   HiSparkles,
   HiUserGroup,
 } from "react-icons/hi2";
+import { Link } from "react-router-dom";
 
 function AboutSection() {
   const features = [
@@ -107,9 +108,12 @@ function AboutSection() {
 
             {/* Call to Action */}
             <div className="mt-8">
-              <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg">
+              <Link
+                to="/equipo"
+                className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg inline-block"
+              >
                 Conoce Nuestro Equipo
-              </button>
+              </Link>
             </div>
           </div>
         </div>

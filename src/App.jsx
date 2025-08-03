@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import TeamSection from "./components/TeamSection";
 import Home from "./Features/Home";
 import Login from "./Features/Login";
 import Register from "./Features/Register";
@@ -48,6 +49,7 @@ function App() {
           <Route path="/ciclo-formacion" element={<CicloFormacion />} />
           <Route path="/cowork-ceramico" element={<CoworkCeramico />} />
           <Route path="/alquiler-hornos" element={<AlquilerHornos />} />
+          <Route path="/equipo" element={<TeamSection />} />
           <Route
             path="/admin"
             element={
