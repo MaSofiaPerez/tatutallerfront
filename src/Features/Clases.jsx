@@ -26,10 +26,10 @@ function Clases() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-amber-500 to-orange-400 text-white py-16">
+      <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <HiSparkles className="w-20 h-20 mx-auto mb-6 text-amber-200" />
+            <HiSparkles className="w-20 h-20 mx-auto mb-6 text-yellow-200" />
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Clases de Cerámica
             </h1>
@@ -44,7 +44,7 @@ function Clases() {
                     .getElementById("reserva-sistema")
                     .scrollIntoView({ behavior: "smooth" })
                 }
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-amber-600 transition-colors"
+                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-yellow-600 transition-colors"
               >
                 Reservar Ahora
               </button>
