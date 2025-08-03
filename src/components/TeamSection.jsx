@@ -101,19 +101,10 @@ function TeamSection() {
             </h1>
             <div className="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
             <p className="text-xl md:text-2xl max-w-4xl mx-auto mb-8 text-gray-700">
-              Los talleristas que hacen posible la magia de Tatú Taller. Cada
-              uno aporta su experiencia, pasión y estilo único para crear un
-              ambiente de aprendizaje excepcional.
+              Los talleristas que hacen posible de Tatú Taller. Cada uno aporta
+              su experiencia, pasión y estilo único para crear un ambiente de
+              aprendizaje continuo.
             </p>
-
-            {/* Botón para volver */}
-            <Link
-              to="/"
-              className="inline-flex items-center px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded-lg font-semibold transition-colors shadow-lg"
-            >
-              <HiArrowLeft className="w-5 h-5 mr-2" />
-              Volver al Inicio
-            </Link>
           </div>
         </div>
       </section>
@@ -221,8 +212,7 @@ function TeamSection() {
             ¿Te gustaría conocernos en persona?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Ven a visitarnos y conoce a nuestro equipo. Estaremos encantados de
-            mostrarte nuestro taller y responder todas tus preguntas.
+            Vení a visitarnos y conoce a nuestro equipo. ¡Te esperamos!.
           </p>
           <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
             <Link

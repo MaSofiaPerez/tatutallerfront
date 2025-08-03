@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import TeamSection from "./components/TeamSection";
+import Gallery from "./components/Gallery";
 import Home from "./Features/Home";
 import Login from "./Features/Login";
 import Register from "./Features/Register";
@@ -50,6 +51,7 @@ function App() {
           <Route path="/cowork-ceramico" element={<CoworkCeramico />} />
           <Route path="/alquiler-hornos" element={<AlquilerHornos />} />
           <Route path="/equipo" element={<TeamSection />} />
+          <Route path="/galeria" element={<Gallery />} />
           <Route
             path="/admin"
             element={
