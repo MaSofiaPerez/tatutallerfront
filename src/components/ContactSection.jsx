@@ -1,44 +1,9 @@
 import { useState } from "react";
-import {
-  HiMapPin,
-  HiPhone,
-  HiEnvelope,
-  HiClock,
-  HiPaperAirplane,
-} from "react-icons/hi2";
+import { HiMapPin, HiPhone, HiEnvelope } from "react-icons/hi2";
 import { FaWhatsapp, FaFacebook, FaInstagram } from "react-icons/fa";
 import InteractiveMap from "./InteractiveMap";
 
 function ContactSection() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-    subject: "consulta",
-  });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Aquí iría la lógica para enviar el formulario
-    console.log("Formulario enviado:", formData);
-    alert("¡Mensaje enviado! Te contactaremos pronto.");
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
-      subject: "consulta",
-    });
-  };
-
   const contactInfo = [
     {
       icon: HiMapPin,

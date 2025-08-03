@@ -49,19 +49,15 @@ function InteractiveMap() {
   const tallerLocations = [
     {
       id: 1,
-      name: "TatuTaller - Sede Principal",
+      name: "TatuTaller",
       address: "Wilson Ferreira Aldunate 1238, Montevideo",
-      coordinates: [-34.9058, -56.1913],
-      phone: "+598 2901 1234",
-      hours: "Lun-Vie: 9:00-20:00 | Sáb: 10:00-18:00",
+      coordinates: [-34.90820560176461, -56.195351189895334],
     },
     {
       id: 2,
-      name: "TatuTaller - Sucursal Centro",
+      name: "TatuTaller",
       address: "Canelones 1033, Montevideo",
-      coordinates: [-34.9042, -56.1879],
-      phone: "+598 2902 5678",
-      hours: "Lun-Vie: 10:00-19:00 | Sáb: 10:00-17:00",
+      coordinates: [-34.908666899314554, -56.19362673037519],
     },
   ];
 
