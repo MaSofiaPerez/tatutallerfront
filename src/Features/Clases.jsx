@@ -1,15 +1,16 @@
 /**
- * VERSIÓN TEMPORAL CON DATOS ESTÁTICOS
+ * VERSIÓN MODIFICADA SIN INTEGRACIÓN A REDUX
  *
- * Esta versión de Clases.jsx usa datos estáticos para evitar el bucle infinito
- * que sobrecarga el backend. Una vez resuelto el problema de bucle infinito,
- * se debe restaurar la lógica de Redux para consumir datos reales del backend.
- *
- * Ver el historial de cambios para la versión original con Redux.
+ * Esta es la versión de Clases.jsx sin la integración a Redux. Ahora se
+ * consumen los datos directamente desde el backend utilizando fetch.
  */
+
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+
+import { useEffect, useState } from "react";
+
 import BookingSystem from "../components/BookingSystem";
 import {
   HiAcademicCap,
@@ -18,10 +19,35 @@ import {
   HiStar,
   HiCalendarDays,
   HiSparkles,
+
 } from "react-icons/hi2";
 
 function Clases() {
+  const [classes, setClasses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
+
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetch("http://localhost:8080/api/public/classes-grid")
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al cargar las clases");
+        return res.json();
+      })
+      .then((data) => {
+        setClasses(data);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setError("Ocurrió un error al cargar las clases.");
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <div>Cargando clases...</div>;
+  if (error) return <div style={{ color: "red" }}>{error}</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,8 +60,11 @@ function Clases() {
               Clases de Cerámica
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
+
               Aprende el arte de la cerámica con nosotros. Desde principiantes
               hasta técnicas avanzadas de modelado y esmaltado.
+
+
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -56,6 +85,7 @@ function Clases() {
       {/* Información General de Clases */}
       <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Modalidades de Clases
@@ -284,6 +314,7 @@ function Clases() {
                     <p className="text-gray-600">
                       Aprende con ceramistas apasionados que te guiarán paso a
                       paso en tu proceso creativo.
+
                     </p>
                   </div>
                 </div>
@@ -297,8 +328,10 @@ function Clases() {
                       Grupos Reducidos
                     </h3>
                     <p className="text-gray-600">
+
                       Máximo 6 estudiantes por clase para garantizar atención
                       personalizada y seguimiento individual.
+
                     </p>
                   </div>
                 </div>
@@ -312,8 +345,7 @@ function Clases() {
                       Material Incluido
                     </h3>
                     <p className="text-gray-600">
-                      Todos los materiales necesarios están incluidos: arcilla,
-                      herramientas, esmaltes y acceso al horno.
+                      Todos los materiales necesarios están incluidos: arcilla, herramientas, esmaltes y acceso al horno.
                     </p>
                   </div>
                 </div>

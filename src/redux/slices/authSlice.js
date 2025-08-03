@@ -213,15 +213,15 @@ export const fetchUserDetails = createAsyncThunk(
 );
 
 // Leer usuario y token de localStorage al iniciar
-const storedToken = localStorage.getItem('token');
-const storedUser = localStorage.getItem('user');
+const userFromStorage = JSON.parse(localStorage.getItem('user') || 'null');
+const tokenFromStorage = localStorage.getItem('token');
 
 const initialState = {
-  user: null,
-  token: storedToken,
-  isAuthenticated: false,
-  isAdmin: false,
-  isTeacher: false,
+  isAuthenticated: !!tokenFromStorage,
+  user: userFromStorage,
+  token: tokenFromStorage,
+  isAdmin: userFromStorage?.role?.toLowerCase() === 'admin' || userFromStorage?.role?.toLowerCase() === 'administrator',
+  isTeacher: userFromStorage?.role?.toLowerCase() === 'teacher' || userFromStorage?.role?.toLowerCase() === 'instructor',
   isLoading: false,
   error: null,
 };

@@ -33,7 +33,6 @@ function Tienda() {
   const handleAddToCart = (product) => {
     // Aquí irá la lógica para agregar al carrito
     console.log("Agregado al carrito:", product);
-    alert(`${product.name} agregado al carrito`);
   };
 
   if (isLoading) {

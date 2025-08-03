@@ -419,20 +419,26 @@ export const createBookingWithNotification = createAsyncThunk(
   }
 );
 
+const initialState = {
+  bookings: [],
+  userBookings: [],
+  availableSlots: [],
+  isLoading: false,
+  error: null,
+  currentBooking: null,
+  notificationStatus: null, // 'sending', 'sent', 'failed'
+  notificationError: null,
+  success: false,
+};
+
 const bookingSlice = createSlice({
   name: 'booking',
-  initialState: {
-    bookings: [],
-    userBookings: [],
-    availableSlots: [],
-    isLoading: false,
-    error: null,
-    currentBooking: null,
-    notificationStatus: null, // 'sending', 'sent', 'failed'
-    notificationError: null,
-  },
+  initialState,
   reducers: {
     clearError: (state) => {
+      state.error = null;
+    },
+    clearBookingError: (state) => {   // <-- Agrega este reducer
       state.error = null;
     },
     setCurrentBooking: (state, action) => {
@@ -440,6 +446,9 @@ const bookingSlice = createSlice({
     },
     clearCurrentBooking: (state) => {
       state.currentBooking = null;
+    },
+    clearBookingSuccess: (state) => {
+      state.success = false;
     },
   },
   extraReducers: (builder) => {
@@ -454,10 +463,12 @@ const bookingSlice = createSlice({
         state.bookings.push(action.payload);
         state.currentBooking = action.payload;
         state.error = null;
+        state.success = true;
       })
       .addCase(createBooking.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.success = false;
       })
       
       // Fetch bookings
@@ -591,5 +602,5 @@ const bookingSlice = createSlice({
   },
 });
 
-export const { clearError, setCurrentBooking, clearCurrentBooking } = bookingSlice.actions;
+export const { clearError, clearBookingError, setCurrentBooking, clearCurrentBooking, clearBookingSuccess } = bookingSlice.actions;
 export default bookingSlice.reducer;
