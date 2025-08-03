@@ -44,15 +44,12 @@ function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900">
-                Piezas y moldes personalizados
+                Tienda Web
               </h3>
               <p className="text-gray-600 mb-4">
-                Creamos moldes de yeso y piezas a medida adaptadas a tu estilo y
-                necesidades.
+                Contamos con una tienda online para que puedas comprar
+                materiales cerámicos desde la comodidad de tu hogar.
               </p>
-              <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
-                Ver más →
-              </button>
             </div>
 
             <div className="bg-gray-50 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow border border-gray-100">
@@ -78,9 +75,6 @@ function Home() {
                 Clases adaptadas a tu ritmo sin importar tu nivel de
                 experiencia.
               </p>
-              <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
-                Ver más →
-              </button>
             </div>
 
             <div className="bg-gray-50 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow border border-gray-100">
@@ -106,9 +100,6 @@ function Home() {
                 Servicio completo de cocción y espacio para poder crear tus
                 propias piezas sin necesidad de montar tu propio taller.
               </p>
-              <button className="text-yellow-600 font-medium hover:text-yellow-700 transition-colors">
-                Ver más →
-              </button>
             </div>
           </div>
         </div>
@@ -130,13 +121,7 @@ function Home() {
               to="/clases"
               className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-block"
             >
-              Ver Clases Disponibles
-            </Link>
-            <Link
-              to="/clases#clases-disponibles"
-              className="bg-transparent border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-block"
-            >
-              Reservar Ahora
+              Ver y Reservar Clases
             </Link>
           </div>
         </div>

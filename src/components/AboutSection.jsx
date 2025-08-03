@@ -10,21 +10,21 @@ function AboutSection() {
   const features = [
     {
       icon: HiCheckBadge,
-      title: "Experiencia Comprobada",
+      title: "Compromiso Artístico",
       description:
-        "Más de 10 años creando piezas cerámicas únicas y personalizadas.",
+        "Más de una década de exploración y descubrimiento en el mundo de la cerámica.",
     },
     {
       icon: HiHeart,
-      title: "Calidad y Precisión",
+      title: "Variedad de Estilos",
       description:
-        "Técnicas tradicionales y modernas con máximos estándares de calidad en cada pieza.",
+        "Técnicas tradicionales y modernas para que elijas lo que más te representa",
     },
     {
       icon: HiSparkles,
-      title: "Ceramistas Especializados",
+      title: "Talleristas Especializados",
       description:
-        "Equipo de profesionales expertos en diversas técnicas y estilos cerámicos.",
+        "Equipo de profesionales enfocados en trasmitir diversas técnicas y estilos.",
     },
     {
       icon: HiUserGroup,

@@ -42,8 +42,8 @@ function ContactSection() {
   const contactInfo = [
     {
       icon: HiMapPin,
-      title: "Dirección",
-      content: "Canelones 1033, Montevideo, Uruguay",
+      title: "Ubicaciones",
+      content: "Canelones 1033 • Wilson Ferreira Aldunate 1238",
       color: "text-blue-600",
       bgColor: "bg-blue-100",
     },
@@ -60,13 +60,6 @@ function ContactSection() {
       content: "tatutaller@gmail.com",
       color: "text-purple-600",
       bgColor: "bg-purple-100",
-    },
-    {
-      icon: HiClock,
-      title: "Horarios",
-      content: "Lun-Vi: 10:00-20:00",
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
     },
   ];
 
@@ -85,193 +78,69 @@ function ContactSection() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div className="bg-white rounded-2xl p-8 shadow-2xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Envíanos un mensaje
-            </h3>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Nombre completo *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                  placeholder="Tu nombre completo"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                    placeholder="tu@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                    placeholder="Tu número de teléfono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="subject"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Motivo de consulta
-                </label>
-                <select
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                >
-                  <option key="consulta" value="consulta">
-                    Consulta general
-                  </option>
-                  <option key="cowork" value="cowork">
-                    Alquiler de espacio de trabajo
-                  </option>
-                  <option key="clase" value="clase">
-                    Información sobre clases
-                  </option>
-                  <option key="pieza" value="pieza">
-                    Encargo de pieza personalizada
-                  </option>
-                  <option key="coccion" value="coccion">
-                    Servicio de cocción
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Mensaje *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={5}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors resize-none"
-                  placeholder="Cuéntanos sobre tu proyecto en cerámica, dudas sobre clases, o cualquier información que nos ayude a brindarte un mejor servicio..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+        {/* Contact Information & Map */}
+        <div className="space-y-8">
+          {/* Contact Cards */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {contactInfo.map((info, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl p-6 shadow-lg text-center"
               >
-                <HiPaperAirplane className="w-5 h-5" />
-                Enviar mensaje
-              </button>
-            </form>
+                <div
+                  className={`w-12 h-12 ${info.bgColor} rounded-lg flex items-center justify-center mx-auto mb-4`}
+                >
+                  <info.icon className={`w-6 h-6 ${info.color}`} />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2 text-base">
+                  {info.title}
+                </h4>
+                <p className="text-gray-600 text-sm">{info.content}</p>
+              </div>
+            ))}
           </div>
 
-          {/* Contact Information & Map */}
-          <div className="space-y-8">
-            {/* Contact Cards */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              {contactInfo.map((info, index) => (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
-                  <div
-                    className={`w-12 h-12 ${info.bgColor} rounded-lg flex items-center justify-center mb-4`}
-                  >
-                    <info.icon className={`w-6 h-6 ${info.color}`} />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">
-                    {info.title}
-                  </h4>
-                  <p className="text-gray-600">{info.content}</p>
-                </div>
-              ))}
+          {/* Map */}
+          <div className="bg-white rounded-xl p-6 shadow-lg">
+            <h4 className="font-semibold text-gray-900 mb-4">Ubicación</h4>
+            <div className="h-64 bg-gray-200 rounded-lg overflow-hidden">
+              <InteractiveMap />
             </div>
+          </div>
 
-            {/* Map placeholder */}
-            <div className="bg-white rounded-xl p-6 shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-4">Ubicación</h4>
-              <div className="h-64 bg-gray-200 rounded-lg overflow-hidden">
-                <InteractiveMap />
-              </div>
-            </div>
-
-            {/* Social Media & Additional Info */}
-            <div className="bg-yellow-500 rounded-xl p-6 text-gray-900">
-              <h4 className="font-bold text-xl mb-4">¡Síguenos en redes!</h4>
-              <p className="mb-4">
-                Mantente al día con nuestros trabajos más recientes y
-                promociones especiales.
+          {/* Social Media - Compact */}
+          <div className="flex justify-center">
+            <div className="bg-yellow-500 rounded-xl p-6 text-gray-900 text-center inline-block">
+              <h4 className="font-bold text-xl mb-3">¡Síguenos en redes!</h4>
+              <p className="mb-4 text-sm">
+                Mantente al día con nuestros trabajos más recientes
               </p>
-              <div className="flex space-x-4">
+              <div className="flex gap-3">
                 <a
                   href="https://www.instagram.com/tatutaller"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm"
                 >
-                  <FaInstagram className="w-5 h-5" />
+                  <FaInstagram className="w-4 h-4" />
                   Instagram
                 </a>
                 <a
                   href="https://www.facebook.com/share/1FshwF9AD9/?mibextid=wwXIfr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm"
                 >
-                  <FaFacebook className="w-5 h-5" />
+                  <FaFacebook className="w-4 h-4" />
                   Facebook
                 </a>
                 <a
                   href="https://wa.me/59898028302"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm"
                 >
-                  <FaWhatsapp className="w-5 h-5" />
+                  <FaWhatsapp className="w-4 h-4" />
                   WhatsApp
                 </a>
               </div>
