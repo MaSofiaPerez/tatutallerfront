@@ -72,7 +72,7 @@ function Navbar() {
             <li>
               <Link
                 to="/clases"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                className="block text-white bg-yellow-500 hover:bg-yellow-600 transition-colors px-4 py-2 rounded-lg"
                 onClick={closeMenus}
               >
                 Clases de Cerámica
@@ -81,7 +81,7 @@ function Navbar() {
             <li>
               <Link
                 to="/ciclo-formacion"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                className="block text-white bg-yellow-500 hover:bg-yellow-600 transition-colors px-4 py-2 rounded-lg"
                 onClick={closeMenus}
               >
                 Ciclo de Formación
@@ -89,17 +89,17 @@ function Navbar() {
             </li>
             <li>
               <Link
-                to="/cowork"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                to="/cowork-ceramico"
+                className="block text-white bg-red-500 hover:bg-red-600 transition-colors px-4 py-2 rounded-lg"
                 onClick={closeMenus}
               >
-                Cowork
+                Cowork Cerámico
               </Link>
             </li>
             <li>
               <Link
                 to="/alquiler-hornos"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                className="block text-white bg-green-500 hover:bg-green-600 transition-colors px-4 py-2 rounded-lg"
                 onClick={closeMenus}
               >
                 Alquiler de Hornos
@@ -129,7 +129,7 @@ function Navbar() {
             <li>
               <Link
                 to="/tienda"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                className="block text-white bg-gray-900 hover:bg-gray-800 transition-colors px-4 py-2 rounded-lg"
                 onClick={closeMenus}
               >
                 Tienda Online
@@ -139,7 +139,7 @@ function Navbar() {
               <li>
                 <Link
                   to="/mi-cuenta"
-                  className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                  className="block text-gray-700 hover:text-gray-900 transition-colors"
                   onClick={closeMenus}
                 >
                   Mi Cuenta
@@ -149,7 +149,7 @@ function Navbar() {
             <li>
               <Link
                 to="/account"
-                className="block text-gray-700 hover:text-yellow-600 transition-colors"
+                className="block text-gray-700 hover:text-gray-900 transition-colors"
                 onClick={closeMenus}
               >
                 Información de Cuenta
@@ -296,29 +296,29 @@ function Navbar() {
               </li>
               <li>
                 <Link
-                  to="/cowork"
-                  className="text-gray-700 hover:text-yellow-600 font-medium transition-colors relative group"
+                  to="/cowork-ceramico"
+                  className="text-gray-700 hover:text-red-600 font-medium transition-colors relative group"
                 >
-                  Cowork
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-600 transition-all group-hover:w-full"></span>
+                  Cowork Cerámico
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 transition-all group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/alquiler-hornos"
-                  className="text-gray-700 hover:text-yellow-600 font-medium transition-colors relative group"
+                  className="text-gray-700 hover:text-green-600 font-medium transition-colors relative group"
                 >
                   Alquiler de Hornos
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-600 transition-all group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/tienda"
-                  className="text-gray-700 hover:text-yellow-600 font-medium transition-colors relative group"
+                  className="text-gray-700 hover:text-gray-900 font-medium transition-colors relative group"
                 >
                   Tienda
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-600 transition-all group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
                 </Link>
               </li>
             </ul>

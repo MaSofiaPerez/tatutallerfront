@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
+import { Link } from "react-router-dom";
 
 function ImageSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -102,15 +103,24 @@ function ImageSlider() {
                   {slide.description}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">
+                  <Link
+                    to="/clases"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg inline-block text-center"
+                  >
                     Reservar Clase
-                  </button>
-                  <button className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors shadow-lg">
+                  </Link>
+                  <Link
+                    to="/galeria"
+                    className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors shadow-lg inline-block text-center"
+                  >
                     Ver Galería
-                  </button>
-                  <button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">
+                  </Link>
+                  <Link
+                    to="/tienda"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg inline-block text-center"
+                  >
                     Ir a Tienda
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

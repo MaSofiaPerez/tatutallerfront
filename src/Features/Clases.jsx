@@ -5,13 +5,21 @@
  * consumen los datos directamente desde el backend utilizando fetch.
  */
 
+
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
 import { useEffect, useState } from "react";
+
 import BookingSystem from "../components/BookingSystem";
 import {
   HiAcademicCap,
   HiUsers,
   HiClock,
   HiStar,
+  HiCalendarDays,
+  HiSparkles,
+
 } from "react-icons/hi2";
 
 function Clases() {
@@ -19,6 +27,7 @@ function Clases() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
+
 
   useEffect(() => {
     setIsLoading(true);
@@ -43,34 +52,28 @@ function Clases() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-700 text-white py-16">
+      <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
+            <HiSparkles className="w-20 h-20 mx-auto mb-6 text-yellow-200" />
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Clases de Cerámica
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
-              Aprende el arte de la cerámica con ceramistas experimentados.
-              Desde principiantes hasta técnicas avanzadas de modelado y esmaltado.
+
+              Aprende el arte de la cerámica con nosotros. Desde principiantes
+              hasta técnicas avanzadas de modelado y esmaltado.
+
+
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() =>
-                  document
-                    .getElementById("clases-disponibles")
-                    .scrollIntoView({ behavior: "smooth" })
-                }
-                className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-8 py-3 rounded-lg font-semibold transition-colors"
-              >
-                Ver Clases Disponibles
-              </button>
               <button
                 onClick={() =>
                   document
                     .getElementById("reserva-sistema")
                     .scrollIntoView({ behavior: "smooth" })
                 }
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors"
+                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-yellow-600 transition-colors"
               >
                 Reservar Ahora
               </button>
@@ -79,103 +82,210 @@ function Clases() {
         </div>
       </div>
 
-      {/* Tipos de Clases */}
-      <section className="py-16 bg-white" id="clases-disponibles">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Información General de Clases */}
+      <section className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Nuestros Cursos
+              Modalidades de Clases
             </h2>
-            <div className="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
+            <div className="w-24 h-1 bg-amber-500 mx-auto mb-6"></div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Ofrecemos diferentes niveles de formación para que puedas desarrollar tus habilidades paso a paso
+              Ofrecemos diferentes modalidades para que puedas elegir la que
+              mejor se adapte a tu ritmo y necesidades
             </p>
           </div>
 
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-yellow-500"></div>
+          {/* Precios y Modalidades */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            {/* Clase Puntual */}
+            <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <HiCalendarDays className="w-8 h-8 text-amber-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Clase Puntual
+              </h3>
+              <div className="text-3xl font-bold text-amber-600 mb-2">
+                $1,400
+              </div>
+              <p className="text-gray-600 text-sm">Por clase única</p>
+              <p className="text-gray-500 text-xs mt-2">
+                Perfecto para asistir ocasionalmente
+              </p>
             </div>
-          ) : error ? (
-            <div className="text-center text-red-600 py-8">
-              Ocurrió un error al cargar las clases.
+
+            {/* Mensual */}
+            <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <HiClock className="w-8 h-8 text-yellow-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Mensual</h3>
+              <div className="text-3xl font-bold text-yellow-600 mb-2">
+                $4,000
+              </div>
+              <p className="text-gray-600 text-sm">Por un mes</p>
+              <p className="text-gray-500 text-xs mt-2">
+                Ideal para evaluar tus preferencias
+              </p>
             </div>
-          ) : classes && classes.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {classes.map((classItem) => (
-                <div
-                  key={classItem.id}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-gray-100"
-                >
-                  <div className="aspect-w-16 aspect-h-9 overflow-hidden">
-                    <img
-                      src={
-                        classItem.image ||
-                        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                      }
-                      alt={classItem.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  </div>
 
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {classItem.name}
-                      </h3>
-                      <span className="text-2xl font-bold text-yellow-600">
-                        ${classItem.price}
-                      </span>
-                    </div>
+            {/* Anual con Suscripción */}
+            <div className="bg-yellow-50 rounded-xl p-6 text-center border border-yellow-300 hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-yellow-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <HiStar className="w-8 h-8 text-yellow-700" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Anual</h3>
+              <div className="text-3xl font-bold text-yellow-700 mb-2">
+                $3,800
+              </div>
+              <p className="text-gray-700 text-sm">
+                Por mes + $500 suscripción
+              </p>
+              <p className="text-gray-600 text-xs mt-2">
+                Suscripción gratuita en marzo
+              </p>
+            </div>
 
-                    <p className="text-gray-600 mb-4">{classItem.description}</p>
+            {/* Clase de Prueba */}
+            <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <HiAcademicCap className="w-8 h-8 text-yellow-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Clase de Prueba
+              </h3>
+              <div className="text-3xl font-bold text-yellow-600 mb-2">
+                $1,400
+              </div>
+              <p className="text-gray-600 text-sm">Primera vez</p>
+              <p className="text-gray-500 text-xs mt-2">
+                Si continúas, solo abonás la diferencia
+              </p>
+            </div>
+          </div>
 
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <HiClock className="w-4 h-4 mr-2" />
-                      <span>Duración: {classItem.duration} min</span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <HiUsers className="w-4 h-4 mr-2" />
-                      <span>
-                        Capacidad máxima: {classItem.capacity} estudiantes
-                      </span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <HiAcademicCap className="w-4 h-4 mr-2" />
-                      <span>Nivel: {classItem.level}</span>
-                    </div>
-
-                    {classItem.includes && (
-                      <div className="space-y-2 mb-6">
-                        <h4 className="font-semibold text-gray-900">Incluye:</h4>
-                        <ul className="text-sm text-gray-600">
-                          {classItem.includes.map((item, index) => (
-                            <li key={index} className="flex items-center">
-                              <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => setSelectedClass(classItem)}
-                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 py-3 rounded-lg font-semibold transition-colors"
-                    >
-                      Reservar Clase
-                    </button>
-                  </div>
+          {/* Información Importante */}
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            {/* Incluido en el Precio */}
+            <div className="bg-gray-50 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <HiStar className="w-5 h-5 text-green-600" />
                 </div>
-              ))}
+                Incluido en el Precio
+              </h3>
+              <ul className="space-y-3">
+                <li className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  Todos los materiales necesarios
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  Horneadas de tus piezas
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  Herramientas de trabajo
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  Recuperación de clases (hasta 1 mes)
+                </li>
+              </ul>
             </div>
-          ) : (
-            <div className="text-center text-gray-500 py-8">
-              No hay clases disponibles en este momento.
+
+            {/* Modalidades de Pago */}
+            <div className="bg-gray-50 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <HiClock className="w-5 h-5 text-blue-600" />
+                </div>
+                Formas de Pago
+              </h3>
+              <ul className="space-y-3">
+                <li className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  Dentro de los primeros 10 días del mes
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  Efectivo o transferencia directa
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  Si comenzás a mitad de mes: las clases se abonan como
+                  puntuales hasta el siguiente mes donde podés optar por mensual
+                  o anual
+                </li>
+              </ul>
             </div>
-          )}
+          </div>
+
+          {/* Información Adicional */}
+          <div className="bg-yellow-50 rounded-xl p-8 mb-12">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Información Importante
+            </h3>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3">
+                  💡 Suscripción Gratuita
+                </h4>
+                <p className="text-gray-700 text-sm mb-4">
+                  Todos los años hasta marzo inclusive, la suscripción de $500
+                  es gratuita. Los alumnos que continúan del año anterior están
+                  exonerados.
+                </p>
+
+                <h4 className="font-semibold text-gray-900 mb-3">
+                  📅 Recuperación de Clases
+                </h4>
+                <p className="text-gray-700 text-sm">
+                  Podés coordinar con tu tallerista para reponer clases fuera
+                  del horario habitual. Tiempo máximo: 1 mes.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3">
+                  🎨 Eventos Especiales
+                </h4>
+                <p className="text-gray-700 text-sm mb-2">
+                  • Muestra Temática Anual
+                </p>
+                <p className="text-gray-700 text-sm mb-4">
+                  • Día del Patrimonio con clases abiertas
+                </p>
+
+                <h4 className="font-semibold text-gray-900 mb-3">
+                  ⚠️ Ausencias Prolongadas
+                </h4>
+                <p className="text-gray-700 text-sm">
+                  Después de 30 días de ausencia se pierde el cupo y hay que
+                  abonar nuevamente la suscripción.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Cowork Cerámico */}
+          <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-xl p-8 text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              ¿Sabías que tenemos Cowork Cerámico?
+            </h3>
+            <p className="text-gray-700 mb-6">
+              Además de los cursos, contamos con un área de cowork equipada para
+              aquellos que deseen realizar piezas por su cuenta en un lugar
+              adecuado para trabajar.
+            </p>
+            <Link
+              to="/cowork-ceramico"
+              className="inline-flex items-center px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors"
+            >
+              Conocer Cowork Cerámico
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -199,10 +309,12 @@ function Clases() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      Instructores Certificados
+                      Talleristas Experimentados
                     </h3>
                     <p className="text-gray-600">
-                      Aprende de ceramistas profesionales con años de experiencia y reconocimiento en la industria.
+                      Aprende con ceramistas apasionados que te guiarán paso a
+                      paso en tu proceso creativo.
+
                     </p>
                   </div>
                 </div>
@@ -216,7 +328,10 @@ function Clases() {
                       Grupos Reducidos
                     </h3>
                     <p className="text-gray-600">
-                      Máximo 12 estudiantes por clase para garantizar atención personalizada y seguimiento individual.
+
+                      Máximo 6 estudiantes por clase para garantizar atención
+                      personalizada y seguimiento individual.
+
                     </p>
                   </div>
                 </div>
