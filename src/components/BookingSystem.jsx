@@ -14,6 +14,7 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import esAR from "date-fns/locale/es";
+import { mockClassesGrid } from "../utils/mockData";
 
 function BookingSystem({ selectedService }) {
   const [step, setStep] = useState(1);
@@ -77,8 +78,10 @@ function BookingSystem({ selectedService }) {
           data
         );
       } catch (e) {
-        setClassesGrid([]);
-        console.error("Error al obtener clases para la grilla:", e);
+        // Si la API falla, usar datos mock
+        console.warn("API no disponible, usando datos mock para clases grid");
+        setClassesGrid(mockClassesGrid);
+        console.log("Usando datos mock para clases grid:", mockClassesGrid);
       }
     };
     fetchClassesGrid();

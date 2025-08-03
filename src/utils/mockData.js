@@ -168,3 +168,119 @@ export const mockAPI = {
     return { data: mockUserClasses };
   }
 };
+
+// Mock data para la grilla de clases (usado en BookingSystem)
+export const mockClassesGrid = [
+  {
+    id: 1,
+    name: "Introducción a la Cerámica",
+    instructor: "Ana Rodríguez",
+    description: "Aprende los fundamentos básicos de la cerámica",
+    duration: 120,
+    price: 1200,
+    maxParticipants: 8,
+    level: "Principiante",
+    materials: "Incluidos",
+    schedule: {
+      dayOfWeek: "MONDAY",
+      startTime: "10:00",
+      endTime: "12:00"
+    }
+  },
+  {
+    id: 2,
+    name: "Técnicas de Esmaltado",
+    instructor: "Carlos Méndez",
+    description: "Domina diferentes técnicas de esmaltado",
+    duration: 180,
+    price: 1800,
+    maxParticipants: 6,
+    level: "Intermedio",
+    materials: "Incluidos",
+    schedule: {
+      dayOfWeek: "TUESDAY",
+      startTime: "14:00",
+      endTime: "17:00"
+    }
+  },
+  {
+    id: 3,
+    name: "Torno de Alfarero",
+    instructor: "Ana Rodríguez",
+    description: "Aprende a usar el torno para crear piezas únicas",
+    duration: 180,
+    price: 2100,
+    maxParticipants: 4,
+    level: "Intermedio",
+    materials: "Incluidos",
+    schedule: {
+      dayOfWeek: "WEDNESDAY",
+      startTime: "10:00",
+      endTime: "13:00"
+    }
+  },
+  {
+    id: 4,
+    name: "Escultura en Cerámica",
+    instructor: "Laura Vega",
+    description: "Crea esculturas usando técnicas de modelado",
+    duration: 180,
+    price: 1950,
+    maxParticipants: 6,
+    level: "Intermedio",
+    materials: "Incluidos", 
+    schedule: {
+      dayOfWeek: "THURSDAY",
+      startTime: "15:00",
+      endTime: "18:00"
+    }
+  },
+  {
+    id: 5,
+    name: "Raku - Técnica Japonesa",
+    instructor: "Hiroshi Tanaka",
+    description: "Técnica tradicional japonesa de cocción",
+    duration: 240,
+    price: 3500,
+    maxParticipants: 4,
+    level: "Avanzado",
+    materials: "Incluidos",
+    schedule: {
+      dayOfWeek: "FRIDAY",
+      startTime: "09:00",
+      endTime: "13:00"
+    }
+  },
+  {
+    id: 6,
+    name: "Cerámica para Niños",
+    instructor: "Patricia Silva",
+    description: "Taller especial para los más pequeños",
+    duration: 90,
+    price: 800,
+    maxParticipants: 10,
+    level: "Principiante",
+    materials: "Incluidos",
+    schedule: {
+      dayOfWeek: "SATURDAY",
+      startTime: "10:00",
+      endTime: "11:30"
+    }
+  },
+  {
+    id: 7,
+    name: "Taller Libre",
+    instructor: "Ana Rodríguez",
+    description: "Espacio para trabajar en proyectos personales",
+    duration: 120,
+    price: 600,
+    maxParticipants: 8,
+    level: "Todos los niveles",
+    materials: "No incluidos",
+    schedule: {
+      dayOfWeek: "SATURDAY",
+      startTime: "14:00",
+      endTime: "16:00"
+    }
+  }
+];

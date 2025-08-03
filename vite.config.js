@@ -17,7 +17,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com'
+      '/api': 'http://localhost:8080'
     }
+    // Comentado el servidor AWS temporalmente
+    // proxy: {
+    //   '/api': 'http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com'
+    // }
   }
 })
