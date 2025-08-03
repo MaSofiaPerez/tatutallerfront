@@ -17,72 +17,25 @@ import {
   HiClock,
   HiStar,
   HiCalendarDays,
+  HiSparkles,
 } from "react-icons/hi2";
-
-// DATOS ESTÁTICOS TEMPORALES - PARA PROTEGER EL BACKEND DEL BUCLE INFINITO
-const staticClasses = [
-  {
-    id: 1,
-    name: "Cerámica para Principiantes",
-    description:
-      "Aprende las técnicas básicas de la cerámica desde cero. Incluye modelado básico, decoración y esmaltado.",
-    duration: 120,
-    price: 2500,
-    capacity: 8,
-    level: "Principiante",
-    includes: ["Materiales básicos", "Herramientas", "Horno"],
-    image:
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 2,
-    name: "Torno de Alfarero",
-    description:
-      "Domina el arte del torno. Aprende a centrar, abrir y levantar piezas cilíndricas.",
-    duration: 180,
-    price: 3500,
-    capacity: 6,
-    level: "Intermedio",
-    includes: ["Uso del torno", "Arcilla", "Esmaltado básico"],
-    image:
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 3,
-    name: "Técnicas de Esmaltado",
-    description:
-      "Explora diferentes técnicas de esmaltado y efectos decorativos para tus piezas.",
-    duration: 150,
-    price: 3000,
-    capacity: 10,
-    level: "Intermedio",
-    includes: ["Esmaltes diversos", "Pinceles especializados", "Cocción"],
-    image:
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-  },
-];
 
 function Clases() {
   const [selectedClass, setSelectedClass] = useState(null);
 
-  // USANDO SOLO DATOS ESTÁTICOS PARA LA VISTA DE CURSOS
-  const classes = staticClasses;
-  const isLoading = false;
-  const error = null;
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-700 text-white py-16">
+      <div className="bg-gradient-to-r from-amber-500 to-orange-400 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
+            <HiSparkles className="w-20 h-20 mx-auto mb-6 text-amber-200" />
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Clases de Cerámica
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
-              Aprende el arte de la cerámica con ceramistas experimentados.
-              Desde principiantes hasta técnicas avanzadas de modelado y
-              esmaltado.
+              Aprende el arte de la cerámica con nosotros. Desde principiantes
+              hasta técnicas avanzadas de modelado y esmaltado.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -91,7 +44,7 @@ function Clases() {
                     .getElementById("reserva-sistema")
                     .scrollIntoView({ behavior: "smooth" })
                 }
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-colors"
+                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-amber-600 transition-colors"
               >
                 Reservar Ahora
               </button>
@@ -107,7 +60,7 @@ function Clases() {
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Modalidades de Clases
             </h2>
-            <div className="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
+            <div className="w-24 h-1 bg-amber-500 mx-auto mb-6"></div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Ofrecemos diferentes modalidades para que puedas elegir la que
               mejor se adapte a tu ritmo y necesidades
@@ -118,13 +71,13 @@ function Clases() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {/* Clase Puntual */}
             <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <HiCalendarDays className="w-8 h-8 text-yellow-600" />
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <HiCalendarDays className="w-8 h-8 text-amber-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Clase Puntual
               </h3>
-              <div className="text-3xl font-bold text-yellow-600 mb-2">
+              <div className="text-3xl font-bold text-amber-600 mb-2">
                 $1,400
               </div>
               <p className="text-gray-600 text-sm">Por clase única</p>

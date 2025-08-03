@@ -166,34 +166,34 @@ function AlquilerHornos() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-gradient-to-r from-green-600 to-green-500 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <HiFire className="w-20 h-20 mx-auto mb-6 text-green-600" />
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-green-600">
+          <HiFire className="w-20 h-20 mx-auto mb-6 text-green-200" />
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
             Alquiler de Hornos
           </h1>
-          <div className="w-24 h-1 bg-green-500 mx-auto mb-6"></div>
-          <p className="text-xl md:text-2xl max-w-4xl mx-auto mb-8 text-gray-700">
+          <div className="w-24 h-1 bg-green-300 mx-auto mb-6"></div>
+          <p className="text-xl md:text-2xl max-w-4xl mx-auto mb-8 opacity-90">
             Cocción profesional para tus piezas cerámicas. Hornos eléctricos y a
             gas con monitoreo experto para resultados perfectos en cada cocción.
           </p>
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
-                <div className="text-3xl font-bold text-green-600">4</div>
-                <div className="text-sm text-gray-600">Hornos</div>
+                <div className="text-3xl font-bold text-white">4</div>
+                <div className="text-sm text-green-200">Hornos</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-green-600">1350°C</div>
-                <div className="text-sm text-gray-600">Temp. Máx</div>
+                <div className="text-3xl font-bold text-white">1350°C</div>
+                <div className="text-sm text-green-200">Temp. Máx</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-green-600">24/7</div>
-                <div className="text-sm text-gray-600">Monitoreo</div>
+                <div className="text-3xl font-bold text-white">24/7</div>
+                <div className="text-sm text-green-200">Monitoreo</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-green-600">15+</div>
-                <div className="text-sm text-gray-600">Años Exp.</div>
+                <div className="text-3xl font-bold text-white">15+</div>
+                <div className="text-sm text-green-200">Años Exp.</div>
               </div>
             </div>
           </div>
