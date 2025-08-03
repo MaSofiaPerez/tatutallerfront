@@ -1,15 +1,5 @@
-/**
- * VERSIÓN MODIFICADA SIN INTEGRACIÓN A REDUX
- *
- * Esta es la versión de Clases.jsx sin la integración a Redux. Ahora se
- * consumen los datos directamente desde el backend utilizando fetch.
- */
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-import { useEffect, useState } from "react";
 
 import BookingSystem from "../components/BookingSystem";
 import {
@@ -19,7 +9,6 @@ import {
   HiStar,
   HiCalendarDays,
   HiSparkles,
-
 } from "react-icons/hi2";
 
 function Clases() {
@@ -27,7 +16,6 @@ function Clases() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
-
 
   useEffect(() => {
     setIsLoading(true);
@@ -60,11 +48,8 @@ function Clases() {
               Clases de Cerámica
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
-
               Aprende el arte de la cerámica con nosotros. Desde principiantes
               hasta técnicas avanzadas de modelado y esmaltado.
-
-
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -85,7 +70,6 @@ function Clases() {
       {/* Información General de Clases */}
       <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Modalidades de Clases
@@ -314,7 +298,6 @@ function Clases() {
                     <p className="text-gray-600">
                       Aprende con ceramistas apasionados que te guiarán paso a
                       paso en tu proceso creativo.
-
                     </p>
                   </div>
                 </div>
@@ -328,10 +311,8 @@ function Clases() {
                       Grupos Reducidos
                     </h3>
                     <p className="text-gray-600">
-
                       Máximo 6 estudiantes por clase para garantizar atención
                       personalizada y seguimiento individual.
-
                     </p>
                   </div>
                 </div>
@@ -345,7 +326,8 @@ function Clases() {
                       Material Incluido
                     </h3>
                     <p className="text-gray-600">
-                      Todos los materiales necesarios están incluidos: arcilla, herramientas, esmaltes y acceso al horno.
+                      Todos los materiales necesarios están incluidos: arcilla,
+                      herramientas, esmaltes y acceso al horno.
                     </p>
                   </div>
                 </div>

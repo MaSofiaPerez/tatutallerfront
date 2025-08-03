@@ -181,11 +181,9 @@ export const mockClassesGrid = [
     maxParticipants: 8,
     level: "Principiante",
     materials: "Incluidos",
-    schedule: {
-      dayOfWeek: "MONDAY",
-      startTime: "10:00",
-      endTime: "12:00"
-    }
+    weekDay: "Lunes",
+    startTime: "10:00",
+    endTime: "12:00"
   },
   {
     id: 2,
@@ -197,11 +195,9 @@ export const mockClassesGrid = [
     maxParticipants: 6,
     level: "Intermedio",
     materials: "Incluidos",
-    schedule: {
-      dayOfWeek: "TUESDAY",
-      startTime: "14:00",
-      endTime: "17:00"
-    }
+    weekDay: "Martes",
+    startTime: "14:00",
+    endTime: "17:00"
   },
   {
     id: 3,
@@ -213,11 +209,9 @@ export const mockClassesGrid = [
     maxParticipants: 4,
     level: "Intermedio",
     materials: "Incluidos",
-    schedule: {
-      dayOfWeek: "WEDNESDAY",
-      startTime: "10:00",
-      endTime: "13:00"
-    }
+    weekDay: "Miércoles",
+    startTime: "10:00",
+    endTime: "13:00"
   },
   {
     id: 4,
@@ -229,11 +223,9 @@ export const mockClassesGrid = [
     maxParticipants: 6,
     level: "Intermedio",
     materials: "Incluidos", 
-    schedule: {
-      dayOfWeek: "THURSDAY",
-      startTime: "15:00",
-      endTime: "18:00"
-    }
+    weekDay: "Jueves",
+    startTime: "15:00",
+    endTime: "18:00"
   },
   {
     id: 5,
@@ -245,11 +237,9 @@ export const mockClassesGrid = [
     maxParticipants: 4,
     level: "Avanzado",
     materials: "Incluidos",
-    schedule: {
-      dayOfWeek: "FRIDAY",
-      startTime: "09:00",
-      endTime: "13:00"
-    }
+    weekDay: "Viernes",
+    startTime: "09:00",
+    endTime: "13:00"
   },
   {
     id: 6,
@@ -261,11 +251,9 @@ export const mockClassesGrid = [
     maxParticipants: 10,
     level: "Principiante",
     materials: "Incluidos",
-    schedule: {
-      dayOfWeek: "SATURDAY",
-      startTime: "10:00",
-      endTime: "11:30"
-    }
+    weekDay: "Sábado",
+    startTime: "10:00",
+    endTime: "11:30"
   },
   {
     id: 7,
@@ -277,10 +265,8 @@ export const mockClassesGrid = [
     maxParticipants: 8,
     level: "Todos los niveles",
     materials: "No incluidos",
-    schedule: {
-      dayOfWeek: "SATURDAY",
-      startTime: "14:00",
-      endTime: "16:00"
-    }
+    weekDay: "Sábado",
+    startTime: "14:00",
+    endTime: "16:00"
   }
 ];
