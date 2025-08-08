@@ -6,6 +6,7 @@ import productsReducer from './slices/productsSlice'
 import usersReducer from './slices/usersSlice'
 import dashboardReducer from './slices/dashboardSlice'
 import teacherReducer from './slices/teacherSlice'
+import cartReducer from './slices/cartSlice'
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     users: usersReducer,
     dashboard: dashboardReducer,
     teacher: teacherReducer,
+    cart: cartReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

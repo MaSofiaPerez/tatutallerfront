@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPublicProducts } from "../redux/slices/productsSlice";
+import { addProductToCart } from "../redux/slices/cartSlice";
 import { HiShoppingBag } from "react-icons/hi2";
+import Cart from "../components/Cart";
 
 function Tienda() {
   const dispatch = useDispatch();
   const { products, isLoading, error } = useSelector((state) => state.products);
+  const cartToken = useSelector((state) => state.cart?.cartToken ?? null);
 
   const [categories, setCategories] = useState([
     "Todos",
@@ -16,6 +19,7 @@ function Tienda() {
   ]);
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCart, setShowCart] = useState(false);
 
   useEffect(() => {
     dispatch(fetchPublicProducts());
@@ -31,8 +35,7 @@ function Tienda() {
   });
 
   const handleAddToCart = (product) => {
-    // Aquí irá la lógica para agregar al carrito
-    console.log("Agregado al carrito:", product);
+    dispatch(addProductToCart({ productId: product.id, quantity: 1, cartToken }));
   };
 
   if (isLoading) {
@@ -64,6 +67,14 @@ function Tienda() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Botón para abrir el carrito */}
+      <button
+        onClick={() => setShowCart(true)}
+        className="fixed top-6 right-6 bg-yellow-600 text-white px-4 py-2 rounded-full shadow-lg z-50"
+      >
+        🛒 Ver Carrito
+      </button>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-gray-900 to-black text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -276,6 +287,8 @@ function Tienda() {
           )}
         </div>
       </div>
+
+      {showCart && <Cart onClose={() => setShowCart(false)} />}
     </div>
   );
 }
