@@ -34,6 +34,16 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
     "Descontinuado"
   ];
 
+  const backendStatusToFrontend = {
+    "Activo": "Disponible",
+    "Sin stock": "Sin Stock",
+    "Inactivo": "Descontinuado",
+    // fallback por si llega el enum directo
+    "ACTIVE": "Disponible",
+    "OUT_OF_STOCK": "Sin Stock",
+    "INACTIVE": "Descontinuado",
+  };
+
   useEffect(() => {
     if (isEditing && productData) {
       setFormData({
@@ -42,7 +52,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         price: productData.price || "",
         stock: productData.stock || "",
         category: productData.category || "",
-        status: productData.status || "Disponible",
+        status: backendStatusToFrontend[productData.status] || "Disponible",
         imageUrl: productData.imageUrl || "",
         file: null,
       });

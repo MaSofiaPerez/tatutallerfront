@@ -46,9 +46,14 @@ export const addProductToCart = createAsyncThunk(
 // Eliminar item del carrito
 export const removeCartItem = createAsyncThunk(
   "cart/removeCartItem",
-  async ({ itemId, cartToken }, { rejectWithValue }) => {
+  async ({ itemId, cartToken }, { getState, rejectWithValue }) => {
     try {
-      await apiClient.delete(`/cart/item/${itemId}`, { params: { cartToken } });
+      const token = getState().auth.token;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      await apiClient.delete(`/cart/item/${itemId}`, {
+        params: { cartToken },
+        headers,
+      });
       return itemId;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Error al eliminar item");
@@ -59,13 +64,18 @@ export const removeCartItem = createAsyncThunk(
 // Actualizar cantidad de item del carrito
 export const updateCartItem = createAsyncThunk(
   "cart/updateCartItem",
-  async ({ itemId, quantity, cartToken }, { rejectWithValue }) => {
+  async ({ itemId, quantity, cartToken }, { getState, rejectWithValue }) => {
     try {
-      const res = await apiClient.put(`/cart/update/${itemId}`, null, {
-        params: { quantity, cartToken }
+      const token = getState().auth.token;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      // Usa la ruta correcta del backend
+      const res = await apiClient.put(`/cart/item/${itemId}`, null, {
+        params: { quantity, cartToken },
+        headers,
       });
       return res.data;
     } catch (err) {
+      console.error("Backend error:", err.response?.data);
       return rejectWithValue(err.response?.data?.message || "Error al actualizar item");
     }
   }
@@ -129,7 +139,13 @@ const cartSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(updateCartItem.fulfilled, (state, action) => {
-        state.cart = action.payload.cart;
+        const updatedItem = action.payload;
+        if (state.cart && state.cart.items) {
+          const idx = state.cart.items.findIndex(item => item.id === updatedItem.id);
+          if (idx !== -1) {
+            state.cart.items[idx] = updatedItem;
+          }
+        }
       })
       .addCase(updateCartItem.rejected, (state, action) => {
         state.error = action.payload;
