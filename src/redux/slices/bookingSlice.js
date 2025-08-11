@@ -16,6 +16,26 @@ export const createBooking = createAsyncThunk(
       console.error('❌ Error response data:', error.response?.data);
       console.error('❌ Error status:', error.response?.status);
       
+      if (error.response?.status === 400) {
+        // Error de validación - extraer detalles específicos
+        const errorData = error.response.data;
+        console.error('🔍 Detalles del error 400:', errorData);
+        
+        if (errorData?.details) {
+          // Si hay detalles de validación, mostrar el primero
+          const validationErrors = Object.entries(errorData.details);
+          if (validationErrors.length > 0) {
+            const [field, message] = validationErrors[0];
+            return rejectWithValue(`Campo ${field}: ${message}`);
+          }
+        }
+        
+        const errorMessage = errorData?.message || 
+                           errorData?.error || 
+                           'Error de validación en los datos enviados';
+        return rejectWithValue(errorMessage);
+      }
+      
       if (error.response?.status === 409) {
         // Extraer mensaje específico del error 409
         const errorMessage = error.response.data?.message || 

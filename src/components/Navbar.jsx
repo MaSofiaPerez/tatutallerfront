@@ -2,8 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState } from "react";
 import { logoutUser } from "../redux/slices/authSlice";
+import CartButton from "./CartButton";
+import Cart from "./Cart";
 import {
-  HiShoppingCart,
   HiUser,
   HiBars3,
   HiXMark,
@@ -16,7 +17,7 @@ function Navbar() {
   const dispatch = useDispatch();
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
   const [isRightMenuOpen, setIsRightMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const { user, isAuthenticated, isAdmin, isTeacher } = useSelector(
     (state) => state.auth
@@ -40,6 +41,10 @@ function Navbar() {
   const closeMenus = () => {
     setIsLeftMenuOpen(false);
     setIsRightMenuOpen(false);
+  };
+
+  const closeCart = () => {
+    setIsCartOpen(false);
   };
 
   return (
@@ -247,18 +252,7 @@ function Navbar() {
               )}
 
               {isAdmin ? null : (
-                <Link
-                  to="/cart"
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 relative transition-colors"
-                >
-                  <HiShoppingCart className="w-5 h-5" />
-                  <span className="hidden md:inline">Carrito</span>
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
+                <CartButton onClick={() => setIsCartOpen(true)} />
               )}
 
               {/* Mobile Menu Button (Right) */}
@@ -325,6 +319,9 @@ function Navbar() {
           </div>
         </nav>
       </header>
+
+      {/* Cart Sidebar */}
+      {isCartOpen && <Cart onClose={closeCart} />}
     </>
   );
 }

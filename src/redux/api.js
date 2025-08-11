@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 
- const API_BASE_URL = 'http://localhost:8080'; // Cambia esto a tu URL de API real
-// Base URL de tu API - Spring Boot backend
+ const API_BASE_URL = 'http://localhost:8080'; 
+
 //const API_BASE_URL = 'http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com';
 
 // Configurar axios interceptor para incluir token en todas las requests
