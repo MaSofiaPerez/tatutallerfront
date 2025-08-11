@@ -161,6 +161,18 @@ function UserPanel() {
     });
   };
 
+  const formatDateLocal = (isoDateString) => {
+    const date = new Date(isoDateString);
+    // Suma el desfase horario local
+    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+    return date.toLocaleDateString("es-ES", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toUpperCase()) {
       case "CONFIRMED":
@@ -354,12 +366,7 @@ function UserPanel() {
                 <div>
                   <p className="text-gray-500">📅 Fecha</p>
                   <p className="font-medium text-gray-900">
-                    {new Date(booking.bookingDate).toLocaleDateString("es-ES", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                    {formatDateLocal(booking.bookingDate)}
                   </p>
                 </div>
                 <div>
