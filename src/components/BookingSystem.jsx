@@ -90,14 +90,6 @@ function BookingSystem() {
     new Set(classesGrid.map((cls) => cls.instructor))
   ).filter(Boolean);
 
-  // Efecto para mostrar errores de reserva
-  useEffect(() => {
-    if (bookingError) {
-      toast.error(`Error de reserva: ${bookingError}`);
-      dispatch(clearBookingError());
-    }
-  }, [bookingError, dispatch]);
-
   // Mapear clases a una estructura por día y tallerista
   const scheduleByDay = {};
   weekDays.forEach((day) => {
@@ -411,12 +403,7 @@ function BookingSystem() {
       }
 
       await dispatch(createBooking(bookingPayload)).unwrap();
-      toast.success(
-        "¡Reserva enviada exitosamente! Te llegará un email de confirmación con los detalles.",
-        {
-          duration: 5000,
-        }
-      );
+      toast.success("Reserva creada exitosamente");
 
       // Reset form
       setStep(1);
@@ -433,7 +420,15 @@ function BookingSystem() {
       setShowSummary(false);
     } catch (error) {
       console.error("Error creating booking:", error);
-      toast.error(error.message || "Error al crear la reserva");
+      // Si el error viene del backend con ese mensaje
+      if (
+        error?.message?.includes("selecciona un horario diferente") ||
+        error?.response?.data?.message?.includes("selecciona un horario diferente")
+      ) {
+        toast.error("Por favor, selecciona un horario distinto");
+      } else {
+        toast.error(`Error al crear la reserva: ${error?.message || error}`);
+      }
     }
   };
 
@@ -679,10 +674,10 @@ function BookingSystem() {
                       <option
                         key={slot.startTime}
                         value={slot.startTime}
-                        disabled={!slot.available}
+                        // disabled={!slot.available}
                       >
                         {slot.displayText}{" "}
-                        {slot.available ? "" : "(No disponible)"}
+                        {/* {slot.available ? "" : "(No disponible)"} */}
                       </option>
                     ))}
                   </select>

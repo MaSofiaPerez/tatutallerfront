@@ -149,6 +149,7 @@ function AdminPanel() {
     (state) => state.booking
   );
   const { token } = useSelector((state) => state.auth); // Agrega esta línea
+  const teachers = useSelector((state) => state.users.teachers) || [];
 
   const prevCount = useRef(bookings.length);
 
@@ -342,13 +343,6 @@ function AdminPanel() {
   };
 
   const renderClassesTable = () => {
-    const futureClassesWithReservations = classes.filter((classItem) => {
-      const hasReservations =
-        classItem.reservations && classItem.reservations.length > 0;
-      const isFutureClass = new Date(classItem.startTime) > new Date();
-      return hasReservations || isFutureClass;
-    });
-
     return (
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
@@ -362,9 +356,9 @@ function AdminPanel() {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               Horario
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               Cupos Disponibles
-            </th>
+            </th> */}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               Acciones
             </th>
@@ -391,9 +385,9 @@ function AdminPanel() {
                       ? `${classItem.startTime} - ${classItem.endTime}`
                       : "N/A"}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {cuposDisponibles}
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button
                       onClick={() => {
@@ -423,10 +417,7 @@ function AdminPanel() {
             })
            ) : (
             <tr>
-              <td
-                colSpan="5"
-                className="px-6 py-4 text-center text-gray-500"
-              >
+              <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
                 No hay clases registradas
               </td>
             </tr>
