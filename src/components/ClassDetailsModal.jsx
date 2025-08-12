@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../redux/api";
 import { isWithinInterval, parseISO } from "date-fns";
+import { useSelector } from "react-redux";
 
 const ClassDetailsModal = ({ classId, onClose }) => {
   const [reservations, setReservations] = useState([]);
@@ -9,6 +10,7 @@ const ClassDetailsModal = ({ classId, onClose }) => {
   const [filteredReservations, setFilteredReservations] = useState([]);
   const [error, setError] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -21,16 +23,25 @@ const ClassDetailsModal = ({ classId, onClose }) => {
       if (isFetching) return;
       setIsFetching(true);
 
-      const url = `/admin/classes/${classId}/reservations`;
       try {
-        const response = await apiClient.get(url);
-        const formattedReservations = response.data.map((reservation) => ({
+        const response = await fetch(
+          `http://localhost:8080/api/admin/classes/${classId}/reservations`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        if (!response.ok) throw new Error('Error al obtener reservas');
+        const data = await response.json();
+        const formattedReservations = data.map((reservation) => ({
           id: reservation.id,
-          studentName: reservation.userName,
+          userName: reservation.userName || reservation.studentName || "", // <-- usa el campo correcto
           date: reservation.bookingDate,
           startTime: reservation.startTime,
           endTime: reservation.endTime,
-          availableSpots: reservation.availableSpots,
+          status: reservation.status,
         }));
         setReservations(formattedReservations);
         setError(null);
@@ -46,7 +57,7 @@ const ClassDetailsModal = ({ classId, onClose }) => {
     };
 
     fetchReservations();
-  }, [classId]);
+  }, [classId, token]);
 
   useEffect(() => {
     // Si no hay fechas, mostrar todas
@@ -123,20 +134,35 @@ const ClassDetailsModal = ({ classId, onClose }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Horario
                   </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Estado
+                  </th>
                 
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredReservations.map((reservation) => (
-                  <tr key={reservation.id}>
+                {filteredReservations.map((reserva) => (
+                  <tr key={reserva.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reservation.date}
+                      {/* Día en formato legible */}
+                      {reserva.date
+                        ? new Date(reserva.date).toLocaleDateString("es-ES")
+                        : ""}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reservation.studentName}
+                      {reserva.userName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reservation.startTime}
+                      {reserva.startTime} - {reserva.endTime}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{
+                        PENDING: "Pendiente",
+                        CONFIRMED: "Confirmada",
+                        REJECTED: "Rechazada",
+                        CANCELLED: "Cancelada",
+                        COMPLETED: "Completada"
+                      }[reserva.status?.toUpperCase()] || "N/A"}
                     </td>
                   </tr>
                 ))}
