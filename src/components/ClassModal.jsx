@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createClass, updateClass } from "../redux/slices/classesSlice";
-import { fetchTeachers } from "../redux/slices/usersSlice";
 import toast from "react-hot-toast";
 
 function ClassModal({ isOpen, onClose, classData, isEditing }) {
   const dispatch = useDispatch();
-  const { teachers, isLoading: teachersLoading } = useSelector(
-    (state) => state.users
-  );
+  const { user } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -17,61 +14,13 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
     level: "Todos los Niveles",
     materials: "",
     requirements: "",
-    teacherId: "",
+    teacherId: user?.id || "", // <-- inicializa con el ID del usuario
     dayOfWeek: "",
     startTime: "",
     endTime: "",
     duration: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  // Teachers temporales como fallback
-  const fallbackTeachers = [
-    {
-      id: "temp-1",
-      name: "Profesor",
-      lastName: "Temporal 1",
-      email: "teacher1@temp.com",
-    },
-    {
-      id: "temp-2",
-      name: "Profesor",
-      lastName: "Temporal 2",
-      email: "teacher2@temp.com",
-    },
-    {
-      id: "temp-3",
-      name: "Instructor",
-      lastName: "Ceramica",
-      email: "ceramica@temp.com",
-    },
-  ];
-
-  useEffect(() => {
-    // Cargar la lista de teachers cuando se abre el modal
-    if (isOpen) {
-      console.log("Modal abierto, cargando teachers...");
-      dispatch(fetchTeachers());
-    }
-  }, [isOpen, dispatch]);
-
-  useEffect(() => {
-    console.log("Teachers actualizados:", teachers);
-
-    // Si no hay teachers, mostrar información de debug
-    if (!teachers || teachers.length === 0) {
-      console.log("⚠️ No se encontraron teachers. Esto puede indicar:");
-      console.log("1. El endpoint /admin/teachers no existe en el backend");
-      console.log('2. No hay usuarios con rol "teacher" en la base de datos');
-      console.log("3. Problemas de autenticación/autorización");
-      console.log("4. La respuesta del backend tiene un formato diferente");
-      console.log("💡 Usando teachers temporales como fallback");
-    }
-  }, [teachers]);
-
-  // Usar teachers del backend si están disponibles, sino usar fallback
-  const availableTeachers =
-    teachers && teachers.length > 0 ? teachers : fallbackTeachers;
 
   useEffect(() => {
     if (isEditing && classData) {
@@ -83,7 +32,7 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
         level: classData.level || "Todos los Niveles",
         materials: classData.materials || "",
         requirements: classData.requirements || "",
-        teacherId: classData.instructor?.id || "",
+        teacherId: classData.instructor?.id || user?.id || "", // <-- fallback al usuario logueado
         dayOfWeek: classData.dayOfWeek || "",
         startTime: classData.startTime || "",
         endTime: classData.endTime || "",
@@ -98,14 +47,14 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
         level: "Principiante",
         materials: "",
         requirements: "",
-        teacherId: "",
+        teacherId: user?.id || "", // <-- fallback al usuario logueado
         dayOfWeek: "",
         startTime: "",
         endTime: "",
         duration: "",
       });
     }
-  }, [isEditing, classData, isOpen]);
+  }, [isEditing, classData, isOpen, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -226,44 +175,18 @@ function ClassModal({ isOpen, onClose, classData, isEditing }) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Profesor *
-                {(!teachers || teachers.length === 0) && (
-                  <span className="text-amber-600 text-xs ml-1">
-                    (usando datos temporales)
-                  </span>
-                )}
               </label>
               <select
                 name="teacherId"
                 value={formData.teacherId}
                 onChange={handleChange}
                 required
-                disabled={teachersLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent disabled:opacity-50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               >
-                <option key="" value="">
-                  {teachersLoading
-                    ? "Cargando profesores..."
-                    : "Selecciona un profesor"}
+                <option key={user.id} value={user.id}>
+                  {user.name}
                 </option>
-                {availableTeachers.map((teacher) => (
-                  <option
-                    key={teacher.id || teacher._id}
-                    value={teacher.id || teacher._id}
-                  >
-                    {teacher.name || teacher.username || teacher.email}{" "}
-                    {teacher.lastName && `${teacher.lastName}`}
-                    {String(teacher.id || teacher._id).includes("temp-") &&
-                      " (Temporal)"}
-                  </option>
-                ))}
               </select>
-              {(!teachers || teachers.length === 0) && !teachersLoading && (
-                <p className="text-sm text-amber-600 mt-1">
-                  ⚠️ Usando profesores temporales. Para solucionarlo:
-                  <br />• Crea usuarios con rol "teacher" en tu base de datos
-                  <br />• O implementa el endpoint /admin/teachers en tu backend
-                </p>
-              )}
             </div>
 
             <div>
