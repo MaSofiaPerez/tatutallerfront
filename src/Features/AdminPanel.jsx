@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardStats,
+  fetchMyDashboardStats, // <-- agrega esta línea
   // fetchMonthlyRevenue y fetchPopularClasses se implementarán más tarde
 } from "../redux/slices/dashboardSlice";
 import {
@@ -221,23 +222,18 @@ function AdminPanel() {
     }
   }, [activeTab, dispatch]);
 
-  const tabs = [
-    { id: "dashboard", name: "Dashboard", icon: "📊" },
-    // Admins y teachers pueden ver usuarios/estudiantes
-    ...(isAdmin || isTeacher
-      ? [
-          {
-            id: "usuarios",
-            name: isTeacher ? "Mis Estudiantes" : "Usuarios",
-            icon: "👥",
-          },
-        ]
-      : []),
-    // Solo admins pueden ver productos
-    ...(isAdmin ? [{ id: "productos", name: "Productos", icon: "🏺" }] : []),
-    { id: "clases", name: "Clases", icon: "🎨" },
-    { id: "reservas", name: "Reservas", icon: "📅" },
-  ];
+  const tabs = isTeacher
+    ? [
+        { id: "clases", name: "Clases", icon: "🎨" },
+        { id: "reservas", name: "Reservas", icon: "📅" },
+      ]
+    : [
+        { id: "dashboard", name: "Dashboard", icon: "📊" },
+        { id: "usuarios", name: "Usuarios", icon: "👥" },
+        { id: "productos", name: "Productos", icon: "🏺" },
+        { id: "clases", name: "Clases", icon: "🎨" },
+        { id: "reservas", name: "Reservas", icon: "📅" },
+      ];
 
   const handleDeleteItem = async (type, id) => {
     if (!window.confirm(`¿Estás seguro de eliminar este ${type}?`)) return;
@@ -475,7 +471,7 @@ function AdminPanel() {
   };
 
   // Filtrado
-  const filteredBookings = bookings.filter((booking) => {
+  const filteredBookingsRaw = bookings.filter((booking) => {
     const matchesName =
       booking.userName?.toLowerCase().includes(bookingSearch.toLowerCase());
 
@@ -495,11 +491,21 @@ function AdminPanel() {
   );
 
   // Filtrado de clases por profesor
-  const filteredClasses = classes.filter((classItem) =>
-    classItem.instructor?.name
-      ?.toLowerCase()
-      .includes(classTeacherSearch.toLowerCase())
-  );
+  const filteredClasses = isTeacher
+    ? classes.filter(
+        (classItem) =>
+          classItem.instructor &&
+          classItem.instructor.email === user.email // o compara por id si tienes instructor.id
+      )
+    : classes;
+
+  const teacherClassIds = filteredClasses.map((cls) => cls.id);
+
+  const filteredBookingsBySearch = filteredBookingsRaw;
+
+  const filteredBookings = isTeacher
+    ? filteredBookingsBySearch.filter((booking) => teacherClassIds.includes(booking.classId))
+    : filteredBookingsBySearch;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -886,7 +892,30 @@ function AdminPanel() {
             </div>
           )}
 
-          {activeTab === "clases" && renderClassesTab()}
+          {activeTab === "clases" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">Gestión de Clases</h2>
+                <button
+                  onClick={() => {
+                    setModalType("create");
+                    setSelectedItem(null);
+                    setShowModal(true);
+                  }}
+                  className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
+                >
+                  Agregar Clase
+                </button>
+              </div>
+              {classesLoading || bookingsLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+                </div>
+              ) : (
+                renderClassesTable()
+              )}
+            </div>
+          )}
 
           {activeTab === "reservas" && (
             <div className="space-y-6">
@@ -1067,12 +1096,13 @@ function AdminPanel() {
             setShowModal(false);
             setSelectedItem(null);
             setModalType("");
-            // Refresca clases y reservas al cerrar el modal (tras crear o editar)
             dispatch(fetchClasses());
             dispatch(fetchBookings());
           }}
           classData={selectedItem}
           isEditing={modalType === "edit"}
+          // Solo el profesor logueado como opción
+          teachers={isTeacher ? [user] : teachers}
         />
       )}
 
