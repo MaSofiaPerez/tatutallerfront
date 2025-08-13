@@ -37,7 +37,7 @@ const ClassDetailsModal = ({ classId, onClose }) => {
         const data = await response.json();
         const formattedReservations = data.map((reservation) => ({
           id: reservation.id,
-          userName: reservation.userName || reservation.studentName || "", // <-- usa el campo correcto
+          userName: reservation.userName || reservation.studentName || "",
           date: reservation.bookingDate,
           startTime: reservation.startTime,
           endTime: reservation.endTime,
@@ -144,7 +144,6 @@ const ClassDetailsModal = ({ classId, onClose }) => {
                 {filteredReservations.map((reserva) => (
                   <tr key={reserva.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {/* Día en formato legible */}
                       {reserva.date
                         ? new Date(reserva.date).toLocaleDateString("es-ES")
                         : ""}
@@ -153,7 +152,9 @@ const ClassDetailsModal = ({ classId, onClose }) => {
                       {reserva.userName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reserva.startTime} - {reserva.endTime}
+                      {reserva.startTime && reserva.endTime
+                        ? `${reserva.startTime} - ${reserva.endTime}`
+                        : "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {{
