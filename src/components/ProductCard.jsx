@@ -104,6 +104,11 @@ function ProductCard({ product, onEdit, onDelete, showActions = false }) {
           </span>
         </div>
 
+        {/* Cantidad del producto */}
+        <p className="text-gray-500 text-sm mb-1">
+          {product.cantidadProducto}
+        </p>
+
         {/* Acciones (para admin) */}
         {showActions && (
           <div className="flex space-x-2">

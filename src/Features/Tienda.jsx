@@ -249,6 +249,9 @@ function Tienda() {
                   <p className="text-gray-600 text-sm mb-3">
                     {product.description}
                   </p>
+                  <p className="text-gray-500 text-sm mb-1">
+                    {product.cantidadProducto}
+                  </p>
 
                   <div className="flex justify-between items-center">
                     <span className="text-2xl font-bold text-gray-800">
