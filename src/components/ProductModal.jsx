@@ -12,10 +12,10 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
     description: "",
     price: "",
     stock: "",
-    category: "",
-    status: "Disponible",
     imageUrl: "",
-    file: null,
+    category: "",
+    status: "",
+    cantidadProducto: "", // <-- aquí agregas el campo
   });
 
   const [localLoading, setLocalLoading] = useState(false);
@@ -55,6 +55,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         status: backendStatusToFrontend[productData.status] || "Disponible",
         imageUrl: productData.imageUrl || "",
         file: null,
+        cantidadProducto: productData.cantidadProducto || "",
       });
     } else {
       setFormData({
@@ -66,6 +67,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         status: "Disponible",
         imageUrl: "",
         file: null,
+        cantidadProducto: "",
       });
     }
   }, [isEditing, productData, isOpen]);
@@ -112,6 +114,7 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
         category: categoryMap[formData.category], // <-- Traducción aquí
         status: statusMap[formData.status],       // <-- Traducción aquí
         imageUrl: formData.imageUrl,
+        cantidadProducto: formData.cantidadProducto,
       };
 
       // Usar FormData para enviar archivo + JSON
@@ -284,6 +287,21 @@ function ProductModal({ isOpen, onClose, productData, isEditing }) {
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               placeholder="Describe las características, materiales, dimensiones y cualidades especiales del producto..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cantidad / Presentación *
+            </label>
+            <input
+              type="text"
+              name="cantidadProducto"
+              value={formData.cantidadProducto}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              placeholder="Ej: 1 kilo, 200 gramos, 500 ml"
             />
           </div>
 
