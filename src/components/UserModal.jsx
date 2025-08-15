@@ -221,13 +221,12 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
               value={formData.role}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              {availableRoles.map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.label}
-                </option>
-              ))}
+              <option value="user">Alumno</option>
+              <option value="teacher">Tallerista</option>
+              <option value="admin">Administrador</option>
+              <option value="client">Cliente</option> {/* <-- NUEVO */}
             </select>
             {isTeacher && (
               <p className="text-xs text-gray-500 mt-1">
@@ -368,5 +367,21 @@ function UserDetails({ userData, reservations }) {
     </div>
   );
 }
+
+const translateRole = (role) => {
+  const normalizedRole = (role || "").toLowerCase().trim();
+  const roleTranslations = {
+    user: "Alumno",
+    teacher: "Tallerista",
+    admin: "Administrador",
+    client: "Cliente", // <-- NUEVO
+    usuario: "Alumno",
+    estudiante: "Alumno",
+    administrador: "Administrador",
+    tallerista: "Tallerista",
+    cliente: "Cliente",
+  };
+  return roleTranslations[normalizedRole] || "Alumno";
+};
 
 export default UserModal;
