@@ -74,9 +74,9 @@ function AdminPanel() {
 
     const roleTranslations = {
       user: "Alumno",
-      usuario: "Alumno", // Por si viene en español
+      usuario: "Alumno",
       student: "Alumno",
-      estudiante: "Alumno", // Por si viene en español
+      estudiante: "Alumno",
       admin: "Administrador",
       administrador: "Administrador",
       administrator: "Administrador",
@@ -84,6 +84,8 @@ function AdminPanel() {
       profesor: "Tallerista",
       instructor: "Tallerista",
       tallerista: "Tallerista",
+      client: "Cliente", // <-- Agregado
+      cliente: "Cliente", // <-- Por si viene en español
     };
 
     return roleTranslations[normalizedRole] || "Alumno"; // Por defecto "Alumno" si no encuentra el rol
