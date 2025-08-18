@@ -46,7 +46,10 @@ function ChangePasswordPage() {
     const toastId = toast.loading("Cambiando contraseña...");
 
     try {
-      const response = await apiClient.post("/auth/change-password", {
+
+      // Cambiar endpoint y payload
+      const response = await apiClient.post("auth/reset-password", {
+        email: user?.email,
         newPassword: formData.newPassword,
       });
 
