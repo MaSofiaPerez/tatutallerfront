@@ -17,9 +17,11 @@ import { useState } from "react";
 
 function Cart({ onClose }) {
   const { cart, isLoading, error } = useSelector((state) => state.cart);
+  const user = useSelector((state) => state.auth.user); // <--- obtiene el usuario logueado
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const total =
     cart?.items?.reduce(
@@ -79,6 +81,31 @@ function Cart({ onClose }) {
   const handleContinueShopping = () => {
     onClose();
     navigate("/tienda");
+  };
+
+  const handleCheckout = async () => {
+    if (!user?.email) {
+      alert("No se encontró el email del usuario logueado.");
+      return;
+    }
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch("http://localhost:8080/api/pedidos/checkout", { // <-- CORREGIDO
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.init_point) {
+        window.location.href = data.init_point; // Redirige a Mercado Pago
+      } else {
+        alert(data.error || "No se pudo iniciar el pago.");
+      }
+    } catch (e) {
+      alert("Error al iniciar el checkout.");
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   if (isLoading)
@@ -299,9 +326,10 @@ function Cart({ onClose }) {
               <div className="space-y-2">
                 <button
                   className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-md"
-                  disabled={isUpdating}
+                  disabled={isUpdating || checkoutLoading}
+                  onClick={handleCheckout}
                 >
-                  🛒 Finalizar compra
+                  {checkoutLoading ? "Redirigiendo..." : "🛒 Finalizar compra"}
                 </button>
                 <button
                   onClick={handleContinueShopping}
