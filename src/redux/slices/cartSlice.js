@@ -108,6 +108,12 @@ const cartSlice = createSlice({
     },
     setCartToken: (state, action) => {
       state.cartToken = action.payload;
+    },
+    resetCart: (state) => {
+      state.cart = null;
+      state.cartToken = null;
+      state.isLoading = false;
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -168,5 +174,5 @@ const cartSlice = createSlice({
   },
 });
 
-export const { clearError, setCartToken } = cartSlice.actions;
+export const { clearError, setCartToken, resetCart } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -78,16 +78,20 @@ function Login() {
     const toastId = toast.loading("Iniciando sesión...");
 
     try {
-      const result = await dispatch(loginUser(formData)).unwrap();
-      console.log("Login exitoso:", result);
-      console.log("Datos del usuario:", result.user);
-      console.log("Rol del usuario:", result.user?.role);
-      console.log("Es admin?:", result.user?.role?.toLowerCase() === "admin");
-      console.log("Debe cambiar contraseña?:", result.user?.mustChangePassword);
+      // 1. Obtener el cartToken anónimo (si existe)
+      const cartToken = localStorage.getItem("cartToken");
+
+      // 2. Enviar el cartToken junto con las credenciales al backend
+      const result = await dispatch(
+        loginUser({ ...formData, cartToken })
+      ).unwrap();
 
       toast.success("¡Bienvenido! Has iniciado sesión correctamente", {
         id: toastId,
       });
+
+      // 3. Si el login fue exitoso y el backend fusionó carritos, elimina el cartToken del localStorage
+      localStorage.removeItem("cartToken");
 
       // ✅ NUEVA LÓGICA: Verificar si debe cambiar contraseña
       if (result.user?.mustChangePassword === true) {
