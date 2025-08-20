@@ -1,5 +1,6 @@
 ﻿import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { apiClient } from '../api';
+import { resetCart } from "./cartSlice"; // importa el action
 
 // Async thunks para las operaciones de autenticación
 export const loginUser = createAsyncThunk(
@@ -155,6 +156,7 @@ export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, { dispatch }) => {
     localStorage.removeItem('token');
+    dispatch(resetCart());
     return {};
   }
 );

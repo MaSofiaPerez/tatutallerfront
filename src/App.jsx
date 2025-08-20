@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { verifyToken } from "./redux/slices/authSlice";
+import { fetchCart } from "./redux/slices/cartSlice"; // <-- importa fetchCart
 import { Toaster } from "react-hot-toast";
 
 // Componentes
@@ -25,6 +26,17 @@ import AlquilerHornos from "./Features/AlquilerHornos";
 function App() {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.auth.user); // <-- obtiene el usuario logueado
+
+  // Sincroniza el carrito según el usuario autenticado o anónimo
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchCart()); // Si hay usuario, busca carrito por usuario
+    } else {
+      const cartToken = localStorage.getItem("cartToken");
+      dispatch(fetchCart(cartToken)); // Si es anónimo, busca por token
+    }
+  }, [user, dispatch]);
 
   if (isLoading) {
     return (
