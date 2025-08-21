@@ -114,6 +114,7 @@ const cartSlice = createSlice({
       state.cartToken = null;
       state.isLoading = false;
       state.error = null;
+      localStorage.removeItem("cartToken"); // <-- Limpia el token persistente
     }
   },
   extraReducers: (builder) => {
