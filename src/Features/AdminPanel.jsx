@@ -34,6 +34,8 @@ import BookingDetailModal from "../components/BookingDetailModal";
 import ClassDetailsModal from "../components/ClassDetailsModal";
 import UserDetailsModal from "../components/UserDetailsModal";
 import toast from "react-hot-toast";
+
+import PedidosAdmin from "./PedidosAdmin";
 import apiClient from "../redux/api"; // Corrige la ruta para usar el cliente API existente
 
 const API_BASE_URL =
@@ -166,7 +168,7 @@ function AdminPanel() {
           "http://localhost:8080/api/admin/bookings/count",
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -236,6 +238,7 @@ function AdminPanel() {
         { id: "productos", name: "Productos", icon: "🏺" },
         { id: "clases", name: "Clases", icon: "🎨" },
         { id: "reservas", name: "Reservas", icon: "📅" },
+        { id: "pedidos", name: "Pedidos", icon: "📦" },
       ];
 
   const handleDeleteItem = async (type, id) => {
@@ -369,7 +372,8 @@ function AdminPanel() {
         <tbody className="bg-white divide-y divide-gray-200">
           {filteredClasses.length > 0 ? (
             filteredClasses.map((classItem) => {
-              const capacidadMaxima = classItem.capacity || classItem.maxCapacity || 0;
+              const capacidadMaxima =
+                classItem.capacity || classItem.maxCapacity || 0;
               const cantidadUsuarios = bookings.filter(
                 (b) => b.classId === classItem.id
               ).length;
@@ -417,7 +421,7 @@ function AdminPanel() {
                 </tr>
               );
             })
-           ) : (
+          ) : (
             <tr>
               <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
                 No hay clases registradas
@@ -440,7 +444,9 @@ function AdminPanel() {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">Gestión de Clases</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Gestión de Clases
+          </h2>
           <button
             onClick={() => {
               setModalType("create");
@@ -465,8 +471,9 @@ function AdminPanel() {
 
   // Filtrado
   const filteredBookingsRaw = bookings.filter((booking) => {
-    const matchesName =
-      booking.userName?.toLowerCase().includes(bookingSearch.toLowerCase());
+    const matchesName = booking.userName
+      ?.toLowerCase()
+      .includes(bookingSearch.toLowerCase());
 
     let matchesDate = true;
     if (bookingDateFrom) {
@@ -487,8 +494,7 @@ function AdminPanel() {
   const filteredClasses = isTeacher
     ? classes.filter(
         (classItem) =>
-          classItem.instructor &&
-          classItem.instructor.email === user.email // o compara por id si tienes instructor.id
+          classItem.instructor && classItem.instructor.email === user.email // o compara por id si tienes instructor.id
       )
     : classes;
 
@@ -497,7 +503,9 @@ function AdminPanel() {
   const filteredBookingsBySearch = filteredBookingsRaw;
 
   const filteredBookings = isTeacher
-    ? filteredBookingsBySearch.filter((booking) => teacherClassIds.includes(booking.classId))
+    ? filteredBookingsBySearch.filter((booking) =>
+        teacherClassIds.includes(booking.classId)
+      )
     : filteredBookingsBySearch;
 
   return (
@@ -745,11 +753,19 @@ function AdminPanel() {
                                       src={
                                         product.imageUrl.startsWith("http")
                                           ? product.imageUrl
-                                          : `${API_BASE_URL}${product.imageUrl.startsWith("/") ? "" : "/"}${product.imageUrl}`
+                                          : `${API_BASE_URL}${
+                                              product.imageUrl.startsWith("/")
+                                                ? ""
+                                                : "/"
+                                            }${product.imageUrl}`
                                       }
                                       alt={product.name}
                                       onError={(e) => {
-                                        if (!e.target.src.endsWith("/placeholder.jpg")) {
+                                        if (
+                                          !e.target.src.endsWith(
+                                            "/placeholder.jpg"
+                                          )
+                                        ) {
                                           e.target.onerror = null;
                                           e.target.src = "/placeholder.jpg";
                                         }
@@ -888,7 +904,9 @@ function AdminPanel() {
           {activeTab === "clases" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">Gestión de Clases</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Gestión de Clases
+                </h2>
                 <button
                   onClick={() => {
                     setModalType("create");
@@ -926,7 +944,12 @@ function AdminPanel() {
                   className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 />
                 <div className="flex flex-col">
-                  <label htmlFor="date-from" className="text-xs text-gray-600 mb-1">Desde</label>
+                  <label
+                    htmlFor="date-from"
+                    className="text-xs text-gray-600 mb-1"
+                  >
+                    Desde
+                  </label>
                   <input
                     id="date-from"
                     type="date"
@@ -937,7 +960,12 @@ function AdminPanel() {
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label htmlFor="date-to" className="text-xs text-gray-600 mb-1">Hasta</label>
+                  <label
+                    htmlFor="date-to"
+                    className="text-xs text-gray-600 mb-1"
+                  >
+                    Hasta
+                  </label>
                   <input
                     id="date-to"
                     type="date"
@@ -1147,6 +1175,13 @@ function AdminPanel() {
             dispatch(fetchBookings());
           }}
         />
+      )}
+
+      {/* TAB Pedidos dentro del contenedor principal */}
+      {activeTab === "pedidos" && isAdmin && (
+        <div className="space-y-6">
+          <PedidosAdmin />
+        </div>
       )}
 
       {/* Modal para Detalles de Clases (Reservas de Clases) */}
