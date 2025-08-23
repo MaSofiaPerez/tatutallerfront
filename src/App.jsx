@@ -22,6 +22,7 @@ import Clases from "./Features/Clases";
 import CicloFormacion from "./Features/CicloFormacion";
 import CoworkCeramico from "./Features/CoworkCeramico";
 import AlquilerHornos from "./Features/AlquilerHornos";
+import EfectivoInfo from "./Features/EfectivoInfo";
 
 function App() {
   const dispatch = useDispatch();
@@ -62,6 +63,7 @@ function App() {
           <Route path="/ciclo-formacion" element={<CicloFormacion />} />
           <Route path="/cowork-ceramico" element={<CoworkCeramico />} />
           <Route path="/alquiler-hornos" element={<AlquilerHornos />} />
+          <Route path="/efectivo-info" element={<EfectivoInfo />} />
           <Route path="/equipo" element={<TeamSection />} />
           <Route path="/galeria" element={<Gallery />} />
           <Route

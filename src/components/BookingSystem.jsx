@@ -345,7 +345,7 @@ function BookingSystem() {
   const handleSummary = (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert("Debes iniciar sesión para realizar una reserva");
+      toast.error("Debes iniciar sesión para realizar una reserva");
       return;
     }
     if (
@@ -353,7 +353,7 @@ function BookingSystem() {
       !bookingData.bookingDate ||
       !bookingData.startTime
     ) {
-      alert("Completa todos los campos obligatorios.");
+      toast.error("Completa todos los campos obligatorios.");
       return;
     }
     setShowSummary(true);
@@ -423,7 +423,9 @@ function BookingSystem() {
       // Si el error viene del backend con ese mensaje
       if (
         error?.message?.includes("selecciona un horario diferente") ||
-        error?.response?.data?.message?.includes("selecciona un horario diferente")
+        error?.response?.data?.message?.includes(
+          "selecciona un horario diferente"
+        )
       ) {
         toast.error("Por favor, selecciona un horario distinto");
       } else {

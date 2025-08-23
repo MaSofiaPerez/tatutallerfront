@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
   removeCartItem,
   updateCartItem,
@@ -85,12 +86,12 @@ function Cart({ onClose }) {
 
   const handleCheckout = async () => {
     if (!user?.email) {
-      alert("No se encontró el email del usuario logueado.");
+      toast.error("No se encontró el email del usuario logueado.");
       return;
     }
     setCheckoutLoading(true);
     try {
-      const res = await fetch("http://localhost:8080/api/pedidos/checkout", { // <-- CORREGIDO
+      const res = await fetch("http://localhost:8080/api/pedidos/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
@@ -99,12 +100,50 @@ function Cart({ onClose }) {
       if (res.ok && data.init_point) {
         window.location.href = data.init_point; // Redirige a Mercado Pago
       } else {
-        alert(data.error || "No se pudo iniciar el pago.");
+        toast.error(data.error || "No se pudo iniciar el pago.");
       }
     } catch (e) {
-      alert("Error al iniciar el checkout.");
+      toast.error("Error al iniciar el checkout.");
     } finally {
       setCheckoutLoading(false);
+    }
+  };
+
+  // Maneja el pago en efectivo: da de alta el pedido y redirige a info
+  const [cashLoading, setCashLoading] = useState(false);
+  const handleCashPayment = async () => {
+    if (!user?.email) {
+      toast.error("No se encontró el email del usuario logueado.");
+      return;
+    }
+    const token = user?.token || localStorage.getItem("token");
+    if (!token) {
+      toast.error("Debes iniciar sesión para realizar el pedido.");
+      return;
+    }
+    setCashLoading(true);
+    try {
+      const res = await fetch("http://localhost:8080/api/pedidos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email: user.email }),
+      });
+      if (res.ok) {
+        navigate("/efectivo-info");
+        dispatch(clearCart(cart?.token));
+      } else {
+        const data = await res.json();
+        toast.error(
+          data.error || "No se pudo registrar el pedido en efectivo."
+        );
+      }
+    } catch (e) {
+      toast.error("Error al registrar el pedido en efectivo.");
+    } finally {
+      setCashLoading(false);
     }
   };
 
@@ -330,6 +369,13 @@ function Cart({ onClose }) {
                   onClick={handleCheckout}
                 >
                   {checkoutLoading ? "Redirigiendo..." : "🛒 Finalizar compra"}
+                </button>
+                <button
+                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-md"
+                  disabled={isUpdating || cashLoading}
+                  onClick={handleCashPayment}
+                >
+                  {cashLoading ? "Procesando..." : "💵 Pago en efectivo"}
                 </button>
                 <button
                   onClick={handleContinueShopping}
