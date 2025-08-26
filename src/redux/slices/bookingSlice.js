@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { apiClient } from '../api';
+import { API_BASE_URL } from '../../utils/apiBase'; // <-- importa la URL base
 
 // Async thunks para las operaciones de reservas
 export const createBooking = createAsyncThunk(
@@ -23,7 +24,7 @@ export const fetchBookings = createAsyncThunk(
     try {
       const { auth } = getState();
       const token = auth.token;
-      const response = await fetch('http://localhost:8080/api/admin/bookings', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/bookings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -154,7 +155,7 @@ export const notifyTeacherBooking = createAsyncThunk(
       const { auth } = getState();
       const token = auth.token;
       
-      const response = await fetch('/api/bookings/notify-teacher', {
+      const response = await fetch(`${API_BASE_URL}/api/bookings/notify-teacher`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -192,7 +193,7 @@ export const createBookingWithNotification = createAsyncThunk(
       const booking = response.data;
       console.log('✅ Reserva creada:', booking);        // 2. Obtener detalles de la clase (incluyendo profesor)
         try {
-          const classResponse = await fetch(`/api/public/classes/${booking.classEntity.id}`, {
+          const classResponse = await fetch(`${API_BASE_URL}/api/public/classes/${booking.classEntity.id}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -239,7 +240,7 @@ export const createBookingWithNotification = createAsyncThunk(
             console.log(`🔍 Obteniendo datos del profesor con ID: ${instructorId}`);
             
             try {
-              const instructorResponse = await fetch(`/api/users/${instructorId}`, {
+              const instructorResponse = await fetch(`${API_BASE_URL}/api/users/${instructorId}`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'
@@ -256,7 +257,7 @@ export const createBookingWithNotification = createAsyncThunk(
               } else {
                 console.log('⚠️ No se pudo obtener datos del profesor desde /api/users/' + instructorId);
                 // Intentar endpoint alternativo para usuarios públicos
-                const publicUserResponse = await fetch(`/api/public/users/${instructorId}`, {
+                const publicUserResponse = await fetch(`${API_BASE_URL}/api/public/users/${instructorId}`, {
                   headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -280,7 +281,7 @@ export const createBookingWithNotification = createAsyncThunk(
           if (teacherEmail) {
             console.log(`📧 Enviando notificación a: ${teacherName} (${teacherEmail})`);
             
-            const notification = await fetch('/api/bookings/notify-teacher', {
+            const notification = await fetch(`${API_BASE_URL}/api/bookings/notify-teacher`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -346,7 +347,7 @@ export const createBookingWithNotification = createAsyncThunk(
             if (import.meta.env.DEV && fallbackEmail) {
               console.log(`🔧 Modo desarrollo: usando email de fallback: ${fallbackEmail}`);
               
-              const notification = await fetch('/api/bookings/notify-teacher', {
+              const notification = await fetch(`${API_BASE_URL}/api/bookings/notify-teacher`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${token}`,

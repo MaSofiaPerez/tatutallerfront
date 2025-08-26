@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-
- const API_BASE_URL = 'http://localhost:8080'; 
+import { API_BASE_URL } from '../utils/apiBase';
 
 //const API_BASE_URL = 'http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com';
 

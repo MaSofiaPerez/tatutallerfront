@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchPublicProducts } from "../redux/slices/productsSlice";
 import { addProductToCart } from "../redux/slices/cartSlice";
 import { HiShoppingBag } from "react-icons/hi2";
+import { API_BASE_URL } from "../utils/apiBase";
 
 function Tienda() {
   const dispatch = useDispatch();
@@ -205,12 +206,7 @@ function Tienda() {
                         product.imageUrl
                           ? product.imageUrl.startsWith("http")
                             ? product.imageUrl
-                            : `${
-                                import.meta.env.VITE_API_URL ||
-                                "http://localhost:8080/api"
-                              }${product.imageUrl.startsWith("/") ? "" : "/"}${
-                                product.imageUrl
-                              }`
+                            : `${API_BASE_URL}/api${product.imageUrl.startsWith("/") ? "" : "/"}${product.imageUrl}`
                           : "/placeholder.jpg"
                       }
                       alt={product.name}

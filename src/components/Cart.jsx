@@ -15,6 +15,7 @@ import {
 } from "react-icons/hi";
 import { FiX } from "react-icons/fi";
 import { useState } from "react";
+import { API_BASE_URL } from "../utils/apiBase";
 
 function Cart({ onClose }) {
   const { cart, isLoading, error } = useSelector((state) => state.cart);
@@ -91,7 +92,7 @@ function Cart({ onClose }) {
     }
     setCheckoutLoading(true);
     try {
-      const res = await fetch("http://localhost:8080/api/pedidos/checkout", {
+      const res = await fetch(`${API_BASE_URL}/api/pedidos/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
@@ -123,7 +124,7 @@ function Cart({ onClose }) {
     }
     setCashLoading(true);
     try {
-      const res = await fetch("http://localhost:8080/api/pedidos", {
+      const res = await fetch(`${API_BASE_URL}/api/pedidos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
