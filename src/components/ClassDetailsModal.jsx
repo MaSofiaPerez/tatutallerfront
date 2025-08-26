@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import apiClient from "../redux/api";
 import { isWithinInterval, parseISO } from "date-fns";
 import { useSelector } from "react-redux";
+import { API_BASE_URL } from "../utils/apiBase";
 
 const ClassDetailsModal = ({ classId, onClose }) => {
   const [reservations, setReservations] = useState([]);
@@ -25,7 +26,7 @@ const ClassDetailsModal = ({ classId, onClose }) => {
 
       try {
         const response = await fetch(
-          `http://localhost:8080/api/admin/classes/${classId}/reservations`,
+          `${API_BASE_URL}/api/admin/classes/${classId}/reservations`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,

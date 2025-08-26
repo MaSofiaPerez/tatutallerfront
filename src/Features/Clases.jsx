@@ -10,6 +10,7 @@ import {
   HiCalendarDays,
   HiSparkles,
 } from "react-icons/hi2";
+import { API_BASE_URL } from "../utils/apiBase";
 
 function Clases() {
   const [classes, setClasses] = useState([]);
@@ -19,7 +20,7 @@ function Clases() {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch("http://localhost:8080/api/public/classes-grid")
+    fetch(`${API_BASE_URL}/api/public/classes-grid`)
       .then((res) => {
         if (!res.ok) throw new Error("Error al cargar las clases");
         return res.json();
