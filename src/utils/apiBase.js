@@ -4,4 +4,4 @@ const isLocal = window.location.hostname === "localhost" || window.location.host
 
 export const API_BASE_URL = isLocal
   ? "http://localhost:8080" 
-  : "https://tatuback.us-east-2.elasticbeanstalk.com";
+  : "https://app.tatutaller.com.uy";
