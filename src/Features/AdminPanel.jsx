@@ -38,8 +38,8 @@ import toast from "react-hot-toast";
 import PedidosAdmin from "./PedidosAdmin";
 import apiClient from "../redux/api"; // Corrige la ruta para usar el cliente API existente
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+import { API_BASE_URL } from "../utils/apiBase"; // Agrega esta línea y elimina la definición local de API_BASE_URL
+
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -161,29 +161,32 @@ function AdminPanel() {
     prevCount.current = bookings.length;
   }, [bookings.length]);
 
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(
-          "http://localhost:8080/api/admin/bookings/count",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await res.json();
-        if (data.count !== prevCount.current) {
-          dispatch(fetchBookings());
-          dispatch(fetchClasses()); // <-- Agrega esto
-        }
-      } catch (e) {
-        // Opcional: manejar error
-      }
-    }, 10000);
 
-    return () => clearInterval(interval);
-  }, [dispatch, token]);
+// ...existing code...
+
+useEffect(() => {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/admin/bookings/count`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      if (data.count !== prevCount.current) {
+        dispatch(fetchBookings());
+        dispatch(fetchClasses());
+      }
+    } catch (e) {
+      // Opcional: manejar error
+    }
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, [dispatch, token]);
 
   useEffect(() => {
     // Cargar datos iniciales según la tab activa y el rol del usuario

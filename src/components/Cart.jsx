@@ -264,7 +264,7 @@ function Cart({ onClose }) {
                         src={
                           item.product.imageUrl.startsWith("http")
                             ? item.product.imageUrl
-                            : `http://localhost:8080/api${
+                            : `${API_BASE_URL}/api${
                                 item.product.imageUrl.startsWith("/") ? "" : "/"
                               }${item.product.imageUrl}`
                         }
