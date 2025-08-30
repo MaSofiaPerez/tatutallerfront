@@ -20,6 +20,7 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import esAR from "date-fns/locale/es";
+import { API_BASE_URL } from "../utils/apiBase";
 
 function BookingSystem() {
   const [step, setStep] = useState(1);
@@ -53,7 +54,7 @@ function BookingSystem() {
   // Fetch clases-grid del backend
   useEffect(() => {
     setLoading(true);
-    fetch("/api/public/classes-grid")
+    fetch(`${API_BASE_URL}/api/public/classes-grid`)
       .then((res) => {
         if (!res.ok) throw new Error("Error al cargar clases");
         return res.json();
