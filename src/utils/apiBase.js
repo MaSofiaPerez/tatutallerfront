@@ -5,3 +5,9 @@ const isLocal = window.location.hostname === "localhost" || window.location.host
 export const API_BASE_URL = isLocal
   ? "http://localhost:8080" 
   : "https://app.tatutaller.com.uy";
+
+src={
+  imageUrl.startsWith("http")
+    ? imageUrl
+    : `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`
+}
