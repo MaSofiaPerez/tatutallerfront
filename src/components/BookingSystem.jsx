@@ -21,6 +21,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import esAR from "date-fns/locale/es";
 import { API_BASE_URL } from "../utils/apiBase";
+import api from "../redux/api"; // Agrega esta línea
 
 function BookingSystem() {
   const [step, setStep] = useState(1);
@@ -54,17 +55,14 @@ function BookingSystem() {
   // Fetch clases-grid del backend
   useEffect(() => {
     setLoading(true);
-    fetch(`${API_BASE_URL}/api/public/classes-grid`)
+    api
+      .get("/public/classes-grid")
       .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar clases");
-        return res.json();
-      })
-      .then((data) => {
-        setClassesGrid(data);
+        setClassesGrid(res.data);
         setLoading(false);
         console.log(
           "Clases traídas del endpoint /api/public/classes-grid:",
-          data
+          res.data
         );
       })
       .catch((error) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import apiClient from "../redux/api";
+import api from "../redux/api"; // Usa el cliente centralizado
 import { isWithinInterval, parseISO } from "date-fns";
 import { useSelector } from "react-redux";
 import { API_BASE_URL } from "../utils/apiBase";
@@ -25,17 +25,16 @@ const ClassDetailsModal = ({ classId, onClose }) => {
       setIsFetching(true);
 
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/admin/classes/${classId}/reservations`,
+        const res = await api.get(
+          `/admin/classes/${classId}/reservations`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
           }
         );
-        if (!response.ok) throw new Error('Error al obtener reservas');
-        const data = await response.json();
+        const data = res.data;
         const formattedReservations = data.map((reservation) => ({
           id: reservation.id,
           userName: reservation.userName || reservation.studentName || "",

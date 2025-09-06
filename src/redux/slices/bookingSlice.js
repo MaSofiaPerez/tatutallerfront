@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiClient } from '../api';
+import apiClient from '../api'; // Asegúrate de importar el default export
 import { API_BASE_URL } from '../../utils/apiBase'; // <-- importa la URL base
 
 // Async thunks para las operaciones de reservas
@@ -24,20 +24,15 @@ export const fetchBookings = createAsyncThunk(
     try {
       const { auth } = getState();
       const token = auth.token;
-      const response = await fetch(`${API_BASE_URL}/api/admin/bookings`, {
+      const response = await apiClient.get('/admin/bookings', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al obtener las reservas');
-      }
-      return await response.json();
+      return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.message || 'Error al obtener las reservas'
+        error.response?.data?.message || 'Error al obtener las reservas'
       );
     }
   }
@@ -154,27 +149,14 @@ export const notifyTeacherBooking = createAsyncThunk(
     try {
       const { auth } = getState();
       const token = auth.token;
-      
-      const response = await fetch(`${API_BASE_URL}/api/bookings/notify-teacher`, {
-        method: 'POST',
+      const response = await apiClient.post('/bookings/notify-teacher', notificationData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(notificationData)
       });
-      
-      if (!response.ok) {
-        const errorData = await safeParseResponse(response);
-        throw new Error(errorData.message || 'Error al enviar notificación');
-      }
-      
-      const result = await safeParseResponse(response);
-      console.log('✅ Notificación enviada al profesor:', result);
-      return result;
+      return response.data;
     } catch (error) {
-      console.log('❌ Error al enviar notificación al profesor:', error);
-      return rejectWithValue(error.message || 'Error al notificar al profesor');
+      return rejectWithValue(error.response?.data?.message || 'Error al notificar al profesor');
     }
   }
 );
@@ -193,18 +175,13 @@ export const createBookingWithNotification = createAsyncThunk(
       const booking = response.data;
       console.log('✅ Reserva creada:', booking);        // 2. Obtener detalles de la clase (incluyendo profesor)
         try {
-          const classResponse = await fetch(`${API_BASE_URL}/api/public/classes/${booking.classEntity.id}`, {
+          const classResponse = await apiClient.get(`/public/classes/${booking.classEntity.id}`, {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
           
-          if (!classResponse.ok) {
-            throw new Error('No se pudo obtener detalles de la clase');
-          }
-          
-          const classDetails = await safeParseResponse(classResponse);
+          const classDetails = classResponse.data;
           console.log('✅ Detalles de clase obtenidos:', classDetails);
           
           // 3. Determinar información del profesor
@@ -240,37 +217,31 @@ export const createBookingWithNotification = createAsyncThunk(
             console.log(`🔍 Obteniendo datos del profesor con ID: ${instructorId}`);
             
             try {
-              const instructorResponse = await fetch(`${API_BASE_URL}/api/users/${instructorId}`, {
+              const instructorResponse = await apiClient.get(`/users/${instructorId}`, {
                 headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json'
-                }
+                  Authorization: `Bearer ${token}`,
+                },
               });
               
-              if (instructorResponse.ok) {
-                const instructorData = await safeParseResponse(instructorResponse);
-                if (instructorData && instructorData.email) {
-                  teacherEmail = instructorData.email;
-                  teacherName = instructorData.name;
-                  console.log(`✅ Datos del profesor obtenidos: ${teacherName} (${teacherEmail})`);
-                }
+              const instructorData = instructorResponse.data;
+              if (instructorData && instructorData.email) {
+                teacherEmail = instructorData.email;
+                teacherName = instructorData.name;
+                console.log(`✅ Datos del profesor obtenidos: ${teacherName} (${teacherEmail})`);
               } else {
                 console.log('⚠️ No se pudo obtener datos del profesor desde /api/users/' + instructorId);
                 // Intentar endpoint alternativo para usuarios públicos
-                const publicUserResponse = await fetch(`${API_BASE_URL}/api/public/users/${instructorId}`, {
+                const publicUserResponse = await apiClient.get(`/public/users/${instructorId}`, {
                   headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                  }
+                    Authorization: `Bearer ${token}`,
+                  },
                 });
                 
-                if (publicUserResponse.ok) {
-                  const publicUserData = await safeParseResponse(publicUserResponse);
-                  if (publicUserData && publicUserData.email) {
-                    teacherEmail = publicUserData.email;
-                    teacherName = publicUserData.name;
-                    console.log(`✅ Datos del profesor obtenidos desde endpoint público: ${teacherName} (${teacherEmail})`);
-                  }
+                const publicUserData = publicUserResponse.data;
+                if (publicUserData && publicUserData.email) {
+                  teacherEmail = publicUserData.email;
+                  teacherName = publicUserData.name;
+                  console.log(`✅ Datos del profesor obtenidos desde endpoint público: ${teacherName} (${teacherEmail})`);
                 }
               }
             } catch (instructorError) {
@@ -281,33 +252,30 @@ export const createBookingWithNotification = createAsyncThunk(
           if (teacherEmail) {
             console.log(`📧 Enviando notificación a: ${teacherName} (${teacherEmail})`);
             
-            const notification = await fetch(`${API_BASE_URL}/api/bookings/notify-teacher`, {
-              method: 'POST',
+            const notification = await apiClient.post('/bookings/notify-teacher', {
+              bookingId: booking.id,
+              teacherEmail: teacherEmail,
+              teacherName: teacherName || 'Profesor/a',
+              studentName: userInfo.name || userInfo.email,
+              studentEmail: userInfo.email,
+              className: classDetails.name || booking.classEntity.name,
+              bookingDate: booking.bookingDate,
+              bookingTime: booking.bookingTime,
+              notes: booking.notes || ''
+            }, {
               headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                Authorization: `Bearer ${token}`,
               },
-              body: JSON.stringify({
-                bookingId: booking.id,
-                teacherEmail: teacherEmail,
-                teacherName: teacherName || 'Profesor/a',
-                studentName: userInfo.name || userInfo.email,
-                studentEmail: userInfo.email,
-                className: classDetails.name || booking.classEntity.name,
-                bookingDate: booking.bookingDate,
-                bookingTime: booking.bookingTime,
-                notes: booking.notes || ''
-              })
             });
             
-            if (notification.ok) {
-              const notificationResult = await safeParseResponse(notification);
+            if (notification.status === 200) {
+              const notificationResult = notification.data;
               console.log('✅ Profesor notificado exitosamente:', notificationResult);
               
               // Dispatch acción de éxito de notificación
               dispatch(notifyTeacherBooking.fulfilled(notificationResult));
             } else {
-              const errorData = await safeParseResponse(notification);
+              const errorData = notification.data;
               
               // Mensaje específico para error 404 (endpoint no implementado)
               if (notification.status === 404) {
@@ -347,31 +315,28 @@ export const createBookingWithNotification = createAsyncThunk(
             if (import.meta.env.DEV && fallbackEmail) {
               console.log(`🔧 Modo desarrollo: usando email de fallback: ${fallbackEmail}`);
               
-              const notification = await fetch(`${API_BASE_URL}/api/bookings/notify-teacher`, {
-                method: 'POST',
+              const notification = await apiClient.post('/bookings/notify-teacher', {
+                bookingId: booking.id,
+                teacherEmail: fallbackEmail,
+                teacherName: 'Administrador (Fallback)',
+                studentName: userInfo.name || userInfo.email,
+                studentEmail: userInfo.email,
+                className: classDetails.name || booking.classEntity.name,
+                bookingDate: booking.bookingDate,
+                bookingTime: booking.bookingTime,
+                notes: booking.notes || ''
+              }, {
                 headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json'
+                  Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                  bookingId: booking.id,
-                  teacherEmail: fallbackEmail,
-                  teacherName: 'Administrador (Fallback)',
-                  studentName: userInfo.name || userInfo.email,
-                  studentEmail: userInfo.email,
-                  className: classDetails.name || booking.classEntity.name,
-                  bookingDate: booking.bookingDate,
-                  bookingTime: booking.bookingTime,
-                  notes: booking.notes || ''
-                })
               });
               
-              if (notification.ok) {
-                const notificationResult = await safeParseResponse(notification);
+              if (notification.status === 200) {
+                const notificationResult = notification.data;
                 console.log('✅ Notificación enviada a email de fallback:', notificationResult);
                 dispatch(notifyTeacherBooking.fulfilled(notificationResult));
               } else {
-                const errorData = await safeParseResponse(notification);
+                const errorData = notification.data;
                 
                 // Mensaje específico para error 404 (endpoint no implementado)
                 if (notification.status === 404) {
