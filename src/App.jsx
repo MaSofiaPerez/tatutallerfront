@@ -6,6 +6,7 @@ import { fetchCart } from "./redux/slices/cartSlice"; // <-- importa fetchCart
 import { Toaster } from "react-hot-toast";
 
 // Componentes
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -23,6 +24,9 @@ import CicloFormacion from "./Features/CicloFormacion";
 import CoworkCeramico from "./Features/CoworkCeramico";
 import AlquilerHornos from "./Features/AlquilerHornos";
 import EfectivoInfo from "./Features/EfectivoInfo";
+import PagoSucces from "./components/PagoSucces";
+import PagoPending from "./components/PagoPending";
+import PagoFailure from "./components/PagoFailure";
 
 function App() {
   const dispatch = useDispatch();
@@ -66,6 +70,9 @@ function App() {
           <Route path="/efectivo-info" element={<EfectivoInfo />} />
           <Route path="/equipo" element={<TeamSection />} />
           <Route path="/galeria" element={<Gallery />} />
+          <Route path="/pago/success" element={<PagoSucces />} />
+          <Route path="/pago/pending" element={<PagoPending />} />
+          <Route path="/pago/failure" element={<PagoFailure />} />
           <Route
             path="/admin"
             element={

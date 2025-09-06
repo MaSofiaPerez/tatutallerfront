@@ -1,37 +1,17 @@
-import axios from 'axios';
-import { API_BASE_URL } from '../utils/apiBase';
+import axios from "axios";
+import { API_BASE_URL } from "../utils/apiBase";
 
-//const API_BASE_URL = 'http://Tatutallerapp-env.eba-txcpu5py.us-east-1.elasticbeanstalk.com';
-
-// Configurar axios interceptor para incluir token en todas las requests
-export const apiClient = axios.create({
+const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api`,
-  timeout: 10000, // 10 segundos de timeout
+  timeout: 50000,
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  // console.log('🔄 Request:', config.method.toUpperCase(), config.url, config.data);
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Interceptor para respuestas
-apiClient.interceptors.response.use(
-  (response) => {
-    // console.log('✅ Response:', response.status, response.data);
-    return response;
-  },
-  (error) => {
-    // console.error('❌ Error Response:', {
-    //   status: error.response?.status,
-    //   data: error.response?.data,
-    //   message: error.message
-    // });
-    return Promise.reject(error);
-  }
-);
-
 export default apiClient;
+export { apiClient }; // <-- así puedes importar por nombre o por default

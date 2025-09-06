@@ -15,7 +15,8 @@ import {
 } from "react-icons/hi";
 import { FiX } from "react-icons/fi";
 import { useState } from "react";
-import { API_BASE_URL } from "../utils/apiBase";
+import { API_BASE_URL, getImageUrl } from "../utils/apiBase";
+import api from "../redux/api"; // Agrega esta línea
 
 function Cart({ onClose }) {
   const { cart, isLoading, error } = useSelector((state) => state.cart);
@@ -92,16 +93,11 @@ function Cart({ onClose }) {
     }
     setCheckoutLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/pedidos/checkout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email }),
-      });
-      const data = await res.json();
-      if (res.ok && data.init_point) {
-        window.location.href = data.init_point; // Redirige a Mercado Pago
+      const res = await api.post("/pedidos/checkout", { email: user.email });
+      if (res.data && res.data.init_point) {
+        window.location.href = res.data.init_point; // Redirige a Mercado Pago
       } else {
-        toast.error(data.error || "No se pudo iniciar el pago.");
+        toast.error(res.data?.error || "No se pudo iniciar el pago.");
       }
     } catch (e) {
       toast.error("Error al iniciar el checkout.");
@@ -124,21 +120,17 @@ function Cart({ onClose }) {
     }
     setCashLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/pedidos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ email: user.email }),
-      });
-      if (res.ok) {
+      const res = await api.post(
+        "/pedidos",
+        { email: user.email },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.status === 200) {
         navigate("/efectivo-info");
         dispatch(clearCart(cart?.token));
       } else {
-        const data = await res.json();
         toast.error(
-          data.error || "No se pudo registrar el pedido en efectivo."
+          res.data?.error || "No se pudo registrar el pedido en efectivo."
         );
       }
     } catch (e) {
@@ -261,13 +253,7 @@ function Cart({ onClose }) {
                   <div className="flex-shrink-0">
                     {item.product?.imageUrl ? (
                       <img
-                        src={
-                          item.product.imageUrl.startsWith("http")
-                            ? item.product.imageUrl
-                            : `${API_BASE_URL}/api${
-                                item.product.imageUrl.startsWith("/") ? "" : "/"
-                              }${item.product.imageUrl}`
-                        }
+                        src={getImageUrl(item.product.imageUrl)}
                         alt={item.product.name}
                         className="w-20 h-20 object-cover rounded-lg border-2 border-gray-100 shadow-sm"
                         onError={(e) => {

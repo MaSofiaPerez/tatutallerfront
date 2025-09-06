@@ -1,5 +1,5 @@
 ﻿import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiClient } from '../api';
+import apiClient from '../api';
 import { resetCart } from "./cartSlice"; // importa el action
 
 // Async thunks para las operaciones de autenticación

@@ -11,6 +11,7 @@ import {
   HiSparkles,
 } from "react-icons/hi2";
 import { API_BASE_URL } from "../utils/apiBase";
+import api from "../redux/api";
 
 function Clases() {
   const [classes, setClasses] = useState([]);
@@ -20,13 +21,9 @@ function Clases() {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch(`${API_BASE_URL}/api/public/classes-grid`)
+    api.get("/public/classes-grid")
       .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar las clases");
-        return res.json();
-      })
-      .then((data) => {
-        setClasses(data);
+        setClasses(res.data);
         setIsLoading(false);
       })
       .catch(() => {
