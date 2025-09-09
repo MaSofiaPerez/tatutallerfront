@@ -268,14 +268,11 @@ function BookingSystem() {
     return `${hours}:${minutes}:00`; // Devolver con segundos para el backend
   }
 
-  function getLastDayOfMonth() {
-    const refDate = bookingData.bookingDate
-      ? new Date(bookingData.bookingDate)
-      : new Date();
-    const year = refDate.getFullYear();
-    const month = refDate.getMonth();
-    const lastDay = new Date(year, month + 1, 0);
-    return lastDay.toISOString().split("T")[0];
+  function getLastDayOfMonth(dateStr) {
+    const date = new Date(dateStr);
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0)
+      .toISOString()
+      .split("T")[0];
   }
 
   // Efecto para actualizar fechas automáticas en reservas recurrentes
@@ -365,6 +362,17 @@ function BookingSystem() {
       return;
     }
 
+    // Validación extra para recurrentes
+    if (
+      bookingData.bookingType === "RECURRENTE" &&
+      bookingData.bookingDate &&
+      bookingData.recurrenceEndDate &&
+      new Date(bookingData.recurrenceEndDate) < new Date(bookingData.bookingDate)
+    ) {
+      toast.error("La fecha de fin debe ser igual o posterior a la de inicio.");
+      return;
+    }
+
     try {
       const bookingPayload = {
         classId: parseInt(bookingData.classEntity.id),
@@ -374,7 +382,7 @@ function BookingSystem() {
         bookingType: bookingData.bookingType,
         notes: bookingData.notes || "",
         ...(bookingData.bookingType === "RECURRENTE" && {
-          recurrenceEndDate: bookingData.recurrenceEndDate,
+          recurrenceEndDate: getLastDayOfMonth(bookingData.bookingDate),
         }),
       };
 

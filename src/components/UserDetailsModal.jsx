@@ -120,18 +120,14 @@ function UserDetailsModal({ isOpen, onClose, userId, userData }) {
           <p>
             <strong>Nombre:</strong> {userData?.name || "N/A"}
           </p>
-          <p>
-            <strong>Apellido:</strong> {userData?.lastName || "N/A"}
-          </p>
+         
           <p>
             <strong>Email:</strong> {userData?.email || "N/A"}
           </p>
           <p>
             <strong>Teléfono:</strong> {userData?.phone || "N/A"}
           </p>
-          <p>
-            <strong>Dirección:</strong> {userData?.address || "N/A"}
-          </p>
+         
         </div>
 
         {/* Reservas del Usuario */}

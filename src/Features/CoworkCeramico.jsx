@@ -368,7 +368,7 @@ function CoworkCeramico() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://wa.me/59899123456"
+  href="https://wa.me/59898028302?text=Hola,%20quiero%20consultar%20sobre%20el%20cowork%20cerámico"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
