@@ -12,18 +12,14 @@ function Footer() {
 
   const quickLinks = [
     { name: "Inicio", path: "/" },
-    { name: "Sobre Nosotros", path: "/nosotros" },
-    { name: "Servicios", path: "/servicios" },
+  
     { name: "Galería", path: "/galeria" },
-    { name: "Contacto", path: "/contacto" },
   ];
 
   const services = [
     { name: "Clases de Cerámica", path: "/clases" },
-    { name: "Piezas Personalizadas", path: "/servicios/piezas" },
-    { name: "Cocción", path: "/servicios/coccion" },
-    { name: "Esmaltado", path: "/servicios/esmaltado" },
-    { name: "Alquiler de Espacio", path: "/servicios/alquiler" },
+    { name: "Cocción", path: "/alquiler-hornos" }, // <-- Cambiado
+    { name: "Alquiler de Espacio", path: "/cowork-ceramico" }, // <-- Cambiado
   ];
 
   const socialLinks = [

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { getImageUrl } from "../utils/apiBase";
 import {
   fetchDashboardStats,
   fetchMyDashboardStats,
@@ -499,10 +500,7 @@ function AdminPanel() {
                         {c.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {c.startTime && c.endTime ? `${c.startTime} - ${c.endTime}` : "N/A"}{" "}
-                        <span className="ml-2 text-xs text-gray-500">
-                          (Cupos: {Math.max(cuposDisponibles, 0)})
-                        </span>
+                        {c.startTime && c.endTime ? `${c.startTime} - ${c.endTime}` : "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button
@@ -858,11 +856,7 @@ function AdminPanel() {
                                   {product.imageUrl ? (
                                     <img
                                       className="h-12 w-12 rounded-lg object-cover mr-4"
-                                      src={
-                                        product.imageUrl.startsWith("http")
-                                          ? product.imageUrl
-                                          : `${API_BASE_URL}${product.imageUrl.startsWith("/") ? "" : "/"}${product.imageUrl}`
-                                      }
+                                      src={getImageUrl(product.imageUrl)}
                                       alt={product.name}
                                       onError={(e) => {
                                         if (!e.target.src.endsWith("/placeholder.jpg")) {
@@ -1060,7 +1054,6 @@ function AdminPanel() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Horario</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -1086,28 +1079,26 @@ function AdminPanel() {
                                 <select
                                   value={booking.status}
                                   onChange={async (e) => {
-                                    const newStatus = e.target.value;
-                                    await handleStatusChange(booking.id, newStatus);
+                                    await handleStatusChange(booking.id, e.target.value);
                                   }}
-                                  className="px-2 py-1 text-xs rounded-full border-0 focus:outline-none focus:ring-2 focus:ring-yellow-500
-                                  bg-gray-100 text-gray-800"
+                                  className={`px-2 py-1 text-xs rounded-full border-0 focus:outline-none focus:ring-2
+      ${
+        booking.status === "CONFIRMED"
+          ? "bg-green-100 text-green-800"
+          : booking.status === "PENDING"
+          ? "bg-yellow-100 text-yellow-800"
+          : booking.status === "REJECTED" || booking.status === "CANCELLED"
+          ? "bg-red-100 text-red-800"
+          : "bg-gray-100 text-gray-800"
+      }
+    `}
                                 >
                                   <option value="PENDING">Pendiente</option>
                                   <option value="CONFIRMED">Confirmada</option>
-                                  <option value="REJECTED">Rechazada</option>
+                                  <option value="REJECTED">Cancelada</option>
                                 </select>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button
-                                  onClick={() => {
-                                    setSelectedItem(booking);
-                                    setShowBookingDetail(true);
-                                  }}
-                                  className="bg-blue-700 text-white px-3 py-1 rounded-md hover:bg-blue-800 text-sm transition-colors"
-                                >
-                                  Ver Detalles
-                                </button>
-                              </td>
+                              
                             </tr>
                           ))
                         ) : (

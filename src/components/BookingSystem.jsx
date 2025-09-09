@@ -225,6 +225,20 @@ function BookingSystem() {
     return lastDay.toISOString().split("T")[0];
   }
 
+ function getNextNWeekdays(startDate, weekday, n = 4) {
+  const dates = [];
+  let date = new Date(startDate);
+  // Ajustar al primer día correcto si startDate no es el día de la semana deseado
+  while (date.getDay() !== weekday) {
+    date.setDate(date.getDate() + 1);
+  }
+  for (let i = 0; i < n; i++) {
+    dates.push(date.toISOString().split("T")[0]);
+    date.setDate(date.getDate() + 7);
+  }
+  return dates;
+}
+
   // Horarios válidos para la clase seleccionada
   function getValidStartTimes(cls) {
     if (!cls || !cls.startTime || !cls.endTime) {
@@ -362,57 +376,53 @@ function BookingSystem() {
       return;
     }
 
-    // Validación extra para recurrentes
-    if (
-      bookingData.bookingType === "RECURRENTE" &&
-      bookingData.bookingDate &&
-      bookingData.recurrenceEndDate &&
-      new Date(bookingData.recurrenceEndDate) < new Date(bookingData.bookingDate)
-    ) {
-      toast.error("La fecha de fin debe ser igual o posterior a la de inicio.");
+    if (bookingData.bookingType === "RECURRENTE") {
+      const recurrenceEndDate = getLastDayOfMonth(bookingData.bookingDate);
+
+      try {
+        await dispatch(
+          createBooking({
+            classId: parseInt(bookingData.classEntity.id),
+            bookingDate: bookingData.bookingDate,
+            startTime: bookingData.startTime,
+            endTime: bookingData.endTime,
+            bookingType: "RECURRENTE",
+            notes: bookingData.notes || "",
+            recurrenceEndDate,
+          })
+        ).unwrap();
+        toast.success("¡Reservas recurrentes creadas exitosamente!");
+        setStep(1);
+        setBookingData({
+          classEntity: { id: "" },
+          bookingDate: "",
+          startTime: "",
+          endTime: "",
+          bookingType: "PUNTUAL",
+          recurrenceEndDate: "",
+          notes: "",
+        });
+        setSelectedClass(null);
+        setShowSummary(false);
+      } catch (error) {
+        toast.error("Error al crear las reservas recurrentes.");
+      }
       return;
     }
 
+    // Reserva puntual
     try {
-      const bookingPayload = {
-        classId: parseInt(bookingData.classEntity.id),
-        bookingDate: bookingData.bookingDate,
-        startTime: bookingData.startTime,
-        endTime: bookingData.endTime,
-        bookingType: bookingData.bookingType,
-        notes: bookingData.notes || "",
-        ...(bookingData.bookingType === "RECURRENTE" && {
-          recurrenceEndDate: getLastDayOfMonth(bookingData.bookingDate),
-        }),
-      };
-
-      console.log("🔍 Datos completos antes de enviar:");
-      console.log("- bookingData:", bookingData);
-      console.log("- selectedClass:", selectedClass);
-      console.log("- bookingPayload final:", bookingPayload);
-
-      // Validar que todos los campos requeridos estén presentes
-      if (!bookingPayload.classId) {
-        toast.error("Error: ID de clase no válido");
-        return;
-      }
-      if (!bookingPayload.bookingDate) {
-        toast.error("Error: Fecha de reserva requerida");
-        return;
-      }
-      if (!bookingPayload.startTime) {
-        toast.error("Error: Hora de inicio requerida");
-        return;
-      }
-      if (!bookingPayload.endTime) {
-        toast.error("Error: Hora de fin requerida");
-        return;
-      }
-
-      await dispatch(createBooking(bookingPayload)).unwrap();
+      await dispatch(
+        createBooking({
+          classId: parseInt(bookingData.classEntity.id),
+          bookingDate: bookingData.bookingDate,
+          startTime: bookingData.startTime,
+          endTime: bookingData.endTime,
+          bookingType: bookingData.bookingType,
+          notes: bookingData.notes || "",
+        })
+      ).unwrap();
       toast.success("Reserva creada exitosamente");
-
-      // Reset form
       setStep(1);
       setBookingData({
         classEntity: { id: "" },
@@ -426,18 +436,13 @@ function BookingSystem() {
       setSelectedClass(null);
       setShowSummary(false);
     } catch (error) {
-      console.error("Error creating booking:", error);
-      // Si el error viene del backend con ese mensaje
-      if (
-        error?.message?.includes("selecciona un horario diferente") ||
-        error?.response?.data?.message?.includes(
-          "selecciona un horario diferente"
-        )
-      ) {
-        toast.error("Por favor, selecciona un horario distinto");
-      } else {
-        toast.error(`Error al crear la reserva: ${error?.message || error}`);
-      }
+      // Mostrar el mensaje real del backend si existe, si no, uno genérico
+      toast.error(
+        typeof error === "string"
+          ? error
+          : error?.message ||
+            "Error al crear la reserva. Intenta con otro horario o consulta al taller."
+      );
     }
   };
 
