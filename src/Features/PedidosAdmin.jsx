@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import toast from "react-hot-toast";
+import { API_BASE_URL } from "../utils/apiBase";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-
-function PedidosAdmin() {
+function PedidosAdmin({ embedded = false }) {
   const { user, token } = useSelector((state) => state.auth);
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,11 +14,8 @@ function PedidosAdmin() {
       setLoading(false);
       return;
     }
-    fetch(`${API_BASE_URL}/pedidos/admin`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+    fetch(`${API_BASE_URL}/api/pedidos/admin`, {
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     })
       .then(async (res) => {
         if (res.status === 403) {
@@ -32,9 +26,7 @@ function PedidosAdmin() {
         return res.json();
       })
       .then((data) => {
-        if (Array.isArray(data)) {
-          setPedidos(data);
-        }
+        if (Array.isArray(data)) setPedidos(data);
         setLoading(false);
       })
       .catch(() => {
@@ -45,111 +37,81 @@ function PedidosAdmin() {
 
   const handleConfirmar = async (pedidoId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/pedidos/admin/${pedidoId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/pedidos/admin/${pedidoId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ estado: "CONFIRMADO" }),
       });
-      if (res.status === 403) {
-        setError("No autorizado");
-        return;
-      }
+      if (res.status === 403) { setError("No autorizado"); return; }
       if (res.ok) {
-        setPedidos((prev) =>
-          prev.map((p) =>
-            p.id === pedidoId ? { ...p, estado: "CONFIRMADO" } : p
-          )
-        );
+        setPedidos((prev) => prev.map((p) => (p.id === pedidoId ? { ...p, estado: "CONFIRMADO" } : p)));
       }
-    } catch (e) {
-      setError("Error al confirmar el pedido");
-    }
+    } catch { setError("Error al confirmar el pedido"); }
   };
 
-  if (loading) {
-    return <div>Cargando pedidos...</div>;
-  }
-  if (error) {
-    return <div className="text-red-600 font-bold">{error}</div>;
-  }
+  const formatMoney = (n) =>
+    typeof n === "number" ? n.toLocaleString("es-UY", { style: "currency", currency: "UYU" }) : n ?? "—";
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Gestión de Pedidos
-        </h2>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Usuario
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {pedidos.length > 0 ? (
-              pedidos.map((pedido) => (
-                <tr key={pedido.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">{pedido.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {pedido.email || pedido.usuarioEmail}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        pedido.estado === "CONFIRMADO"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+  if (loading) return <div className="py-8">Cargando pedidos...</div>;
+  if (error) return <div className="py-8 text-red-600 font-bold">{error}</div>;
+
+  const table = (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {pedidos.length > 0 ? (
+            pedidos.map((pedido) => (
+              <tr key={pedido.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">{pedido.id}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{pedido.usuarioEmail || pedido.email || "—"}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    pedido.estado === "CONFIRMADO" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                  }`}>
+                    {pedido.estado}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{formatMoney(pedido.montoTotal)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {pedido.estado !== "CONFIRMADO" && (
+                    <button
+                      onClick={() => handleConfirmar(pedido.id)}
+                      className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 text-sm transition-colors"
                     >
-                      {pedido.estado}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    ${pedido.montoTotal}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {pedido.estado !== "CONFIRMADO" && (
-                      <button
-                        onClick={() => handleConfirmar(pedido.id)}
-                        className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 text-sm transition-colors"
-                      >
-                        Confirmar
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                  No hay pedidos
+                      Confirmar
+                    </button>
+                  )}
                 </td>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={5} className="px-6 py-12 text-center text-gray-500">No hay pedidos</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
+
+  if (!embedded) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900">Gestión de Pedidos</h2>
+        <div className="bg-white shadow overflow-hidden rounded-md">{table}</div>
+      </div>
+    );
+  }
+  return table;
 }
 
 export default PedidosAdmin;

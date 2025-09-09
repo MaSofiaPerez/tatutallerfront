@@ -184,18 +184,7 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Apellido
-            </label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            />
-          </div>
+      
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -248,18 +237,6 @@ function UserModal({ isOpen, onClose, userData, isEditing }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Dirección
-            </label>
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            />
-          </div>
 
           <div className="flex space-x-3 pt-4">
             <button
@@ -305,16 +282,10 @@ function UserDetails({ userData, reservations }) {
           <strong>Nombre:</strong> {userData.name}
         </p>
         <p>
-          <strong>Apellido:</strong> {userData.lastName}
-        </p>
-        <p>
           <strong>Email:</strong> {userData.email}
         </p>
         <p>
           <strong>Teléfono:</strong> {userData.phone}
-        </p>
-        <p>
-          <strong>Dirección:</strong> {userData.address}
         </p>
       </div>
 
